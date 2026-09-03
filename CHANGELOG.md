@@ -14,3 +14,4 @@ versions follow semantic versioning where practical for a mobile application.
 - Reproducible Flutter version configuration and Dev Container.
 - Android/iOS CI bootstrap, tests and build checks.
 - Verified Android debug and unsigned iOS simulator builds for M0.
+- Exact physical-length conversions and A4, US Letter and 10 × 15 cm presets.

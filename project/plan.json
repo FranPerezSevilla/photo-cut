@@ -159,7 +159,7 @@
       "id": "M1-T01",
       "milestone": "M1",
       "title": "Model physical lengths and paper sizes",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M0-T03"
@@ -180,13 +180,18 @@
       "evidence": [
         "lib/core/units/",
         "test/core/units/"
+      ],
+      "completedAt": "2026-09-03",
+      "verification": [
+        "GitHub Actions CI run 33780112176: Quality and Android — success",
+        "GitHub Actions CI run 33780112176: iOS simulator build — success"
       ]
     },
     {
       "id": "M1-T02",
       "milestone": "M1",
       "title": "Implement repeated-photo sheet layout",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M1-T01"
