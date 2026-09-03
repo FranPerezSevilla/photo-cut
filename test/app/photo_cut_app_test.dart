@@ -17,7 +17,9 @@ void main() {
   ) async {
     await tester.pumpWidget(const PhotoCutApp());
 
-    await tester.tap(find.text('Elegir foto'));
+    final choosePhotoButton = find.text('Elegir foto');
+    await tester.ensureVisible(choosePhotoButton);
+    await tester.tap(choosePhotoButton);
     await tester.pump();
 
     expect(
