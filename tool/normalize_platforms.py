@@ -63,15 +63,6 @@ def expected_problems() -> list[str]:
         if targets != {IOS_TARGET}:
             problems.append(f'iOS deployment targets are {sorted(targets)}, expected only {IOS_TARGET}')
 
-    framework_plist = ROOT / 'ios/Flutter/AppFrameworkInfo.plist'
-    if not framework_plist.exists():
-        problems.append('ios/Flutter/AppFrameworkInfo.plist is missing')
-    else:
-        content = framework_plist.read_text(encoding='utf-8')
-        pattern = rf'<key>MinimumOSVersion</key>\s*<string>{re.escape(IOS_TARGET)}</string>'
-        if not re.search(pattern, content):
-            problems.append(f'AppFrameworkInfo MinimumOSVersion is not {IOS_TARGET}')
-
     info_plist = ROOT / 'ios/Runner/Info.plist'
     if not info_plist.exists():
         problems.append('ios/Runner/Info.plist is missing')
@@ -108,17 +99,6 @@ def normalise() -> None:
         [
             (r'PRODUCT_BUNDLE_IDENTIFIER = [^;]+;', f'PRODUCT_BUNDLE_IDENTIFIER = {IOS_ID};', 0),
             (r'IPHONEOS_DEPLOYMENT_TARGET = [^;]+;', f'IPHONEOS_DEPLOYMENT_TARGET = {IOS_TARGET};', 0),
-        ],
-    )
-
-    replace_file(
-        ROOT / 'ios/Flutter/AppFrameworkInfo.plist',
-        [
-            (
-                r'(<key>MinimumOSVersion</key>\s*<string>)[^<]+(</string>)',
-                rf'\g<1>{IOS_TARGET}\g<2>',
-                0,
-            )
         ],
     )
 
