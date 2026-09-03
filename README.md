@@ -12,9 +12,9 @@ single lifetime purchase.
 
 ## Current state
 
-The physical-unit and repeated-photo layout engines are complete. The repository
-is in **M1 — Geometry and PDF spike**; the next executable task renders the first
-deterministic exact-size PDF from that layout plan.
+Physical units, repeated-photo layout and deterministic exact-size PDF generation
+are complete. The repository is in **M1 — Geometry and PDF spike**; the next
+executable task previews that PDF and hands it to native share and print flows.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
@@ -51,8 +51,8 @@ bash tool/bootstrap_platforms.sh
 python3 tool/project.py validate
 python3 tool/project.py status
 python3 tool/project.py next
-python3 tool/project.py show M1-T03
-python3 tool/project.py verify M1-T03
+python3 tool/project.py show M1-T04
+python3 tool/project.py verify M1-T04
 python3 tool/project.py render-status
 ```
 

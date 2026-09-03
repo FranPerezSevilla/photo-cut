@@ -224,7 +224,7 @@
       "id": "M1-T03",
       "milestone": "M1",
       "title": "Generate the exact-size sample PDF",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M1-T02"
@@ -246,14 +246,22 @@
       "evidence": [
         "lib/platform/pdf/",
         "test/platform/pdf/",
-        "build/evidence/sample-35x45-a4.pdf"
+        "build/evidence/sample-35x45-a4.pdf",
+        "project/evidence/M1-T03/README.md"
+      ],
+      "completedAt": "2026-09-03",
+      "verification": [
+        "GitHub Actions CI run 33797250917: Quality and Android — success",
+        "GitHub Actions CI run 33797250917: iOS simulator build — success",
+        "Artifact 9909790251: PDF, geometry report, APK and coverage",
+        "Artifact digest sha256:2f16065be07c8d87c793baa83d1ef0f1c23cde23d6bccd922e5125e092616c44"
       ]
     },
     {
       "id": "M1-T04",
       "milestone": "M1",
       "title": "Add PDF preview and share spike",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M1-T03"

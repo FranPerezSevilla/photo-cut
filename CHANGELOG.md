@@ -16,3 +16,4 @@ versions follow semantic versioning where practical for a mobile application.
 - Verified Android debug and unsigned iOS simulator builds for M0.
 - Exact physical-length conversions and A4, US Letter and 10 × 15 cm presets.
 - Deterministic repeated-photo sheet layout with orientation, margins, gaps and page overflow.
+- Exact-size PDF rendering from SheetPlan with inspected A4 and photo rectangles.
