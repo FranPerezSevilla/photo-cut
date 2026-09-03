@@ -78,10 +78,7 @@ final class SheetLayoutEngine {
     );
   }
 
-  static int _compareCandidates(
-    _LayoutCandidate left,
-    _LayoutCandidate right,
-  ) {
+  static int _compareCandidates(_LayoutCandidate left, _LayoutCandidate right) {
     final int capacityComparison = right.capacity.compareTo(left.capacity);
     if (capacityComparison != 0) {
       return capacityComparison;
@@ -91,8 +88,9 @@ final class SheetLayoutEngine {
       return left.photoRotated ? 1 : -1;
     }
 
-    final int pageOrientationComparison =
-        left.pageOrientation.index.compareTo(right.pageOrientation.index);
+    final int pageOrientationComparison = left.pageOrientation.index.compareTo(
+      right.pageOrientation.index,
+    );
     if (pageOrientationComparison != 0) {
       return pageOrientationComparison;
     }
@@ -150,8 +148,7 @@ final class SheetLayoutEngine {
     }
 
     final double gridWidthMillimetres =
-        (columns * photoWidthMillimetres) +
-        ((columns - 1) * gapMillimetres);
+        (columns * photoWidthMillimetres) + ((columns - 1) * gapMillimetres);
     final double gridHeightMillimetres =
         (rows * photoHeightMillimetres) + ((rows - 1) * gapMillimetres);
     final double originLeftMillimetres =

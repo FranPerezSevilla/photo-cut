@@ -52,24 +52,27 @@ void main() {
     );
   });
 
-  test('chooses landscape paper before rotating the photo when capacity ties', () {
-    final SheetPlan plan = engine.createPlan(
-      SheetLayoutSpec(
-        paperSize: PaperSize.a4,
-        photoWidth: PhysicalLength.millimetres(80),
-        photoHeight: PhysicalLength.millimetres(30),
-        copyCount: 18,
-        margin: PhysicalLength.millimetres(8),
-        gap: PhysicalLength.millimetres(2),
-      ),
-    );
+  test(
+    'chooses landscape paper before rotating the photo when capacity ties',
+    () {
+      final SheetPlan plan = engine.createPlan(
+        SheetLayoutSpec(
+          paperSize: PaperSize.a4,
+          photoWidth: PhysicalLength.millimetres(80),
+          photoHeight: PhysicalLength.millimetres(30),
+          copyCount: 18,
+          margin: PhysicalLength.millimetres(8),
+          gap: PhysicalLength.millimetres(2),
+        ),
+      );
 
-    expect(plan.capacityPerPage, 18);
-    expect(plan.pageOrientation, PageOrientation.landscape);
-    expect(plan.photoRotated, isFalse);
-    expect(plan.columns, 3);
-    expect(plan.rows, 6);
-  });
+      expect(plan.capacityPerPage, 18);
+      expect(plan.pageOrientation, PageOrientation.landscape);
+      expect(plan.photoRotated, isFalse);
+      expect(plan.columns, 3);
+      expect(plan.rows, 6);
+    },
+  );
 
   test('uses portrait paper as the deterministic final tie-breaker', () {
     final SheetPlan plan = engine.createPlan(
@@ -196,13 +199,17 @@ void _expectPlacementsAreValid(
     );
   }
 
-  for (int firstIndex = 0;
-      firstIndex < plan.placements.length;
-      firstIndex += 1) {
+  for (
+    int firstIndex = 0;
+    firstIndex < plan.placements.length;
+    firstIndex += 1
+  ) {
     final PlacedPhoto first = plan.placements[firstIndex];
-    for (int secondIndex = firstIndex + 1;
-        secondIndex < plan.placements.length;
-        secondIndex += 1) {
+    for (
+      int secondIndex = firstIndex + 1;
+      secondIndex < plan.placements.length;
+      secondIndex += 1
+    ) {
       final PlacedPhoto second = plan.placements[secondIndex];
       if (first.pageIndex != second.pageIndex) {
         continue;
