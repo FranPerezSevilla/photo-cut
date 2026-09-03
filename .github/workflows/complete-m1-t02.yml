@@ -127,5 +127,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add project/plan.json tool/tests/test_project_cli.py README.md CHANGELOG.md project/architecture.md
           git commit -m 'M1-T02: complete layout task and open PDF generation'
+          git restore --worktree .
           git pull --rebase origin task/M1-T02-repeated-photo-layout
           git push origin HEAD:task/M1-T02-repeated-photo-layout
