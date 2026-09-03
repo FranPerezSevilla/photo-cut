@@ -1,0 +1,107 @@
+name: Complete M1-T01
+
+on:
+  push:
+    branches:
+      - task/M1-T01-physical-units
+
+permissions:
+  contents: write
+
+concurrency:
+  group: complete-m1-t01
+  cancel-in-progress: false
+
+jobs:
+  complete:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M1-T01-physical-units
+          fetch-depth: 0
+
+      - name: Record completion and open the next task
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan_path = Path('project/plan.json')
+          plan = json.loads(plan_path.read_text(encoding='utf-8'))
+          tasks = {task['id']: task for task in plan['tasks']}
+
+          completed = tasks['M1-T01']
+          if completed['status'] not in {'ready', 'done'}:
+              raise SystemExit(f"Unexpected M1-T01 state: {completed['status']}")
+          completed['status'] = 'done'
+          completed['completedAt'] = '2026-09-03'
+          completed['verification'] = [
+              'GitHub Actions CI run 33780112176: Quality and Android — success',
+              'GitHub Actions CI run 33780112176: iOS simulator build — success',
+          ]
+
+          next_task = tasks['M1-T02']
+          if next_task['status'] == 'backlog':
+              next_task['status'] = 'ready'
+          elif next_task['status'] != 'ready':
+              raise SystemExit(f"Unexpected M1-T02 state: {next_task['status']}")
+
+          plan['currentMilestone'] = 'M1'
+          plan['updatedAt'] = '2026-09-03'
+          plan_path.write_text(
+              json.dumps(plan, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+
+          tests_path = Path('tool/tests/test_project_cli.py')
+          tests = tests_path.read_text(encoding='utf-8')
+          tests = tests.replace(
+              'test_next_returns_physical_units_task',
+              'test_next_returns_sheet_layout_task',
+          )
+          tests = tests.replace("self.assertEqual(task['id'], 'M1-T01')", "self.assertEqual(task['id'], 'M1-T02')")
+          tests = tests.replace("self.assertIn('M1-T01', result.stdout)", "self.assertIn('M1-T02', result.stdout)")
+          tests_path.write_text(tests, encoding='utf-8')
+
+          readme_path = Path('README.md')
+          readme = readme_path.read_text(encoding='utf-8')
+          readme = readme.replace(
+              'The foundation milestone is complete. The repository is now in **M1 — Geometry\n'
+              'and PDF spike**; the next executable task models physical units and paper sizes\n'
+              'before any PDF or user-interface complexity is added.\n',
+              'The foundation and exact physical-unit model are complete. The repository is in\n'
+              '**M1 — Geometry and PDF spike**; the next executable task distributes repeated\n'
+              'photo rectangles across one or more sheets.\n',
+          )
+          readme = readme.replace('show M1-T01', 'show M1-T02')
+          readme = readme.replace('verify M1-T01', 'verify M1-T02')
+          readme_path.write_text(readme, encoding='utf-8')
+
+          changelog_path = Path('CHANGELOG.md')
+          changelog = changelog_path.read_text(encoding='utf-8')
+          marker = '- Verified Android debug and unsigned iOS simulator builds for M0.\n'
+          addition = '- Exact physical-length conversions and A4, US Letter and 10 × 15 cm presets.\n'
+          if addition not in changelog:
+              changelog = changelog.replace(marker, marker + addition)
+          changelog_path.write_text(changelog, encoding='utf-8')
+          PY
+
+      - name: Validate repository-owned state
+        run: |
+          python3 tool/project.py validate
+          python3 -m unittest discover -s tool/tests -p 'test_*.py'
+          python3 tool/project.py status
+          python3 tool/project.py next
+
+      - name: Commit roadmap state
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add project/plan.json tool/tests/test_project_cli.py README.md CHANGELOG.md
+          git commit -m 'M1-T01: complete task and open sheet layout'
+          git push origin HEAD:task/M1-T01-physical-units
