@@ -13,3 +13,4 @@ versions follow semantic versioning where practical for a mobile application.
 - Initial Flutter application shell.
 - Reproducible Flutter version configuration and Dev Container.
 - Android/iOS CI bootstrap, tests and build checks.
+- Verified Android debug and unsigned iOS simulator builds for M0.

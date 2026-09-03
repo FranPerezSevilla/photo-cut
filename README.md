@@ -12,9 +12,9 @@ single lifetime purchase.
 
 ## Current state
 
-The repository is in **M0 — Foundation**. It contains the Flutter shell, the
-agent execution contract, the implementation roadmap, reproducible tooling and
-CI for Android and iOS. Product functionality starts in M1.
+The foundation milestone is complete. The repository is now in **M1 — Geometry
+and PDF spike**; the next executable task models physical units and paper sizes
+before any PDF or user-interface complexity is added.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
@@ -67,7 +67,7 @@ project/plan.json          Canonical milestone/task state
 project/decisions/         Architecture decision records
 project/evidence/          Evidence policy and durable small artifacts
 store/                     Store identity, products and future metadata
- tool/project.py            Task/status CLI
+tool/project.py             Task/status CLI
 .github/workflows/ci.yml   Android/iOS verification
 .devcontainer/             Reproducible Flutter development environment
 ```

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "photo-cut",
-  "currentMilestone": "M0",
+  "currentMilestone": "M1",
   "updatedAt": "2026-09-03",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
@@ -115,7 +115,7 @@
       "id": "M0-T03",
       "milestone": "M0",
       "title": "Commit and verify Android/iOS platform scaffolds",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M0-T02"
@@ -148,13 +148,18 @@
         "pubspec.lock",
         ".metadata",
         ".github/workflows/ci.yml"
+      ],
+      "completedAt": "2026-09-03",
+      "verification": [
+        "GitHub Actions CI run 33777871880: Quality and Android — success",
+        "GitHub Actions CI run 33777871880: iOS simulator build — success"
       ]
     },
     {
       "id": "M1-T01",
       "milestone": "M1",
       "title": "Model physical lengths and paper sizes",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M0-T03"
