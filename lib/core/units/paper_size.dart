@@ -2,11 +2,7 @@ import 'package:photo_cut/core/units/physical_length.dart';
 
 /// A named paper preset with exact physical dimensions in portrait orientation.
 final class PaperSize {
-  PaperSize._({
-    required this.id,
-    required this.width,
-    required this.height,
-  });
+  PaperSize._({required this.id, required this.width, required this.height});
 
   static final PaperSize a4 = PaperSize._(
     id: 'a4',

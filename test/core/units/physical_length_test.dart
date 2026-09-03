@@ -33,10 +33,7 @@ void main() {
       ];
 
       for (final length in reconstructed) {
-        expect(
-          length.inMillimetres,
-          closeTo(original.inMillimetres, 0.001),
-        );
+        expect(length.inMillimetres, closeTo(original.inMillimetres, 0.001));
       }
     });
 
@@ -56,10 +53,7 @@ void main() {
           () => PhysicalLength.centimetres(invalidValue),
           throwsArgumentError,
         );
-        expect(
-          () => PhysicalLength.inches(invalidValue),
-          throwsArgumentError,
-        );
+        expect(() => PhysicalLength.inches(invalidValue), throwsArgumentError);
         expect(
           () => PhysicalLength.pdfPoints(invalidValue),
           throwsArgumentError,

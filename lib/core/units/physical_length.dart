@@ -23,9 +23,7 @@ final class PhysicalLength implements Comparable<PhysicalLength> {
 
   factory PhysicalLength.pdfPoints(num value) {
     final points = _validatedValue(value, unitName: 'PDF points');
-    return PhysicalLength._(
-      points * millimetresPerInch / pdfPointsPerInch,
-    );
+    return PhysicalLength._(points * millimetresPerInch / pdfPointsPerInch);
   }
 
   static const double millimetresPerCentimetre = 10;
@@ -59,17 +57,11 @@ final class PhysicalLength implements Comparable<PhysicalLength> {
   @override
   String toString() => 'PhysicalLength(${_millimetres}mm)';
 
-  static double _validatedMillimetres(
-    num value, {
-    required String unitName,
-  }) {
+  static double _validatedMillimetres(num value, {required String unitName}) {
     return _validatedValue(value, unitName: unitName);
   }
 
-  static double _validatedValue(
-    num value, {
-    required String unitName,
-  }) {
+  static double _validatedValue(num value, {required String unitName}) {
     final convertedValue = value.toDouble();
     if (!convertedValue.isFinite || convertedValue <= 0) {
       throw ArgumentError.value(
