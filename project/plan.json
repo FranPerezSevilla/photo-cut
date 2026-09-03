@@ -1,0 +1,649 @@
+{
+  "schemaVersion": 1,
+  "project": "photo-cut",
+  "currentMilestone": "M1",
+  "updatedAt": "2026-09-03",
+  "statusDefinitions": {
+    "backlog": "Defined but not selectable yet.",
+    "ready": "Dependencies are done and an agent may execute it.",
+    "blocked": "Cannot proceed; statusReason explains the blocker.",
+    "awaiting_human": "Requires a real person, device, physical print or store account.",
+    "done": "Acceptance, checks and evidence are complete."
+  },
+  "milestones": [
+    {
+      "id": "M0",
+      "title": "Foundation",
+      "goal": "A reproducible, agent-operable Flutter repository that builds on Android and iOS."
+    },
+    {
+      "id": "M1",
+      "title": "Geometry and PDF spike",
+      "goal": "Prove exact physical layout and generate a deterministic sample PDF."
+    },
+    {
+      "id": "M2",
+      "title": "Usable MVP flow",
+      "goal": "Select, configure, crop/fit, preview and export one image."
+    },
+    {
+      "id": "M3",
+      "title": "Physical validation",
+      "goal": "Guide 100% printing and validate a real calibration sheet."
+    },
+    {
+      "id": "M4",
+      "title": "Lifetime purchase",
+      "goal": "One free export followed by a non-consumable unlock."
+    },
+    {
+      "id": "M5",
+      "title": "Store release",
+      "goal": "Localise, package, validate and submit version 1.0."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "M0-T01",
+      "milestone": "M0",
+      "title": "Create the agent operating system",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [],
+      "objective": "Persist product context, architecture, task state and universal agent commands in the repository.",
+      "acceptance": [
+        "AGENTS.md defines startup, task, PR, scope, privacy and human-gate rules.",
+        "project/plan.json is machine-readable and validates without third-party Python packages.",
+        "tool/project.py exposes doctor, validate, status, next, show, verify and render-status.",
+        "The CLI has automated tests."
+      ],
+      "checks": [
+        {
+          "command": "python3 tool/project.py validate",
+          "runner": "any"
+        },
+        {
+          "command": "python3 -m unittest discover -s tool/tests -p \"test_*.py\"",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "AGENTS.md",
+        "project/plan.json",
+        "tool/project.py",
+        "tool/tests/test_project_cli.py"
+      ]
+    },
+    {
+      "id": "M0-T02",
+      "milestone": "M0",
+      "title": "Create the Flutter application shell",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M0-T01"
+      ],
+      "objective": "Provide a minimal product-shaped Flutter app with strict analysis and widget tests.",
+      "acceptance": [
+        "The app starts through PhotoCutApp and renders the core product promise.",
+        "The initial action does not claim photo selection is implemented.",
+        "Widget tests cover the shell and temporary foundation message.",
+        "Flutter and Dart versions are pinned in repository files."
+      ],
+      "checks": [
+        {
+          "command": "dart format --output=none --set-exit-if-changed lib test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter analyze --fatal-infos",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/main.dart",
+        "lib/app/photo_cut_app.dart",
+        "test/app/photo_cut_app_test.dart",
+        ".flutter-version"
+      ]
+    },
+    {
+      "id": "M0-T03",
+      "milestone": "M0",
+      "title": "Commit and verify Android/iOS platform scaffolds",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M0-T02"
+      ],
+      "objective": "Generate deterministic platform folders with the provisional bundle ID and prove both target builds in CI.",
+      "acceptance": [
+        "android/ and ios/ are committed rather than generated only in an agent workspace.",
+        "Android uses minimum SDK 24 and application ID com.frainzzel.photocut.",
+        "iOS uses deployment target 15.0 and bundle ID com.frainzzel.photocut.",
+        "CI builds a debug Android APK and an unsigned iOS simulator app.",
+        "pubspec.lock and Flutter metadata are committed."
+      ],
+      "checks": [
+        {
+          "command": "python3 tool/normalize_platforms.py --check",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        },
+        {
+          "command": "flutter build ios --simulator --no-codesign",
+          "runner": "macos"
+        }
+      ],
+      "evidence": [
+        "android/",
+        "ios/",
+        "pubspec.lock",
+        ".metadata",
+        ".github/workflows/ci.yml"
+      ],
+      "completedAt": "2026-09-03",
+      "verification": [
+        "GitHub Actions CI run 33777871880: Quality and Android — success",
+        "GitHub Actions CI run 33777871880: iOS simulator build — success"
+      ]
+    },
+    {
+      "id": "M1-T01",
+      "milestone": "M1",
+      "title": "Model physical lengths and paper sizes",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M0-T03"
+      ],
+      "objective": "Create explicit, tested value types for millimetres, centimetres, inches and PDF points.",
+      "acceptance": [
+        "No public domain API accepts an ambiguous naked length double.",
+        "A4, US Letter and 10 x 15 cm presets expose exact dimensions.",
+        "Round-trip conversion tests stay within 0.001 mm.",
+        "Invalid, zero, NaN and infinite lengths are rejected."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/units",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/units/",
+        "test/core/units/"
+      ]
+    },
+    {
+      "id": "M1-T02",
+      "milestone": "M1",
+      "title": "Implement repeated-photo sheet layout",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M1-T01"
+      ],
+      "objective": "Lay out a requested number of equal photo boxes over one or more pages.",
+      "acceptance": [
+        "Margins, gaps and copy count are respected.",
+        "No placed rectangle overlaps or leaves the printable page box.",
+        "Automatic page orientation chooses the arrangement with the greatest capacity, then deterministic tie-breakers.",
+        "Overflow creates the minimum number of pages for the chosen grid.",
+        "A 35 x 45 mm, eight-copy A4 scenario is covered by tests."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/layout",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/layout/",
+        "test/core/layout/"
+      ]
+    },
+    {
+      "id": "M1-T03",
+      "milestone": "M1",
+      "title": "Generate the exact-size sample PDF",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M1-T02"
+      ],
+      "objective": "Render the layout plan into a PDF without duplicating geometry logic in the renderer.",
+      "acceptance": [
+        "The pdf dependency and licence are documented and locked.",
+        "The PDF page box matches the selected paper size.",
+        "Placed image boxes match the sheet plan within 0.1 mm.",
+        "A deterministic 35 x 45 mm, eight-copy A4 sample is produced in CI.",
+        "The renderer supports synthetic image bytes in tests."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/platform/pdf",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/platform/pdf/",
+        "test/platform/pdf/",
+        "build/evidence/sample-35x45-a4.pdf"
+      ]
+    },
+    {
+      "id": "M1-T04",
+      "milestone": "M1",
+      "title": "Add PDF preview and share spike",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M1-T03"
+      ],
+      "objective": "Prove that the generated bytes can be previewed, shared and handed to native printing.",
+      "acceptance": [
+        "The printing dependency and licence are documented and locked.",
+        "A development-only spike screen previews the deterministic sample.",
+        "Share and print operations are behind a gateway with a fake.",
+        "Android and iOS builds remain green."
+      ],
+      "checks": [
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        },
+        {
+          "command": "flutter build ios --simulator --no-codesign",
+          "runner": "macos"
+        }
+      ],
+      "evidence": [
+        "lib/platform/print_gateway.dart",
+        "test/platform/print_gateway_test.dart"
+      ]
+    },
+    {
+      "id": "M2-T01",
+      "milestone": "M2",
+      "title": "Select one image robustly",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M1-T04"
+      ],
+      "objective": "Select a gallery image and recover Android lost-data cases without retaining private data unnecessarily.",
+      "acceptance": [
+        "image_picker is isolated behind a gateway.",
+        "Cancel is handled without an error state.",
+        "Android lost data is checked at startup.",
+        "iOS photo-library description is present and accurate.",
+        "Tests use synthetic files and a fake gateway."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/platform/image_picker test/features/print_job",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/platform/image_picker_gateway.dart",
+        "test/platform/image_picker_gateway_test.dart"
+      ]
+    },
+    {
+      "id": "M2-T02",
+      "milestone": "M2",
+      "title": "Build the print-job configuration flow",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T01"
+      ],
+      "objective": "Collect dimensions, units, paper, copies, margin, gap and cut-mark preferences with clear validation.",
+      "acceptance": [
+        "The session state is immutable and independent from widgets.",
+        "Width, height and copy count have accessible validation errors.",
+        "Changing units preserves the physical size.",
+        "Defaults make the first successful preview fast.",
+        "Widget tests cover valid and invalid paths."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/print_job",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/features/print_job/",
+        "test/features/print_job/"
+      ]
+    },
+    {
+      "id": "M2-T03",
+      "milestone": "M2",
+      "title": "Implement crop-to-fill and fit-inside",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T02"
+      ],
+      "objective": "Let users control how their image maps into the exact output rectangle.",
+      "acceptance": [
+        "Crop state is stored as normalised source coordinates.",
+        "Fit-inside never distorts the source aspect ratio.",
+        "Crop-to-fill produces the requested aspect ratio.",
+        "EXIF-rotated and portrait/landscape test images are covered.",
+        "The crop package is retained only if a documented spike proves it suitable."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/crop test/features/print_job",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "project/evidence/crop-spike.md",
+        "lib/core/crop/",
+        "test/core/crop/"
+      ]
+    },
+    {
+      "id": "M2-T04",
+      "milestone": "M2",
+      "title": "Connect preview, export, share and print",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T03"
+      ],
+      "objective": "Complete the user flow from a selected image to a named PDF.",
+      "acceptance": [
+        "Preview reflects all current print-job settings.",
+        "Export produces a stable, sanitised filename.",
+        "Share and print errors are recoverable and user-readable.",
+        "The flow works offline.",
+        "Integration tests cover the happy path with fake gateways."
+      ],
+      "checks": [
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "integration_test/print_job_flow_test.dart"
+      ]
+    },
+    {
+      "id": "M2-T05",
+      "milestone": "M2",
+      "title": "Warn about insufficient image resolution",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T04"
+      ],
+      "objective": "Calculate effective DPI for the chosen physical output and warn without blocking export.",
+      "acceptance": [
+        "DPI uses source pixels after crop and exact output inches.",
+        "Thresholds are documented and worded as guidance, not guarantees.",
+        "The warning never changes physical dimensions.",
+        "Boundary cases are unit-tested."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/quality",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/quality/resolution_advisor.dart",
+        "test/core/quality/resolution_advisor_test.dart"
+      ]
+    },
+    {
+      "id": "M3-T01",
+      "milestone": "M3",
+      "title": "Generate calibration and print guidance",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T05"
+      ],
+      "objective": "Provide a 50 mm reference square and precise instructions for actual-size printing.",
+      "acceptance": [
+        "Calibration PDF geometry is automatically verified.",
+        "Guidance explains 100% / actual size and warns against fit-to-page.",
+        "The feature is available before purchase.",
+        "The app does not claim control over printer-driver scaling."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/calibration test/platform/pdf",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/features/calibration/",
+        "test/features/calibration/"
+      ]
+    },
+    {
+      "id": "M3-H01",
+      "milestone": "M3",
+      "title": "Measure a physical calibration print",
+      "status": "backlog",
+      "executor": "human",
+      "dependsOn": [
+        "M3-T01"
+      ],
+      "objective": "Print and measure the generated 50 mm square on real hardware.",
+      "acceptance": [
+        "A human records device, OS, printer, print route and scaling setting.",
+        "Both square dimensions are measured and recorded.",
+        "The result is linked to an exact commit.",
+        "Any deviation greater than 1 mm is investigated before release."
+      ],
+      "checks": [],
+      "evidence": [
+        "project/evidence/calibration/<date>-<printer>.md"
+      ]
+    },
+    {
+      "id": "M4-T01",
+      "milestone": "M4",
+      "title": "Implement export allowance and entitlement model",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M3-H01"
+      ],
+      "objective": "Allow one complete free export and represent a lifetime entitlement independently of store APIs.",
+      "acceptance": [
+        "Preview and calibration never consume the free export.",
+        "A successful normal export consumes it exactly once.",
+        "Failed or cancelled exports do not consume it.",
+        "Lifetime entitlement bypasses the allowance.",
+        "State-transition tests cover reinstall/restore assumptions explicitly."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/entitlement test/features/export",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/entitlement/",
+        "test/core/entitlement/"
+      ]
+    },
+    {
+      "id": "M4-T02",
+      "milestone": "M4",
+      "title": "Integrate the lifetime store purchase",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T01"
+      ],
+      "objective": "Buy and restore one non-consumable product through a testable purchase gateway.",
+      "acceptance": [
+        "in_app_purchase is isolated behind PurchaseGateway.",
+        "Pending, purchased, restored, cancelled and failed states are handled.",
+        "The UI states clearly that the purchase is one-time.",
+        "Restore purchases is accessible.",
+        "Purchase tokens and receipts are never logged."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/platform/purchase test/features/paywall",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/platform/purchase_gateway.dart",
+        "test/platform/purchase_gateway_test.dart"
+      ]
+    },
+    {
+      "id": "M4-H01",
+      "milestone": "M4",
+      "title": "Validate sandbox purchases on Android and iPhone",
+      "status": "backlog",
+      "executor": "human",
+      "dependsOn": [
+        "M4-T02"
+      ],
+      "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
+      "acceptance": [
+        "Purchase and restore succeed on both platforms.",
+        "Cancellation leaves entitlement unchanged.",
+        "Evidence records app version, device and test date.",
+        "Store product names and one-time pricing are reviewed."
+      ],
+      "checks": [],
+      "evidence": [
+        "project/evidence/purchases/android.md",
+        "project/evidence/purchases/ios.md"
+      ]
+    },
+    {
+      "id": "M5-T01",
+      "milestone": "M5",
+      "title": "Localise the app in Spanish and English",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-H01"
+      ],
+      "objective": "Move all user-visible copy into Flutter localisation resources and cover both launch languages.",
+      "acceptance": [
+        "No production user-visible string is hard-coded in a widget.",
+        "Spanish and English flows fit supported phone sizes.",
+        "Units and decimal formatting follow locale expectations.",
+        "Widget tests run in both locales."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/localization test/features",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/l10n/",
+        "test/localization/"
+      ]
+    },
+    {
+      "id": "M5-H01",
+      "milestone": "M5",
+      "title": "Confirm app identity and store ownership",
+      "status": "backlog",
+      "executor": "human",
+      "dependsOn": [
+        "M5-T01"
+      ],
+      "objective": "Confirm final display name, bundle IDs and store accounts before signing configuration is locked.",
+      "acceptance": [
+        "Final Android application ID is registered/available.",
+        "Final iOS bundle ID is registered/available.",
+        "Developer display name and support contact are recorded.",
+        "Any identity change is applied consistently in code and store metadata."
+      ],
+      "checks": [],
+      "evidence": [
+        "store/app_identity.json"
+      ]
+    },
+    {
+      "id": "M5-T02",
+      "milestone": "M5",
+      "title": "Prepare store metadata, privacy and release automation",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M5-H01"
+      ],
+      "objective": "Create versioned listings, screenshots, privacy disclosures and protected release workflows.",
+      "acceptance": [
+        "Store copy and screenshots live under store/ for both locales.",
+        "Privacy disclosures match local-only processing and actual dependencies.",
+        "Android AAB and iOS archive jobs use protected environments and no committed secrets.",
+        "Release notes derive from CHANGELOG.md.",
+        "Internal-track upload can be invoked without changing source files."
+      ],
+      "checks": [
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build appbundle --release",
+          "runner": "linux"
+        },
+        {
+          "command": "flutter build ipa --no-codesign",
+          "runner": "macos"
+        }
+      ],
+      "evidence": [
+        "store/",
+        ".github/workflows/release.yml"
+      ]
+    },
+    {
+      "id": "M5-H02",
+      "milestone": "M5",
+      "title": "Review and submit version 1.0",
+      "status": "backlog",
+      "executor": "human",
+      "dependsOn": [
+        "M5-T02"
+      ],
+      "objective": "Perform final real-device review and submit the release in both stores.",
+      "acceptance": [
+        "The final build is tested on at least one supported Android phone and iPhone.",
+        "Screenshots, pricing, privacy answers and support information are reviewed.",
+        "The Android production release is submitted.",
+        "The iOS production release is submitted.",
+        "Store review outcomes are recorded."
+      ],
+      "checks": [],
+      "evidence": [
+        "project/evidence/release-1.0.md"
+      ]
+    }
+  ]
+}

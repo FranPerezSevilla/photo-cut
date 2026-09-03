@@ -1,0 +1,14 @@
+{
+  "status": "provisional",
+  "products": [
+    {
+      "logicalId": "lifetime_unlock",
+      "type": "non_consumable",
+      "androidProductId": "photo_cut_lifetime",
+      "iosProductId": "photo_cut_lifetime",
+      "priceStrategy": "small one-time purchase; final local prices selected in stores",
+      "implementationTask": "M4-T02",
+      "humanValidationTask": "M4-H01"
+    }
+  ]
+}

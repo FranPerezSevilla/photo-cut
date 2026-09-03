@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.2
+
+jobs:
+  quality-and-android:
+    name: Quality and Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bootstrap platform folders when absent
+        run: bash tool/bootstrap_platforms.sh
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Repository doctor
+        run: python3 tool/project.py doctor --strict
+
+      - name: Validate roadmap
+        run: python3 tool/project.py validate
+
+      - name: Test roadmap CLI
+        run: python3 -m unittest discover -s tool/tests -p 'test_*.py'
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        run: flutter test --coverage
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+
+      - name: Stage generated project scaffold
+        run: |
+          mkdir -p build/bootstrap-project
+          cp -R android ios .metadata pubspec.lock build/bootstrap-project/
+
+      - name: Upload bootstrap project files
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bootstrap-project-${{ github.sha }}
+          path: build/bootstrap-project
+          include-hidden-files: true
+          retention-days: 7
+
+      - name: Upload Android APK and coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-debug-and-coverage-${{ github.sha }}
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            coverage/lcov.info
+          retention-days: 14
+
+  ios-simulator:
+    name: iOS simulator build
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bootstrap platform folders when absent
+        run: bash tool/bootstrap_platforms.sh
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Build unsigned iOS simulator app
+        run: flutter build ios --simulator --no-codesign

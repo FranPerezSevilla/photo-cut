@@ -1,0 +1,15 @@
+{
+  "status": "provisional",
+  "displayName": "Photo Cut",
+  "androidApplicationId": "com.frainzzel.photocut",
+  "iosBundleId": "com.frainzzel.photocut",
+  "supportedLocales": [
+    "es",
+    "en"
+  ],
+  "minimums": {
+    "androidSdk": 24,
+    "ios": "15.0"
+  },
+  "requiresHumanConfirmationTask": "M5-H01"
+}
