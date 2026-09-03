@@ -35,6 +35,12 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Generate required task evidence
+        run: |
+          dart run tool/generate_sample_pdf.dart
+          test -s build/evidence/sample-35x45-a4.pdf
+          test -s build/evidence/sample-35x45-a4.geometry.json
+
       - name: Close M1-T03 and open M1-T04
         run: |
           python3 tool/project.py set-status M1-T03 done
