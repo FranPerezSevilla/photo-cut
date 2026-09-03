@@ -63,6 +63,9 @@ jobs:
       - name: Test
         run: flutter test --coverage
 
+      - name: Generate exact-size PDF evidence
+        run: dart run tool/generate_sample_pdf.dart
+
       - name: Build Android debug APK
         run: flutter build apk --debug
 
@@ -79,12 +82,14 @@ jobs:
           include-hidden-files: true
           retention-days: 7
 
-      - name: Upload Android APK and coverage
+      - name: Upload Android APK, PDF evidence and coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: android-debug-and-coverage-${{ github.sha }}
+          name: android-pdf-and-coverage-${{ github.sha }}
           path: |
             build/app/outputs/flutter-apk/app-debug.apk
+            build/evidence/sample-35x45-a4.pdf
+            build/evidence/sample-35x45-a4.geometry.json
             coverage/lcov.info
           retention-days: 14
 
