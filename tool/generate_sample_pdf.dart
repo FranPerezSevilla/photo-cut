@@ -18,9 +18,7 @@ Future<void> main() async {
     ),
   );
   final Uint8List imageBytes = base64Decode(
-    File('test_resources/synthetic-35x45.png.base64')
-        .readAsStringSync()
-        .trim(),
+    File('test_resources/synthetic-35x45.png.base64').readAsStringSync().trim(),
   );
   final PdfRenderResult result = await const ExactSizePdfRenderer().render(
     plan: plan,
@@ -29,9 +27,7 @@ Future<void> main() async {
 
   final Directory evidenceDirectory = Directory('build/evidence');
   await evidenceDirectory.create(recursive: true);
-  final File pdfFile = File(
-    '${evidenceDirectory.path}/sample-35x45-a4.pdf',
-  );
+  final File pdfFile = File('${evidenceDirectory.path}/sample-35x45-a4.pdf');
   final File geometryFile = File(
     '${evidenceDirectory.path}/sample-35x45-a4.geometry.json',
   );

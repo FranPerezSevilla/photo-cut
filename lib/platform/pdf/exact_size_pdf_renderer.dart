@@ -89,24 +89,26 @@ final class ExactSizePdfRenderer {
   }
 
   static PdfRenderedPage _measurePage(_TrackedPage trackedPage) {
-    final List<PdfRenderedPhotoBox> boxes = trackedPage.photos.map((tracked) {
-      final PdfRect? box = tracked.positioned.box;
-      if (box == null) {
-        throw StateError(
-          'PDF layout did not produce a box for copy '
-          '${tracked.placement.copyIndex}',
-        );
-      }
+    final List<PdfRenderedPhotoBox> boxes = trackedPage.photos
+        .map((tracked) {
+          final PdfRect? box = tracked.positioned.box;
+          if (box == null) {
+            throw StateError(
+              'PDF layout did not produce a box for copy '
+              '${tracked.placement.copyIndex}',
+            );
+          }
 
-      return PdfRenderedPhotoBox(
-        copyIndex: tracked.placement.copyIndex,
-        pageIndex: tracked.placement.pageIndex,
-        leftPoints: box.left,
-        topPoints: trackedPage.pageFormat.height - box.top,
-        widthPoints: box.width,
-        heightPoints: box.height,
-      );
-    }).toList(growable: false);
+          return PdfRenderedPhotoBox(
+            copyIndex: tracked.placement.copyIndex,
+            pageIndex: tracked.placement.pageIndex,
+            leftPoints: box.left,
+            topPoints: trackedPage.pageFormat.height - box.top,
+            widthPoints: box.width,
+            heightPoints: box.height,
+          );
+        })
+        .toList(growable: false);
 
     return PdfRenderedPage(
       pageIndex: trackedPage.pageIndex,
@@ -130,10 +132,7 @@ final class _TrackedPage {
 }
 
 final class _TrackedPhoto {
-  const _TrackedPhoto({
-    required this.placement,
-    required this.positioned,
-  });
+  const _TrackedPhoto({required this.placement, required this.positioned});
 
   final PlacedPhoto placement;
   final pw.Positioned positioned;

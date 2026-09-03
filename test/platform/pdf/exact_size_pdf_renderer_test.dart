@@ -36,8 +36,7 @@ void main() {
     for (final PlacedPhoto placement in plan.placements) {
       final PdfRenderedPhotoBox renderedBox = result.pages.single.photoBoxes
           .singleWhere(
-            (PdfRenderedPhotoBox box) =>
-                box.copyIndex == placement.copyIndex,
+            (PdfRenderedPhotoBox box) => box.copyIndex == placement.copyIndex,
           );
       _expectRenderedBoxMatchesPlan(
         renderedBox,
@@ -47,28 +46,31 @@ void main() {
     }
   });
 
-  test('renders every overflow page from one synthetic image byte source', () async {
-    final SheetPlan plan = _samplePlan(copyCount: 61);
-    final PdfRenderResult result = await renderer.render(
-      plan: plan,
-      imageBytes: _syntheticPngBytes(),
-    );
-
-    expect(plan.pageCount, 3);
-    expect(result.pages, hasLength(3));
-    expect(_readMediaBoxes(result.bytes), hasLength(3));
-    expect(result.pages[0].photoBoxes, hasLength(30));
-    expect(result.pages[1].photoBoxes, hasLength(30));
-    expect(result.pages[2].photoBoxes, hasLength(1));
-
-    for (int pageIndex = 0; pageIndex < result.pages.length; pageIndex += 1) {
-      expect(result.pages[pageIndex].pageIndex, pageIndex);
-      expect(
-        result.pages[pageIndex].photoBoxes.map((box) => box.pageIndex),
-        everyElement(pageIndex),
+  test(
+    'renders every overflow page from one synthetic image byte source',
+    () async {
+      final SheetPlan plan = _samplePlan(copyCount: 61);
+      final PdfRenderResult result = await renderer.render(
+        plan: plan,
+        imageBytes: _syntheticPngBytes(),
       );
-    }
-  });
+
+      expect(plan.pageCount, 3);
+      expect(result.pages, hasLength(3));
+      expect(_readMediaBoxes(result.bytes), hasLength(3));
+      expect(result.pages[0].photoBoxes, hasLength(30));
+      expect(result.pages[1].photoBoxes, hasLength(30));
+      expect(result.pages[2].photoBoxes, hasLength(1));
+
+      for (int pageIndex = 0; pageIndex < result.pages.length; pageIndex += 1) {
+        expect(result.pages[pageIndex].pageIndex, pageIndex);
+        expect(
+          result.pages[pageIndex].photoBoxes.map((box) => box.pageIndex),
+          everyElement(pageIndex),
+        );
+      }
+    },
+  );
 
   test('rejects an empty image byte source before creating a document', () {
     final SheetPlan plan = _samplePlan(copyCount: 1);
@@ -94,9 +96,9 @@ SheetPlan _samplePlan({required int copyCount}) {
 }
 
 Uint8List _syntheticPngBytes() {
-  final String encoded = File(
-    'test_resources/synthetic-35x45.png.base64',
-  ).readAsStringSync().trim();
+  final String encoded = File('test_resources/synthetic-35x45.png.base64')
+      .readAsStringSync()
+      .trim();
   return base64Decode(encoded);
 }
 
@@ -130,20 +132,21 @@ List<_MediaBox> _readMediaBoxes(Uint8List bytes) {
     r'([-+0-9.]+)\s+([-+0-9.]+)\s*\]',
   );
 
-  return mediaBoxPattern.allMatches(source).map((RegExpMatch match) {
-    final double left = double.parse(match.group(1)!);
-    final double bottom = double.parse(match.group(2)!);
-    final double right = double.parse(match.group(3)!);
-    final double top = double.parse(match.group(4)!);
-    return _MediaBox(
-      widthPoints: right - left,
-      heightPoints: top - bottom,
-    );
-  }).toList(growable: false);
+  return mediaBoxPattern
+      .allMatches(source)
+      .map((RegExpMatch match) {
+        final double left = double.parse(match.group(1)!);
+        final double bottom = double.parse(match.group(2)!);
+        final double right = double.parse(match.group(3)!);
+        final double top = double.parse(match.group(4)!);
+        return _MediaBox(widthPoints: right - left, heightPoints: top - bottom);
+      })
+      .toList(growable: false);
 }
 
 double _pointsToMillimetres(double points) {
-  return points * PhysicalLength.millimetresPerInch /
+  return points *
+      PhysicalLength.millimetresPerInch /
       PhysicalLength.pdfPointsPerInch;
 }
 

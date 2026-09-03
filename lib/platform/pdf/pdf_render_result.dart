@@ -60,10 +60,8 @@ final class PdfRenderedPage {
 
 /// Generated PDF bytes plus geometry measured after the PDF layout pass.
 final class PdfRenderResult {
-  PdfRenderResult({
-    required this.bytes,
-    required List<PdfRenderedPage> pages,
-  }) : pages = List<PdfRenderedPage>.unmodifiable(pages);
+  PdfRenderResult({required this.bytes, required List<PdfRenderedPage> pages})
+    : pages = List<PdfRenderedPage>.unmodifiable(pages);
 
   final Uint8List bytes;
   final List<PdfRenderedPage> pages;
