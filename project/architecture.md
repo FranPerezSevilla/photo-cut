@@ -62,8 +62,11 @@ millimetres = points × 25.4 / 72
 Conversions should happen at boundaries. Domain values remain explicit and are
 not rounded for layout. UI formatting may round for display only.
 
-Coordinate-system and placement conventions will be finalised in M1 and covered
-by unit tests before PDF rendering is added.
+Sheet placement uses a top-left physical origin and row-major copy order. The
+engine evaluates portrait and landscape paper plus optional 90-degree photo
+rotation. It selects greatest capacity, then preserves photo orientation, then
+prefers portrait paper as a deterministic tie-breaker. The complete grid is
+centred inside the configured minimum margin; page overflow reuses that grid.
 
 ## Supported platforms
 

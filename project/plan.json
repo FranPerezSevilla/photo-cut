@@ -191,7 +191,7 @@
       "id": "M1-T02",
       "milestone": "M1",
       "title": "Implement repeated-photo sheet layout",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M1-T01"
@@ -213,13 +213,18 @@
       "evidence": [
         "lib/core/layout/",
         "test/core/layout/"
+      ],
+      "completedAt": "2026-09-03",
+      "verification": [
+        "GitHub Actions CI run 33794909155: Quality and Android — success",
+        "GitHub Actions CI run 33794909155: iOS simulator build — success"
       ]
     },
     {
       "id": "M1-T03",
       "milestone": "M1",
       "title": "Generate the exact-size sample PDF",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M1-T02"
