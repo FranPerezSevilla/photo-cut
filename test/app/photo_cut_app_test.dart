@@ -12,8 +12,9 @@ void main() {
     expect(find.byIcon(Icons.add_photo_alternate_outlined), findsOneWidget);
   });
 
-  testWidgets('primary action explains the current foundation state',
-      (tester) async {
+  testWidgets('primary action explains the current foundation state', (
+    tester,
+  ) async {
     await tester.pumpWidget(const PhotoCutApp());
 
     await tester.tap(find.text('Elegir foto'));
