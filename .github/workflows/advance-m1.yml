@@ -1,0 +1,102 @@
+name: Advance roadmap to M1
+
+on:
+  push:
+    branches:
+      - bootstrap/m0-agent-ready
+
+permissions:
+  contents: write
+
+jobs:
+  advance:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: bootstrap/m0-agent-ready
+          fetch-depth: 0
+
+      - name: Record M0 completion and open M1
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan_path = Path('project/plan.json')
+          plan = json.loads(plan_path.read_text(encoding='utf-8'))
+          tasks = {task['id']: task for task in plan['tasks']}
+
+          m0 = tasks['M0-T03']
+          m0['status'] = 'done'
+          m0['completedAt'] = '2026-09-03'
+          m0['verification'] = [
+              'GitHub Actions CI run 33777871880: Quality and Android — success',
+              'GitHub Actions CI run 33777871880: iOS simulator build — success',
+          ]
+
+          tasks['M1-T01']['status'] = 'ready'
+          plan['currentMilestone'] = 'M1'
+          plan['updatedAt'] = '2026-09-03'
+          plan_path.write_text(
+              json.dumps(plan, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+
+          test_path = Path('tool/tests/test_project_cli.py')
+          tests = test_path.read_text(encoding='utf-8')
+          tests = tests.replace(
+              'test_next_returns_platform_scaffold_task',
+              'test_next_returns_physical_units_task',
+          )
+          tests = tests.replace("'M0-T03'", "'M1-T01'")
+          tests = tests.replace(
+              "'M0 — Foundation'",
+              "'M1 — Geometry and PDF spike'",
+          )
+          test_path.write_text(tests, encoding='utf-8')
+
+          readme_path = Path('README.md')
+          readme = readme_path.read_text(encoding='utf-8')
+          readme = readme.replace(
+              'The repository is in **M0 — Foundation**. It contains the Flutter shell, the\n'
+              'agent execution contract, the implementation roadmap, reproducible tooling and\n'
+              'CI for Android and iOS. Product functionality starts in M1.\n',
+              'The foundation milestone is complete. The repository is now in **M1 — Geometry\n'
+              'and PDF spike**; the next executable task models physical units and paper sizes\n'
+              'before any PDF or user-interface complexity is added.\n',
+          )
+          readme = readme.replace(
+              ' tool/project.py            Task/status CLI',
+              'tool/project.py             Task/status CLI',
+          )
+          readme_path.write_text(readme, encoding='utf-8')
+
+          changelog_path = Path('CHANGELOG.md')
+          changelog = changelog_path.read_text(encoding='utf-8')
+          changelog = changelog.replace(
+              '- Android/iOS CI bootstrap, tests and build checks.\n',
+              '- Android/iOS CI bootstrap, tests and build checks.\n'
+              '- Verified Android debug and unsigned iOS simulator builds for M0.\n',
+          )
+          changelog_path.write_text(changelog, encoding='utf-8')
+          PY
+
+      - name: Validate the advanced roadmap
+        run: |
+          python3 tool/project.py validate
+          python3 -m unittest discover -s tool/tests -p 'test_*.py'
+          python3 tool/project.py status
+          python3 tool/project.py next
+
+      - name: Commit roadmap state
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add project/plan.json tool/tests/test_project_cli.py README.md CHANGELOG.md
+          git commit -m 'M0-T03: complete foundation and open M1'
+          git push origin HEAD:bootstrap/m0-agent-ready
