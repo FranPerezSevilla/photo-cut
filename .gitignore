@@ -1,0 +1,47 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+build/
+coverage/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Keep pubspec.lock: this is an application.
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# iOS / Xcode
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Pods/
+ios/.symlinks/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local secrets and environment
+.env
+.env.*
+!.env.example
+*.p12
+*.mobileprovision
+*.cer
+*.pem
+
+# Temporary evidence and generated status
+project/evidence/local/
+STATUS.generated.md

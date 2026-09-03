@@ -1,0 +1,40 @@
+    next_command = subparsers.add_parser('next', help='Show the next ready agent task.')
+    next_command.add_argument('--json', action='store_true')
+    next_command.set_defaults(function=cmd_next)
+
+    show = subparsers.add_parser('show', help='Show one task in full.')
+    show.add_argument('task_id')
+    show.set_defaults(function=cmd_show)
+
+    verify = subparsers.add_parser('verify', help='Run applicable checks and verify evidence.')
+    verify.add_argument('task_id')
+    verify.set_defaults(function=cmd_verify)
+
+    set_status = subparsers.add_parser('set-status', help='Safely update a task state.')
+    set_status.add_argument('task_id')
+    set_status.add_argument('status', choices=sorted(ALLOWED_STATUSES))
+    set_status.add_argument('--reason')
+    set_status.set_defaults(function=cmd_set_status)
+
+    render = subparsers.add_parser('render-status', help='Render a human-readable plan snapshot.')
+    render.add_argument('--stdout', action='store_true')
+    render.set_defaults(function=cmd_render_status)
+
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    try:
+        return int(args.function(args))
+    except PlanError as error:
+        print(f'ERROR: {error}', file=sys.stderr)
+        return 1
+    except KeyboardInterrupt:
+        print('Interrupted.', file=sys.stderr)
+        return 130
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "project": "photo-cut",
+  "currentMilestone": "M0",
+  "updatedAt": "2026-09-03",
+  "statusDefinitions": {
+    "backlog": "Defined but not selectable yet.",
+    "ready": "Dependencies are done and an agent may execute it.",
+    "blocked": "Cannot proceed; statusReason explains the blocker.",
+    "awaiting_human": "Requires a real person, device, physical print or store account.",
+    "done": "Acceptance, checks and evidence are complete."
+  },
+  "milestones": [
+    {
+      "id": "M0",
+      "title": "Foundation",
+      "goal": "A reproducible, agent-operable Flutter repository that builds on Android and iOS."
+    },
+    {
+      "id": "M1",
+      "title": "Geometry and PDF spike",
+      "goal": "Prove exact physical layout and generate a deterministic sample PDF."
+    },
+    {
+      "id": "M2",
+      "title": "Usable MVP flow",
+      "goal": "Select, configure, crop/fit, preview and export one image."
+    },
+    {
+      "id": "M3",
+      "title": "Physical validation",
+      "goal": "Guide 100% printing and validate a real calibration sheet."
+    },
+    {
+      "id": "M4",
+      "title": "Lifetime purchase",
+      "goal": "One free export followed by a non-consumable unlock."
+    },
+    {
+      "id": "M5",
+      "title": "Store release",
+      "goal": "Localise, package, validate and submit version 1.0."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "M0-T01",
+      "milestone": "M0",
+      "title": "Create the agent operating system",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [],
+      "objective": "Persist product context, architecture, task state and universal agent commands in the repository.",
+      "acceptance": [
+        "AGENTS.md defines startup, task, PR, scope, privacy and human-gate rules.",
+        "project/plan.json is machine-readable and validates without third-party Python packages.",
+        "tool/project.py exposes doctor, validate, status, next, show, verify and render-status.",
+        "The CLI has automated tests."
+      ],
+      "checks": [
+        {
+          "command": "python3 tool/project.py validate",
+          "runner": "any"
+        },
+        {
+          "command": "python3 -m unittest discover -s tool/tests -p \"test_*.py\"",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "AGENTS.md",
+        "project/plan.json",
+        "tool/project.py",
+        "tool/tests/test_project_cli.py"
+      ]
+    },
+    {
+      "id": "M0-T02",
+      "milestone": "M0",
+      "title": "Create the Flutter application shell",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M0-T01"
+      ],
+      "objective": "Provide a minimal product-shaped Flutter app with strict analysis and widget tests.",
+      "acceptance": [
+        "The app starts through PhotoCutApp and renders the core product promise.",
+        "The initial action does not claim photo selection is implemented.",
+        "Widget tests cover the shell and temporary foundation message.",
+        "Flutter and Dart versions are pinned in repository files."
+      ],
+      "checks": [
+        {
+          "command": "dart format --output=none --set-exit-if-changed lib test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter analyze --fatal-infos",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/main.dart",
+        "lib/app/photo_cut_app.dart",
+        "test/app/photo_cut_app_test.dart",
+        ".flutter-version"
+      ]
+    },
+    {
+      "id": "M0-T03",
+      "milestone": "M0",
+      "title": "Commit and verify Android/iOS platform scaffolds",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M0-T02"
+      ],
+      "objective": "Generate deterministic platform folders with the provisional bundle ID and prove both target builds in CI.",
+      "acceptance": [
+        "android/ and ios/ are committed rather than generated only in an agent workspace.",
+        "Android uses minimum SDK 24 and application ID com.frainzzel.photocut.",
+        "iOS uses deployment target 15.0 and bundle ID com.frainzzel.photocut.",
+        "CI builds a debug Android APK and an unsigned iOS simulator app.",
+        "pubspec.lock and Flutter metadata are committed."
+      ],
+      "checks": [
+        {
+          "command": "python3 tool/normalize_platforms.py --check",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        },
+        {
+          "command": "flutter build ios --simulator --no-codesign",
+          "runner": "macos"
+        }
+      ],
+      "evidence": [
+        "android/",
+        "ios/",
+        "pubspec.lock",
+        ".metadata",
+        ".github/workflows/ci.yml"
+      ]
+    },
+    {
+      "id": "M1-T01",
+      "milestone": "M1",
+      "title": "Model physical lengths and paper sizes",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M0-T03"
+      ],
+      "objective": "Create explicit, tested value types for millimetres, centimetres, inches and PDF points.",
+      "acceptance": [
+        "No public domain API accepts an ambiguous naked length double.",
+        "A4, US Letter and 10 x 15 cm presets expose exact dimensions.",
+        "Round-trip conversion tests stay within 0.001 mm.",
+        "Invalid, zero, NaN and infinite lengths are rejected."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/units",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/units/",
+        "test/core/units/"
+      ]
+    },
+    {
+      "id": "M1-T02",
+      "milestone": "M1",
+      "title": "Implement repeated-photo sheet layout",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M1-T01"
+      ],
