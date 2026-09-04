@@ -17,7 +17,6 @@ final class PrintConfigurationController extends ChangeNotifier {
     ImageProcessor imageProcessor = const DartImageProcessor(),
   }) {
     return PrintConfigurationController._(
-      image: image,
       layoutEngine: layoutEngine,
       cropPlanner: cropPlanner,
       imageProcessor: imageProcessor,
@@ -26,15 +25,11 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   PrintConfigurationController._({
-    required SelectedImage image,
-    required SheetLayoutEngine layoutEngine,
-    required CropPlanner cropPlanner,
-    required ImageProcessor imageProcessor,
+    required this._layoutEngine,
+    required this._cropPlanner,
+    required this._imageProcessor,
     required PrintConfigurationState initialState,
-  }) : _layoutEngine = layoutEngine,
-       _cropPlanner = cropPlanner,
-       _imageProcessor = imageProcessor,
-       _state = initialState;
+  }) : _state = initialState;
 
   final CropPlanner _cropPlanner;
   final ImageProcessor _imageProcessor;
