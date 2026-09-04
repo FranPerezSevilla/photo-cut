@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "project": "photo-cut",
-  "currentMilestone": "M1",
-  "updatedAt": "2026-09-03",
+  "currentMilestone": "M2",
+  "updatedAt": "2026-09-04",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -261,7 +261,7 @@
       "id": "M1-T04",
       "milestone": "M1",
       "title": "Add PDF preview and share spike",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M1-T03"
@@ -288,15 +288,25 @@
         }
       ],
       "evidence": [
-        "lib/platform/print_gateway.dart",
-        "test/platform/print_gateway_test.dart"
+        "lib/platform/print/",
+        "lib/features/pdf_spike/",
+        "test/platform/print_gateway_test.dart",
+        "test/features/pdf_spike/pdf_spike_screen_test.dart",
+        "project/decisions/ADR-006-native-pdf-preview-share-print.md",
+        "project/evidence/M1-T04/README.md"
+      ],
+      "completedAt": "2026-09-04",
+      "verification": [
+        "GitHub Actions CI run 33859417443: Quality and Android — success",
+        "GitHub Actions CI run 33859417443: iOS simulator build — success",
+        "GitHub Actions preparation run 33859271477: analysis and 36 Flutter tests — success"
       ]
     },
     {
       "id": "M2-T01",
       "milestone": "M2",
       "title": "Select one image robustly",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M1-T04"
