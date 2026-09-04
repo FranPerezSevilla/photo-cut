@@ -42,7 +42,9 @@ final class PrintConfigurationController extends ChangeNotifier {
     }
     _replaceWithPlan(
       _state.copyWith(
-        configuration: _state.configuration.copyWith(photoHeight: parsed.length),
+        configuration: _state.configuration.copyWith(
+          photoHeight: parsed.length,
+        ),
         heightInput: input,
         heightError: null,
       ),
@@ -199,9 +201,7 @@ final class PrintConfigurationController extends ChangeNotifier {
     final String normalised = input.trim().replaceAll(',', '.');
     final double? value = double.tryParse(normalised);
     if (value == null || !value.isFinite || value <= 0) {
-      return const _ParsedLength(
-        error: 'Introduce una medida mayor que 0.',
-      );
+      return const _ParsedLength(error: 'Introduce una medida mayor que 0.');
     }
     return _ParsedLength(length: unit.toPhysicalLength(value));
   }

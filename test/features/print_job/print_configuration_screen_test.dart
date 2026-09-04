@@ -15,12 +15,20 @@ void main() {
     expect(find.text('Preparar en Photo Cut'), findsOneWidget);
     expect(find.text('Paso 1 de 2 · Configura el documento'), findsOneWidget);
     expect(find.byKey(const Key('layout-page-summary')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('layout-photo-0')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('layout-photo-7')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('layout-photo-0')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('layout-photo-7')),
+      findsOneWidget,
+    );
     expect(find.text('8 copias · 1 página'), findsOneWidget);
   });
 
-  testWidgets('invalid input is accessible and disables review', (tester) async {
+  testWidgets('invalid input is accessible and disables review', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(home: PrintConfigurationScreen(image: _image())),
     );
@@ -66,12 +74,10 @@ void main() {
       MaterialApp(
         home: PrintConfigurationScreen(
           image: _image(),
-          onReview: (
-            BuildContext context,
-            PrintJobConfiguration configuration,
-          ) {
-            reviewed = configuration;
-          },
+          onReview:
+              (BuildContext context, PrintJobConfiguration configuration) {
+                reviewed = configuration;
+              },
         ),
       ),
     );

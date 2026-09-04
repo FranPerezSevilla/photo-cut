@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_cut/core/layout/layout.dart';
@@ -78,8 +75,7 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       _SectionTitle(
                         title: 'Tamaño de cada foto',
-                        subtitle:
-                            'Estas son las medidas físicas finales, no píxeles.',
+                        subtitle: 'Estas son las medidas físicas finales, no píxeles.',
                       ),
                       const SizedBox(height: 12),
                       SegmentedButton<LengthUnit>(
@@ -112,9 +108,10 @@ final class _PrintConfigurationScreenState
                                 labelText: 'Ancho (${state.unit.shortLabel})',
                                 errorText: state.widthError,
                               ),
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'[0-9.,]'),
@@ -134,9 +131,10 @@ final class _PrintConfigurationScreenState
                                 labelText: 'Alto (${state.unit.shortLabel})',
                                 errorText: state.heightError,
                               ),
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'[0-9.,]'),
@@ -150,8 +148,7 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Hoja y copias',
-                        subtitle:
-                            'Photo Cut distribuirá las copias y elegirá la orientación que aproveche mejor el papel.',
+                        subtitle: 'Photo Cut distribuirá las copias y elegirá la orientación que aproveche mejor el papel.',
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<PaperSize>(
@@ -193,8 +190,7 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Separación y corte',
-                        subtitle:
-                            'Deja espacio suficiente para que la impresora no recorte los bordes.',
+                        subtitle: 'Deja espacio suficiente para que la impresora no recorte los bordes.',
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -210,9 +206,10 @@ final class _PrintConfigurationScreenState
                                 labelText: 'Margen (${state.unit.shortLabel})',
                                 errorText: state.marginError,
                               ),
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'[0-9.,]'),
@@ -231,9 +228,10 @@ final class _PrintConfigurationScreenState
                                     'Separación (${state.unit.shortLabel})',
                                 errorText: state.gapError,
                               ),
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'[0-9.,]'),
@@ -285,10 +283,7 @@ final class _PrintConfigurationScreenState
     );
   }
 
-  void _review(
-    BuildContext context,
-    PrintJobConfiguration configuration,
-  ) {
+  void _review(BuildContext context, PrintJobConfiguration configuration) {
     final PrintJobReviewCallback? callback = widget.onReview;
     if (callback != null) {
       callback(context, configuration);
