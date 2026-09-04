@@ -37,7 +37,31 @@ void main() {
     expect(gateway.pickCalls, 1);
     expect(find.byKey(const Key('selected-image-preview')), findsOneWidget);
     expect(find.text('portrait.png'), findsOneWidget);
+    expect(find.text('Configurar impresión'), findsOneWidget);
     expect(find.text('Elegir otra foto'), findsOneWidget);
+  });
+
+  testWidgets('selected image opens the Photo Cut configuration step', (
+    tester,
+  ) async {
+    final _FakeImagePickerGateway gateway = _FakeImagePickerGateway(
+      pickResult: ImageSelectionSuccess(_selectedImage('portrait.png')),
+    );
+    await tester.pumpWidget(PhotoCutApp(imagePickerGateway: gateway));
+    await tester.pumpAndSettle();
+
+    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
+    await tester.ensureVisible(choosePhoto);
+    await tester.tap(choosePhoto);
+    await tester.pumpAndSettle();
+
+    final Finder configure = find.byKey(const Key('configure-photo'));
+    await tester.ensureVisible(configure);
+    await tester.tap(configure);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Preparar en Photo Cut'), findsOneWidget);
+    expect(find.text('Paso 1 de 2 · Configura el documento'), findsOneWidget);
   });
 
   testWidgets('recovers a selection returned after Android restarts the app', (
