@@ -16,8 +16,8 @@ final class PhotoSelectionState {
 
 /// Short-lived controller for the first step of a print job.
 final class PhotoSelectionController extends ChangeNotifier {
-  PhotoSelectionController({required ImagePickerGateway imagePickerGateway})
-    : _imagePickerGateway = imagePickerGateway;
+  PhotoSelectionController({required ImagePickerGateway gateway})
+    : _imagePickerGateway = gateway;
 
   final ImagePickerGateway _imagePickerGateway;
   PhotoSelectionState _state = const PhotoSelectionState();
@@ -42,9 +42,7 @@ final class PhotoSelectionController extends ChangeNotifier {
       return;
     }
 
-    _setState(
-      PhotoSelectionState(image: _state.image, isBusy: true),
-    );
+    _setState(PhotoSelectionState(image: _state.image, isBusy: true));
 
     try {
       final ImageSelectionResult result = await operation();
