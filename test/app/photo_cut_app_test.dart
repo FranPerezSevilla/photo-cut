@@ -29,7 +29,9 @@ void main() {
     await tester.pumpWidget(PhotoCutApp(imagePickerGateway: gateway));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('choose-photo')));
+    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
+    await tester.ensureVisible(choosePhoto);
+    await tester.tap(choosePhoto);
     await tester.pumpAndSettle();
 
     expect(gateway.pickCalls, 1);
@@ -57,7 +59,9 @@ void main() {
     await tester.pumpWidget(PhotoCutApp(imagePickerGateway: gateway));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('choose-photo')));
+    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
+    await tester.ensureVisible(choosePhoto);
+    await tester.tap(choosePhoto);
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.error_outline), findsNothing);
