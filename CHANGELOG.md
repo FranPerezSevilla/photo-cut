@@ -21,3 +21,4 @@ versions follow semantic versioning where practical for a mobile application.
 - Local gallery image selection with Android lost-data recovery and no retained provider path.
 - App-owned print configuration with live layout preview, exact units, paper, copies, margins, spacing and cut marks.
 - Normalized crop-to-fill, fit-inside, EXIF orientation handling and app-owned grayscale preview/processing.
+- Separate immutable final PDF review with stable filenames, sharing and explicit native print handoff.

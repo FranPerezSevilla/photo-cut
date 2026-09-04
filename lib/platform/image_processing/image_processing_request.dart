@@ -9,11 +9,21 @@ final class ImageProcessingRequest {
     required this.fitMode,
     required this.colorMode,
     required this.cropRect,
-  }) : _sourceBytes = _validatedCopy(sourceBytes);
+    this.quarterTurns = 0,
+  }) : _sourceBytes = _validatedCopy(sourceBytes) {
+    if (quarterTurns < 0 || quarterTurns > 3) {
+      throw ArgumentError.value(
+        quarterTurns,
+        'quarterTurns',
+        'Quarter turns must be between 0 and 3',
+      );
+    }
+  }
 
   final ImageColorMode colorMode;
   final NormalizedCropRect cropRect;
   final ImageFitMode fitMode;
+  final int quarterTurns;
   final Uint8List _sourceBytes;
 
   Uint8List get sourceBytes => Uint8List.fromList(_sourceBytes);
