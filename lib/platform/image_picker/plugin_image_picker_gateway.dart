@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_picker/image_picker_gateway.dart';
@@ -22,7 +20,7 @@ final class PluginImagePickerGateway implements ImagePickerGateway {
       if (file == null) {
         return const ImageSelectionCancelled();
       }
-      return _read(file);
+      return await _read(file);
     } on PlatformException {
       return const ImageSelectionFailure(
         'No se pudo abrir la galería. Inténtalo de nuevo.',
@@ -54,7 +52,7 @@ final class PluginImagePickerGateway implements ImagePickerGateway {
       if (file == null) {
         return const ImageSelectionCancelled();
       }
-      return _read(file);
+      return await _read(file);
     } on PlatformException {
       return const ImageSelectionFailure(
         'No se pudo recuperar la foto seleccionada.',
@@ -68,7 +66,7 @@ final class PluginImagePickerGateway implements ImagePickerGateway {
 
   Future<ImageSelectionResult> _read(XFile file) async {
     try {
-      final Uint8List bytes = await file.readAsBytes();
+      final bytes = await file.readAsBytes();
       return ImageSelectionSuccess(
         SelectedImage(bytes: bytes, displayName: file.name),
       );
