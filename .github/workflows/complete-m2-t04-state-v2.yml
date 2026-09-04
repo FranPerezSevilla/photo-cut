@@ -1,0 +1,63 @@
+name: Complete M2-T04 state v2
+
+on:
+  push:
+    branches:
+      - task/M2-T04-final-review-print-handoff
+
+permissions:
+  contents: write
+
+concurrency:
+  group: complete-m2-t04-state-v2
+  cancel-in-progress: false
+
+jobs:
+  complete:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T04-final-review-print-handoff
+          fetch-depth: 0
+
+      - name: Execute repository-state update from the reviewed workflow
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          workflow = Path('.github/workflows/complete-m2-t04-state.yml').read_text(
+              encoding='utf-8'
+          )
+          marker = "python3 - <<'PY'\n"
+          block = workflow.split(marker, 1)[1].split('\n          PY', 1)[0]
+          exec(textwrap.dedent(block), {'__name__': '__main__'})
+          PY
+
+      - name: Validate repository-owned state
+        run: |
+          python3 tool/project.py validate
+          python3 -m unittest discover -s tool/tests -p 'test_*.py'
+          python3 tool/project.py status
+          python3 tool/project.py next
+
+      - name: Commit and push completed state
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm \
+            .github/workflows/complete-m2-t04-state.yml \
+            .github/workflows/complete-m2-t04-state-v2.yml
+          git add \
+            project/plan.json \
+            tool/tests/test_project_cli.py \
+            README.md \
+            CHANGELOG.md \
+            project/evidence/M2-T04/README.md
+          git commit -m 'M2-T04: complete final review and open resolution guidance'
+          git push origin HEAD:task/M2-T04-final-review-print-handoff
