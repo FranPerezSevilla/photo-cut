@@ -27,7 +27,7 @@ final class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _controller = PhotoSelectionController(
-      imagePickerGateway: widget.imagePickerGateway,
+      gateway: widget.imagePickerGateway,
     );
     unawaited(_controller.recoverLostSelection());
   }
