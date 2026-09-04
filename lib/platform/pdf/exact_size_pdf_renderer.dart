@@ -4,14 +4,17 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:photo_cut/core/layout/layout.dart';
 import 'package:photo_cut/platform/pdf/pdf_render_result.dart';
+import 'package:photo_cut/platform/pdf/sheet_pdf_renderer.dart';
 
 /// Renders a domain [SheetPlan] without reimplementing any placement logic.
-final class ExactSizePdfRenderer {
+final class ExactSizePdfRenderer implements SheetPdfRenderer {
   const ExactSizePdfRenderer();
 
+  @override
   Future<PdfRenderResult> render({
     required SheetPlan plan,
     required Uint8List imageBytes,
+    bool showCutMarks = false,
   }) async {
     if (imageBytes.isEmpty) {
       throw ArgumentError.value(
@@ -44,11 +47,21 @@ final class ExactSizePdfRenderer {
         final pw.Positioned positioned = pw.Positioned(
           left: placement.left.inPdfPoints,
           top: placement.top.inPdfPoints,
-          child: pw.Image(
-            image,
+          child: pw.Container(
             width: placement.width.inPdfPoints,
             height: placement.height.inPdfPoints,
-            fit: pw.BoxFit.cover,
+            decoration: pw.BoxDecoration(
+              color: PdfColors.white,
+              border: showCutMarks
+                  ? pw.Border.all(color: PdfColors.black, width: 0.25)
+                  : null,
+            ),
+            child: pw.Image(
+              image,
+              width: placement.width.inPdfPoints,
+              height: placement.height.inPdfPoints,
+              fit: pw.BoxFit.contain,
+            ),
           ),
         );
         trackedPhotos.add(

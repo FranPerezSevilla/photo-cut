@@ -23,6 +23,7 @@ final class DartImageProcessor implements ImageProcessor {
     final ImageFitMode fitMode = request.fitMode;
     final ImageColorMode colorMode = request.colorMode;
     final NormalizedCropRect cropRect = request.cropRect;
+    final int quarterTurns = request.quarterTurns;
 
     return Isolate.run<ProcessedImage>(() {
       return _processBytes(
@@ -30,6 +31,7 @@ final class DartImageProcessor implements ImageProcessor {
         fitMode: fitMode,
         colorMode: colorMode,
         cropRect: cropRect,
+        quarterTurns: quarterTurns,
       );
     });
   }
@@ -45,6 +47,7 @@ ProcessedImage _processBytes({
   required ImageFitMode fitMode,
   required ImageColorMode colorMode,
   required NormalizedCropRect cropRect,
+  required int quarterTurns,
 }) {
   img.Image prepared = _decodeAndOrient(sourceBytes);
 
@@ -59,24 +62,27 @@ ProcessedImage _processBytes({
     );
   }
 
-  final img.Image flattened = img.Image(
+  img.Image output = img.Image(
     width: prepared.width,
     height: prepared.height,
     numChannels: 3,
   );
-  flattened.clear(img.ColorRgb8(255, 255, 255));
-  img.compositeImage(flattened, prepared);
+  output.clear(img.ColorRgb8(255, 255, 255));
+  img.compositeImage(output, prepared);
 
   if (colorMode == ImageColorMode.grayscale) {
-    img.grayscale(flattened);
+    img.grayscale(output);
+  }
+  if (quarterTurns != 0) {
+    output = img.copyRotate(output, angle: quarterTurns * 90);
   }
 
-  final Uint8List encoded = img.encodeJpg(flattened, quality: 94);
+  final Uint8List encoded = img.encodeJpg(output, quality: 94);
   return ProcessedImage(
     bytes: encoded,
     size: SourceImageSize(
-      widthPixels: flattened.width,
-      heightPixels: flattened.height,
+      widthPixels: output.width,
+      heightPixels: output.height,
     ),
   );
 }

@@ -147,13 +147,32 @@ final class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openConfiguration(SelectedImage image) {
+    final ImageProcessor imageProcessor =
+        widget.imageProcessor ?? const DartImageProcessor();
     unawaited(
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
-          builder: (BuildContext context) {
+          builder: (BuildContext routeContext) {
             return PrintConfigurationScreen(
               image: image,
-              imageProcessor: widget.imageProcessor,
+              imageProcessor: imageProcessor,
+              onReview: (
+                BuildContext configurationContext,
+                PrintJobConfiguration configuration,
+              ) {
+                unawaited(
+                  Navigator.of(configurationContext).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext reviewContext) {
+                        return PrintReviewScreen.production(
+                          configuration: configuration,
+                          imageProcessor: imageProcessor,
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -164,7 +183,7 @@ final class _HomeScreenState extends State<HomeScreen> {
   void _openPdfSpike(BuildContext context) {
     final WidgetBuilder builder =
         widget.pdfSpikeBuilder ??
-        (BuildContext context) => PdfSpikeScreen.production();
+        (BuildContext routeContext) => PdfSpikeScreen.production();
     unawaited(
       Navigator.of(context)
           .push<void>(MaterialPageRoute<void>(builder: builder)),
@@ -209,7 +228,7 @@ final class _PhotoHero extends StatelessWidget {
                     gaplessPlayback: true,
                     errorBuilder:
                         (
-                          BuildContext context,
+                          BuildContext errorContext,
                           Object error,
                           StackTrace? stack,
                         ) {
