@@ -432,7 +432,7 @@
       "id": "M2-T04",
       "milestone": "M2",
       "title": "Connect preview, export, share and print",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T03"
@@ -452,14 +452,30 @@
         }
       ],
       "evidence": [
-        "integration_test/print_job_flow_test.dart"
+        "lib/features/print_job/print_job_document_factory.dart",
+        "lib/features/print_job/print_job_filename_builder.dart",
+        "lib/features/print_job/print_review_screen.dart",
+        "lib/platform/pdf/sheet_pdf_renderer.dart",
+        "lib/platform/pdf/exact_size_pdf_renderer.dart",
+        "test/features/print_job/print_job_document_factory_test.dart",
+        "test/features/print_job/print_review_screen_test.dart",
+        "test/integration/print_job_flow_test.dart",
+        "test/platform/pdf/cut_marks_test.dart",
+        "project/decisions/ADR-009-immutable-final-pdf-handoff.md",
+        "project/evidence/M2-T04/two-step-handoff.md",
+        "project/evidence/M2-T04/README.md"
+      ],
+      "completedAt": "2026-09-04",
+      "verification": [
+        "GitHub Actions CI run 33918765113: Quality and Android — success",
+        "GitHub Actions CI run 33918765113: iOS simulator build — success"
       ]
     },
     {
       "id": "M2-T05",
       "milestone": "M2",
       "title": "Warn about insufficient image resolution",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M2-T04"
