@@ -73,11 +73,11 @@ class HomeScreen extends StatelessWidget {
 
   void _openPdfSpike(BuildContext context) {
     final WidgetBuilder builder =
-        pdfSpikeBuilder ?? (BuildContext context) => PdfSpikeScreen.production();
+        pdfSpikeBuilder ??
+        (BuildContext context) => PdfSpikeScreen.production();
     unawaited(
-      Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(builder: builder),
-      ),
+      Navigator.of(context)
+          .push<void>(MaterialPageRoute<void>(builder: builder)),
     );
   }
 }

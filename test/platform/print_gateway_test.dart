@@ -16,18 +16,9 @@ void main() {
     });
 
     test('rejects empty bytes and unsafe filenames', () {
-      expect(
-        () => _document(bytes: Uint8List(0)),
-        throwsArgumentError,
-      );
-      expect(
-        () => _document(filename: '../sample.pdf'),
-        throwsArgumentError,
-      );
-      expect(
-        () => _document(filename: 'sample.txt'),
-        throwsArgumentError,
-      );
+      expect(() => _document(bytes: Uint8List(0)), throwsArgumentError);
+      expect(() => _document(filename: '../sample.pdf'), throwsArgumentError);
+      expect(() => _document(filename: 'sample.txt'), throwsArgumentError);
     });
   });
 
@@ -42,10 +33,7 @@ void main() {
   });
 }
 
-PrintDocument _document({
-  Uint8List? bytes,
-  String filename = 'sample.pdf',
-}) {
+PrintDocument _document({Uint8List? bytes, String filename = 'sample.pdf'}) {
   return PrintDocument(
     bytes: bytes ?? Uint8List.fromList(<int>[37, 80, 68, 70]),
     filename: filename,

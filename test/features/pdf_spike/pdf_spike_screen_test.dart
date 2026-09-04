@@ -7,43 +7,44 @@ import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/platform/print/print.dart';
 
 void main() {
-  testWidgets('shows the deterministic preview and routes actions via gateway', (
-    WidgetTester tester,
-  ) async {
-    final PrintDocument document = _document();
-    final _FakePrintGateway gateway = _FakePrintGateway();
+  testWidgets(
+    'shows the deterministic preview and routes actions via gateway',
+    (WidgetTester tester) async {
+      final PrintDocument document = _document();
+      final _FakePrintGateway gateway = _FakePrintGateway();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: PdfSpikeScreen(
-          documentLoader: () async => document,
-          printGateway: gateway,
-          previewBuilder:
-              (BuildContext context, PrintDocument previewDocument) {
-                return const Center(child: Text('Synthetic PDF preview'));
-              },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PdfSpikeScreen(
+            documentLoader: () async => document,
+            printGateway: gateway,
+            previewBuilder:
+                (BuildContext context, PrintDocument previewDocument) {
+                  return const Center(child: Text('Synthetic PDF preview'));
+                },
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Prueba de PDF'), findsOneWidget);
-    expect(find.text('Synthetic PDF preview'), findsOneWidget);
-    expect(find.textContaining('8 copias de 35 × 45 mm'), findsOneWidget);
+      expect(find.text('Prueba de PDF'), findsOneWidget);
+      expect(find.text('Synthetic PDF preview'), findsOneWidget);
+      expect(find.textContaining('8 copias de 35 × 45 mm'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('pdf-spike-share')));
-    await tester.pumpAndSettle();
-    expect(gateway.shared, same(document));
-    expect(find.text('Documento preparado para compartir.'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('pdf-spike-share')));
+      await tester.pumpAndSettle();
+      expect(gateway.shared, same(document));
+      expect(find.text('Documento preparado para compartir.'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('pdf-spike-print')));
-    await tester.pumpAndSettle();
-    expect(gateway.printed, same(document));
-    expect(
-      find.text('Documento enviado al sistema de impresión.'),
-      findsOneWidget,
-    );
-  });
+      await tester.tap(find.byKey(const Key('pdf-spike-print')));
+      await tester.pumpAndSettle();
+      expect(gateway.printed, same(document));
+      expect(
+        find.text('Documento enviado al sistema de impresión.'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('reports cancellation without treating it as an error', (
     WidgetTester tester,
