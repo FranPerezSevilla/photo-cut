@@ -388,7 +388,7 @@
       "id": "M2-T03",
       "milestone": "M2",
       "title": "Implement crop-to-fill and fit-inside",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T02"
@@ -408,16 +408,31 @@
         }
       ],
       "evidence": [
-        "project/evidence/crop-spike.md",
         "lib/core/crop/",
-        "test/core/crop/"
+        "lib/platform/image_processing/",
+        "lib/features/print_job/print_job_configuration.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/print_configuration_screen.dart",
+        "lib/features/print_job/print_sheet_preview.dart",
+        "test/core/crop/crop_planner_test.dart",
+        "test/platform/image_processing/dart_image_processor_test.dart",
+        "test_resources/exif-orientation-6.jpg.base64",
+        "project/decisions/ADR-008-normalized-crop-and-image-processing.md",
+        "project/evidence/crop-spike.md",
+        "project/evidence/M2-T03/README.md"
+      ],
+      "completedAt": "2026-09-04",
+      "verification": [
+        "GitHub Actions preparation run 33912381609: analysis and focused tests — success",
+        "GitHub Actions CI run 33912622500: Quality and Android — success",
+        "GitHub Actions CI run 33912622500: iOS simulator build — success"
       ]
     },
     {
       "id": "M2-T04",
       "milestone": "M2",
       "title": "Connect preview, export, share and print",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M2-T03"

@@ -17,12 +17,14 @@ final class PrintConfigurationState {
     required this.marginInput,
     required this.gapInput,
     required this.previewPlan,
+    required this.isInspectingImage,
     this.widthError,
     this.heightError,
     this.copyCountError,
     this.marginError,
     this.gapError,
     this.layoutError,
+    this.imageError,
   });
 
   final PrintJobConfiguration configuration;
@@ -32,6 +34,8 @@ final class PrintConfigurationState {
   final String? gapError;
   final String heightInput;
   final String? heightError;
+  final String? imageError;
+  final bool isInspectingImage;
   final String? layoutError;
   final String marginInput;
   final String? marginError;
@@ -47,6 +51,9 @@ final class PrintConfigurationState {
         marginError == null &&
         gapError == null &&
         layoutError == null &&
+        imageError == null &&
+        !isInspectingImage &&
+        configuration.sourceSize != null &&
         previewPlan != null;
   }
 
@@ -58,6 +65,7 @@ final class PrintConfigurationState {
     String? copyCountInput,
     String? marginInput,
     String? gapInput,
+    bool? isInspectingImage,
     Object? previewPlan = _keepConfigurationValue,
     Object? widthError = _keepConfigurationValue,
     Object? heightError = _keepConfigurationValue,
@@ -65,6 +73,7 @@ final class PrintConfigurationState {
     Object? marginError = _keepConfigurationValue,
     Object? gapError = _keepConfigurationValue,
     Object? layoutError = _keepConfigurationValue,
+    Object? imageError = _keepConfigurationValue,
   }) {
     return PrintConfigurationState(
       configuration: configuration ?? this.configuration,
@@ -74,6 +83,7 @@ final class PrintConfigurationState {
       copyCountInput: copyCountInput ?? this.copyCountInput,
       marginInput: marginInput ?? this.marginInput,
       gapInput: gapInput ?? this.gapInput,
+      isInspectingImage: isInspectingImage ?? this.isInspectingImage,
       previewPlan: identical(previewPlan, _keepConfigurationValue)
           ? this.previewPlan
           : previewPlan as SheetPlan?,
@@ -95,6 +105,9 @@ final class PrintConfigurationState {
       layoutError: identical(layoutError, _keepConfigurationValue)
           ? this.layoutError
           : layoutError as String?,
+      imageError: identical(imageError, _keepConfigurationValue)
+          ? this.imageError
+          : imageError as String?,
     );
   }
 }

@@ -14,8 +14,13 @@ lib/
 ├── core/
 │   ├── units/              PhysicalLength and point conversion
 │   ├── layout/             Pure sheet-placement engine
+│   ├── crop/               Normalized crop/fit geometry
 │   └── quality/            DPI and resolution advice
-├── platform/               Image, print, file and purchase gateways
+├── platform/
+│   ├── image_picker/       Gallery boundary
+│   ├── image_processing/   EXIF, crop and colour transformations
+│   ├── pdf/                Exact-size document generation
+│   └── print/              Preview/share/native print
 └── features/
     └── print_job/          State/controller and user-facing pages
 ```
@@ -31,28 +36,48 @@ It owns:
 - orientation selection;
 - repeated-copy placement;
 - page overflow;
-- crop/fit metadata;
+- normalized crop/fit metadata;
 - effective-DPI calculations.
+
+Crop state uses source-normalized coordinates in the closed range 0–1. A
+`CropPlanner` derives the crop rectangle from orientation-aware source dimensions,
+the exact physical target aspect and a normalized focus point. Fit-inside retains
+the complete source rectangle.
 
 ### Platform adapters
 
 Plugins and operating-system behaviour are wrapped behind narrow interfaces.
-Tests use fakes. Planned adapters include:
+Tests use fakes. Adapters include:
 
 - image selection;
-- temporary/local files;
-- PDF preview/share/print;
-- lifetime purchase and restoration.
+- orientation-aware image inspection and processing;
+- exact-size PDF generation;
+- PDF preview/share/native print;
+- future temporary/local files and lifetime purchase restoration.
 
 Gallery selection is exposed through `ImagePickerGateway`. The production
 adapter requests one image, immediately copies its bytes into short-lived app
 state, drops provider paths and checks Android lost data once at startup.
 
+`ImageProcessor` is the only boundary that imports `package:image`. It decodes
+bytes off the UI isolate, physically bakes EXIF orientation, applies the normalized
+crop when required, performs app-owned grayscale conversion and returns encoded
+bytes without uploading them.
+
 ### UI and state
 
-The app has one short-lived print-job session. Use an immutable state object and a
-small `ChangeNotifier`/`ValueNotifier`-style controller when the feature begins.
-Do not add a state-management framework without evidence and an ADR.
+The app has one short-lived print-job session. Use immutable state objects and
+small `ChangeNotifier` controllers. Do not add a state-management framework
+without evidence and an ADR.
+
+The product flow is intentionally split:
+
+1. Photo Cut prepares the document and owns every setting that changes PDF
+   content or geometry.
+2. A read-only final review passes the same immutable PDF bytes to share or the
+   operating-system print service.
+
+The native print screen is a printer handoff, not a second document editor.
 
 ## Physical geometry
 
@@ -90,18 +115,22 @@ iOS:     com.frainzzel.photocut
 
 No backend and no database are needed for the MVP. A selected image is temporary
 job input; it is never uploaded by Photo Cut. Provider paths and full metadata are
-not retained. Purchase state is derived from the store API and minimal local
-entitlement state where required.
+not retained. EXIF orientation is applied locally and removed from processed
+output. Purchase state is derived from the store API and minimal local entitlement
+state where required.
 
 ## Dependency policy
 
-Expected dependencies, added only in their roadmap tasks:
+Current runtime dependencies have narrow boundaries:
 
 - `pdf` for document generation;
 - `printing` for preview/share/native print;
 - `image_picker` for source-image selection;
-- `crop_your_image` only if its M2 spike proves suitable;
-- `in_app_purchase` for the lifetime product.
+- `image` for orientation-aware crop and colour processing.
 
-Package additions and upgrades must include a reason, licence check, test impact
-and updated lockfile.
+`crop_your_image` was evaluated for M2-T03 and not retained because the narrow
+MVP only needs normalized focus within a fixed output aspect. Reconsidering a
+freeform crop editor requires a new task and evidence.
+
+`in_app_purchase` remains planned for the lifetime product. Package additions and
+upgrades must include a reason, licence check, test impact and updated lockfile.

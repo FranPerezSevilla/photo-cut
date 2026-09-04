@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photo_cut/core/layout/layout.dart';
+import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/units/units.dart';
 import 'package:photo_cut/features/print_job/length_unit.dart';
 import 'package:photo_cut/features/print_job/print_configuration_controller.dart';
 import 'package:photo_cut/features/print_job/print_configuration_state.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
+import 'package:photo_cut/features/print_job/print_sheet_preview.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
+import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 typedef PrintJobReviewCallback = void Function(
   BuildContext context,
@@ -18,10 +22,12 @@ final class PrintConfigurationScreen extends StatefulWidget {
   const PrintConfigurationScreen({
     super.key,
     required this.image,
+    this.imageProcessor,
     this.onReview,
   });
 
   final SelectedImage image;
+  final ImageProcessor? imageProcessor;
   final PrintJobReviewCallback? onReview;
 
   @override
@@ -36,7 +42,11 @@ final class _PrintConfigurationScreenState
   @override
   void initState() {
     super.initState();
-    _controller = PrintConfigurationController(image: widget.image);
+    _controller = PrintConfigurationController(
+      image: widget.image,
+      imageProcessor: widget.imageProcessor ?? const DartImageProcessor(),
+    );
+    unawaited(_controller.inspectImage());
   }
 
   @override
@@ -66,14 +76,105 @@ final class _PrintConfigurationScreenState
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
-                      _SheetPreview(
+                      PrintSheetPreview(
                         plan: state.previewPlan,
-                        image: state.configuration.image,
-                        showCutMarks: state.configuration.showCutMarks,
+                        configuration: state.configuration,
                         errorMessage: state.layoutError,
                       ),
+                      const SizedBox(height: 12),
+                      _ImageInspectionStatus(state: state),
                       const SizedBox(height: 24),
-                      _SectionTitle(
+                      const _SectionTitle(
+                        title: 'Ajuste de la foto',
+                        subtitle: 'El resultado se aplica dentro de Photo Cut antes de abrir la impresión del sistema.',
+                      ),
+                      const SizedBox(height: 12),
+                      SegmentedButton<ImageFitMode>(
+                        key: const Key('fit-mode-selector'),
+                        segments: const <ButtonSegment<ImageFitMode>>[
+                          ButtonSegment<ImageFitMode>(
+                            value: ImageFitMode.cropToFill,
+                            icon: Icon(Icons.crop),
+                            label: Text('Rellenar'),
+                          ),
+                          ButtonSegment<ImageFitMode>(
+                            value: ImageFitMode.fitInside,
+                            icon: Icon(Icons.fit_screen_outlined),
+                            label: Text('Encajar'),
+                          ),
+                        ],
+                        selected: <ImageFitMode>{state.configuration.fitMode},
+                        onSelectionChanged: (Set<ImageFitMode> selection) {
+                          _controller.changeFitMode(selection.single);
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.configuration.fitMode == ImageFitMode.cropToFill
+                            ? 'Rellena la medida exacta y recorta lo que sobre.'
+                            : 'Muestra la foto completa sin deformarla; pueden quedar bordes blancos.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      if (state.configuration.fitMode ==
+                          ImageFitMode.cropToFill) ...<Widget>[
+                        const SizedBox(height: 16),
+                        Text(
+                          'Encuadre horizontal',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        Slider(
+                          key: const Key('crop-focus-x'),
+                          value: state.configuration.focus.x,
+                          onChanged: _controller.changeFocusX,
+                          divisions: 100,
+                          label: _focusLabel(
+                            state.configuration.focus.x,
+                            start: 'Izquierda',
+                            middle: 'Centro',
+                            end: 'Derecha',
+                          ),
+                        ),
+                        Text(
+                          'Encuadre vertical',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        Slider(
+                          key: const Key('crop-focus-y'),
+                          value: state.configuration.focus.y,
+                          onChanged: _controller.changeFocusY,
+                          divisions: 100,
+                          label: _focusLabel(
+                            state.configuration.focus.y,
+                            start: 'Arriba',
+                            middle: 'Centro',
+                            end: 'Abajo',
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      SegmentedButton<ImageColorMode>(
+                        key: const Key('color-mode-selector'),
+                        segments: const <ButtonSegment<ImageColorMode>>[
+                          ButtonSegment<ImageColorMode>(
+                            value: ImageColorMode.color,
+                            icon: Icon(Icons.palette_outlined),
+                            label: Text('Color'),
+                          ),
+                          ButtonSegment<ImageColorMode>(
+                            value: ImageColorMode.grayscale,
+                            icon: Icon(Icons.tonality_outlined),
+                            label: Text('Blanco y negro'),
+                          ),
+                        ],
+                        selected: <ImageColorMode>{
+                          state.configuration.colorMode,
+                        },
+                        onSelectionChanged: (Set<ImageColorMode> selection) {
+                          _controller.changeColorMode(selection.single);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      const _SectionTitle(
                         title: 'Tamaño de cada foto',
                         subtitle: 'Estas son las medidas físicas finales, no píxeles.',
                       ),
@@ -255,7 +356,7 @@ final class _PrintConfigurationScreenState
                       ),
                       if (state.layoutError != null) ...<Widget>[
                         const SizedBox(height: 12),
-                        _LayoutError(message: state.layoutError!),
+                        _InlineError(message: state.layoutError!),
                       ],
                       const SizedBox(height: 24),
                       FilledButton.icon(
@@ -297,137 +398,39 @@ final class _PrintConfigurationScreenState
   }
 }
 
-final class _SheetPreview extends StatelessWidget {
-  const _SheetPreview({
-    required this.plan,
-    required this.image,
-    required this.showCutMarks,
-    required this.errorMessage,
-  });
+final class _ImageInspectionStatus extends StatelessWidget {
+  const _ImageInspectionStatus({required this.state});
 
-  final String? errorMessage;
-  final SelectedImage image;
-  final SheetPlan? plan;
-  final bool showCutMarks;
+  final PrintConfigurationState state;
 
   @override
   Widget build(BuildContext context) {
-    final SheetPlan? currentPlan = plan;
-    if (currentPlan == null) {
-      return AspectRatio(
-        aspectRatio: 4 / 3,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(20),
+    if (state.isInspectingImage) {
+      return const Column(
+        key: Key('image-inspection-progress'),
+        children: <Widget>[
+          LinearProgressIndicator(),
+          SizedBox(height: 8),
+          Text(
+            'Leyendo tamaño y orientación de la foto…',
+            textAlign: TextAlign.center,
           ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                errorMessage ?? 'No se puede crear la vista previa.',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ),
+        ],
       );
     }
+    if (state.imageError != null) {
+      return _InlineError(message: state.imageError!);
+    }
 
-    final Uint8List bytes = image.bytes;
-    final double pageWidth = currentPlan.pageWidth.inMillimetres;
-    final double pageHeight = currentPlan.pageHeight.inMillimetres;
-    final List<PlacedPhoto> firstPage = currentPlan
-        .placementsForPage(0)
-        .toList(growable: false);
-
-    return Column(
-      children: <Widget>[
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 360),
-            child: AspectRatio(
-              aspectRatio: pageWidth / pageHeight,
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  return DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: const <BoxShadow>[
-                        BoxShadow(blurRadius: 12, color: Color(0x26000000)),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Stack(
-                        clipBehavior: Clip.hardEdge,
-                        children: firstPage
-                            .map(
-                              (PlacedPhoto placement) => Positioned(
-                                key: ValueKey<String>(
-                                  'layout-photo-${placement.copyIndex}',
-                                ),
-                                left:
-                                    placement.left.inMillimetres /
-                                    pageWidth *
-                                    constraints.maxWidth,
-                                top:
-                                    placement.top.inMillimetres /
-                                    pageHeight *
-                                    constraints.maxHeight,
-                                width:
-                                    placement.width.inMillimetres /
-                                    pageWidth *
-                                    constraints.maxWidth,
-                                height:
-                                    placement.height.inMillimetres /
-                                    pageHeight *
-                                    constraints.maxHeight,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    border: showCutMarks
-                                        ? Border.all(
-                                            color: Colors.black54,
-                                            width: 0.5,
-                                          )
-                                        : null,
-                                  ),
-                                  child: currentPlan.photoRotated
-                                      ? RotatedBox(
-                                          quarterTurns: 1,
-                                          child: Image.memory(
-                                            bytes,
-                                            fit: BoxFit.cover,
-                                            gaplessPlayback: true,
-                                          ),
-                                        )
-                                      : Image.memory(
-                                          bytes,
-                                          fit: BoxFit.cover,
-                                          gaplessPlayback: true,
-                                        ),
-                                ),
-                              ),
-                            )
-                            .toList(growable: false),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          currentPlan.pageCount == 1
-              ? '${currentPlan.placements.length} copias · 1 página'
-              : 'Página 1 de ${currentPlan.pageCount} · ${currentPlan.placements.length} copias',
-          key: const Key('layout-page-summary'),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
+    final SourceImageSize? size = state.configuration.sourceSize;
+    if (size == null) {
+      return const SizedBox.shrink();
+    }
+    return Text(
+      'Original orientado: ${size.widthPixels} × ${size.heightPixels} px',
+      key: const Key('source-image-size'),
+      style: Theme.of(context).textTheme.bodySmall,
+      textAlign: TextAlign.center,
     );
   }
 }
@@ -451,8 +454,8 @@ final class _SectionTitle extends StatelessWidget {
   }
 }
 
-final class _LayoutError extends StatelessWidget {
-  const _LayoutError({required this.message});
+final class _InlineError extends StatelessWidget {
+  const _InlineError({required this.message});
 
   final String message;
 
@@ -472,6 +475,21 @@ final class _LayoutError extends StatelessWidget {
       ),
     );
   }
+}
+
+String _focusLabel(
+  double value, {
+  required String start,
+  required String middle,
+  required String end,
+}) {
+  if (value < 0.34) {
+    return start;
+  }
+  if (value > 0.66) {
+    return end;
+  }
+  return middle;
 }
 
 String _paperLabel(PaperSize paper) {

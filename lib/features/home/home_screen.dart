@@ -5,15 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
+import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.imagePickerGateway,
+    this.imageProcessor,
     this.pdfSpikeBuilder,
   });
 
   final ImagePickerGateway imagePickerGateway;
+  final ImageProcessor? imageProcessor;
   final WidgetBuilder? pdfSpikeBuilder;
 
   @override
@@ -148,7 +151,10 @@ final class _HomeScreenState extends State<HomeScreen> {
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
-            return PrintConfigurationScreen(image: image);
+            return PrintConfigurationScreen(
+              image: image,
+              imageProcessor: widget.imageProcessor,
+            );
           },
         ),
       ),
