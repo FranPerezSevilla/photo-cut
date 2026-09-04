@@ -44,6 +44,12 @@ Tests use fakes. Planned adapters include:
 - PDF preview/share/print;
 - lifetime purchase and restoration.
 
+`PrintDocument` carries PDF bytes and explicit physical page dimensions. Native
+share and print requests pass through `PrintGateway`; feature code never invokes
+static plugin APIs. The read-only `PdfDocumentPreview` wrapper disables the
+plugin's built-in actions so all user-triggered share/print operations still use
+the gateway and remain replaceable by fakes in tests.
+
 ### UI and state
 
 The app has one short-lived print-job session. Use an immutable state object and a
