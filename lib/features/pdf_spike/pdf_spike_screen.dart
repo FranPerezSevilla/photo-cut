@@ -61,10 +61,10 @@ final class _PdfSpikeScreenState extends State<PdfSpikeScreen> {
         future: _documentFuture,
         builder: (BuildContext context, AsyncSnapshot<PrintDocument> snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(
+            return Center(
               child: Semantics(
                 label: 'Generando PDF de ejemplo',
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               ),
             );
           }
