@@ -12,9 +12,10 @@ single lifetime purchase.
 
 ## Current state
 
-The geometry and PDF spike is complete: exact-size PDFs can be generated,
-previewed, shared and handed to native printing. The repository is now in
-**M2 — Usable MVP flow**; the next task selects a real gallery image robustly.
+Photo Cut can now select and preview one real gallery image while keeping it
+local to the device and recovering Android lost-data cases. The repository
+remains in **M2 — Usable MVP flow**; the next task builds the app-owned
+configuration screen for the two-step prepare-then-print flow.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
@@ -51,8 +52,8 @@ bash tool/bootstrap_platforms.sh
 python3 tool/project.py validate
 python3 tool/project.py status
 python3 tool/project.py next
-python3 tool/project.py show M2-T01
-python3 tool/project.py verify M2-T01
+python3 tool/project.py show M2-T02
+python3 tool/project.py verify M2-T02
 python3 tool/project.py render-status
 ```
 
