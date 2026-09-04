@@ -85,11 +85,17 @@ ProcessedImage _processBytes({
 }
 
 img.Image _decodeAndOrient(Uint8List bytes) {
-  final img.Image? decoded = img.decodeImage(bytes);
-  if (decoded == null) {
+  try {
+    final img.Image? decoded = img.decodeImage(bytes);
+    if (decoded == null) {
+      throw StateError('Unsupported or invalid image data');
+    }
+    return img.bakeOrientation(decoded);
+  } on StateError {
+    rethrow;
+  } on Object {
     throw StateError('Unsupported or invalid image data');
   }
-  return img.bakeOrientation(decoded);
 }
 
 _PixelCrop _toPixelCrop(
