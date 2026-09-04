@@ -63,10 +63,8 @@ final class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       Text(
                         state.image == null
-                            ? 'Elige una foto, indica sus medidas y crea una '
-                                  'hoja lista para imprimir.'
-                            : 'Foto seleccionada. En el siguiente paso podrás '
-                                  'indicar sus medidas y preparar la hoja.',
+                            ? 'Elige una foto, indica sus medidas y crea una hoja lista para imprimir.'
+                            : 'Foto seleccionada. Ahora configura el documento dentro de Photo Cut.',
                         style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -89,25 +87,39 @@ final class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                       const SizedBox(height: 28),
-                      FilledButton.icon(
-                        key: const Key('choose-photo'),
-                        onPressed: state.isBusy
-                            ? null
-                            : _controller.selectFromGallery,
-                        icon: state.isBusy
-                            ? const SizedBox.square(
-                                dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.add_photo_alternate_outlined),
-                        label: Text(
-                          state.image == null
-                              ? 'Elegir foto'
-                              : 'Elegir otra foto',
+                      if (state.image == null)
+                        FilledButton.icon(
+                          key: const Key('choose-photo'),
+                          onPressed: state.isBusy
+                              ? null
+                              : _controller.selectFromGallery,
+                          icon: state.isBusy
+                              ? const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.add_photo_alternate_outlined),
+                          label: const Text('Elegir foto'),
+                        )
+                      else ...<Widget>[
+                        FilledButton.icon(
+                          key: const Key('configure-photo'),
+                          onPressed: () => _openConfiguration(state.image!),
+                          icon: const Icon(Icons.tune),
+                          label: const Text('Configurar impresión'),
                         ),
-                      ),
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          key: const Key('choose-photo'),
+                          onPressed: state.isBusy
+                              ? null
+                              : _controller.selectFromGallery,
+                          icon: const Icon(Icons.add_photo_alternate_outlined),
+                          label: const Text('Elegir otra foto'),
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       Text(
                         'La foto se procesa en este dispositivo y no se sube.',
@@ -125,6 +137,18 @@ final class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _openConfiguration(SelectedImage image) {
+    unawaited(
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return PrintConfigurationScreen(image: image);
           },
         ),
       ),

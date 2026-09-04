@@ -347,7 +347,7 @@
       "id": "M2-T02",
       "milestone": "M2",
       "title": "Build the print-job configuration flow",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T01"
@@ -367,15 +367,28 @@
         }
       ],
       "evidence": [
-        "lib/features/print_job/",
-        "test/features/print_job/"
+        "lib/features/print_job/length_unit.dart",
+        "lib/features/print_job/print_job_configuration.dart",
+        "lib/features/print_job/print_configuration_state.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/print_configuration_screen.dart",
+        "test/features/print_job/print_configuration_controller_test.dart",
+        "test/features/print_job/print_configuration_screen_test.dart",
+        "project/evidence/M2-T02/README.md",
+        "project/evidence/M2-T02/two-step-flow.md"
+      ],
+      "completedAt": "2026-09-04",
+      "verification": [
+        "GitHub Actions preparation run 33908511625: analysis and focused tests — success",
+        "GitHub Actions CI run 33908672038: Quality and Android — success",
+        "GitHub Actions CI run 33908672038: iOS simulator build — success"
       ]
     },
     {
       "id": "M2-T03",
       "milestone": "M2",
       "title": "Implement crop-to-fill and fit-inside",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M2-T02"

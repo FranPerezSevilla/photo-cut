@@ -24,11 +24,11 @@ class ProjectCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Plan is valid', result.stdout)
 
-    def test_next_returns_print_configuration_task(self) -> None:
+    def test_next_returns_crop_and_fit_task(self) -> None:
         result = self.run_cli('next', '--json')
         self.assertEqual(result.returncode, 0, result.stderr)
         task = json.loads(result.stdout)
-        self.assertEqual(task['id'], 'M2-T02')
+        self.assertEqual(task['id'], 'M2-T03')
         self.assertEqual(task['status'], 'ready')
         self.assertEqual(task['executor'], 'agent')
 
@@ -36,7 +36,7 @@ class ProjectCliTest(unittest.TestCase):
         result = self.run_cli('status')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('M2 — Usable MVP flow', result.stdout)
-        self.assertIn('M2-T02', result.stdout)
+        self.assertIn('M2-T03', result.stdout)
 
     def test_unknown_task_fails_cleanly(self) -> None:
         result = self.run_cli('show', 'M99-T99')
