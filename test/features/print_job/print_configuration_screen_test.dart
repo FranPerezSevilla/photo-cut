@@ -52,7 +52,11 @@ void main() {
     await tester.enterText(copyField, '40');
     await tester.pump();
 
-    await _scrollTo(tester, find.byKey(const Key('layout-page-summary')));
+    await _scrollTo(
+      tester,
+      find.byKey(const Key('layout-page-summary')),
+      delta: -300,
+    );
     expect(find.text('Página 1 de 2 · 40 copias'), findsOneWidget);
   });
 
@@ -84,11 +88,15 @@ void main() {
   });
 }
 
-Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
+Future<void> _scrollTo(
+  WidgetTester tester,
+  Finder finder, {
+  double delta = 300,
+}) async {
   await tester.scrollUntilVisible(
     finder,
-    300,
-    scrollable: find.byType(Scrollable),
+    delta,
+    scrollable: find.byType(Scrollable).first,
   );
   await tester.pumpAndSettle();
 }
