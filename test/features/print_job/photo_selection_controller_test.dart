@@ -10,7 +10,7 @@ void main() {
       recoveryResult: ImageSelectionSuccess(_image('recovered.png')),
     );
     final PhotoSelectionController controller = PhotoSelectionController(
-      imagePickerGateway: gateway,
+      gateway: gateway,
     );
 
     await controller.recoverLostSelection();
@@ -29,7 +29,7 @@ void main() {
       ],
     );
     final PhotoSelectionController controller = PhotoSelectionController(
-      imagePickerGateway: gateway,
+      gateway: gateway,
     );
 
     await controller.selectFromGallery();
@@ -48,7 +48,7 @@ void main() {
       ],
     );
     final PhotoSelectionController controller = PhotoSelectionController(
-      imagePickerGateway: gateway,
+      gateway: gateway,
     );
 
     await controller.selectFromGallery();
