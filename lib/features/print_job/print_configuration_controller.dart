@@ -1,23 +1,73 @@
 import 'package:flutter/foundation.dart';
+import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/layout/layout.dart';
 import 'package:photo_cut/core/units/units.dart';
 import 'package:photo_cut/features/print_job/length_unit.dart';
 import 'package:photo_cut/features/print_job/print_configuration_state.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
+import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 /// Owns validation and canonical physical values for the preparation screen.
 final class PrintConfigurationController extends ChangeNotifier {
   PrintConfigurationController({
     required SelectedImage image,
     SheetLayoutEngine layoutEngine = const SheetLayoutEngine(),
+    CropPlanner cropPlanner = const CropPlanner(),
+    ImageProcessor imageProcessor = const DartImageProcessor(),
   }) : _layoutEngine = layoutEngine,
+       _cropPlanner = cropPlanner,
+       _imageProcessor = imageProcessor,
        _state = _initialState(image, layoutEngine);
 
+  final CropPlanner _cropPlanner;
+  final ImageProcessor _imageProcessor;
   final SheetLayoutEngine _layoutEngine;
+  bool _disposed = false;
+  bool _inspectionAttempted = false;
   PrintConfigurationState _state;
 
   PrintConfigurationState get state => _state;
+
+  Future<void> inspectImage() async {
+    if (_inspectionAttempted || _disposed) {
+      return;
+    }
+    _inspectionAttempted = true;
+    _replace(
+      _state.copyWith(
+        isInspectingImage: true,
+        imageError: null,
+      ),
+    );
+
+    try {
+      final SourceImageSize sourceSize = await _imageProcessor.inspect(
+        _state.configuration.image.bytes,
+      );
+      if (_disposed) {
+        return;
+      }
+      _replaceWithPlanAndCrop(
+        _state.copyWith(
+          configuration: _state.configuration.copyWith(sourceSize: sourceSize),
+          isInspectingImage: false,
+          imageError: null,
+        ),
+      );
+    } on Object {
+      if (_disposed) {
+        return;
+      }
+      _replace(
+        _state.copyWith(
+          isInspectingImage: false,
+          imageError:
+              'No se pudo leer la orientación o el tamaño de esta foto.',
+        ),
+      );
+    }
+  }
 
   void changeWidth(String input) {
     final _ParsedLength parsed = _parseLength(input, _state.unit);
@@ -25,7 +75,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       _replace(_state.copyWith(widthInput: input, widthError: parsed.error));
       return;
     }
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(photoWidth: parsed.length),
         widthInput: input,
@@ -40,7 +90,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       _replace(_state.copyWith(heightInput: input, heightError: parsed.error));
       return;
     }
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(
           photoHeight: parsed.length,
@@ -62,7 +112,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       );
       return;
     }
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(copyCount: parsed),
         copyCountInput: input,
@@ -77,7 +127,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       _replace(_state.copyWith(marginInput: input, marginError: parsed.error));
       return;
     }
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(margin: parsed.length),
         marginInput: input,
@@ -92,7 +142,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       _replace(_state.copyWith(gapInput: input, gapError: parsed.error));
       return;
     }
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(gap: parsed.length),
         gapInput: input,
@@ -106,7 +156,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       return;
     }
     final PrintJobConfiguration configuration = _state.configuration;
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         unit: unit,
         widthInput: _formatLength(configuration.photoWidth, unit),
@@ -122,11 +172,35 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changePaperSize(PaperSize paperSize) {
-    _replaceWithPlan(
+    _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(paperSize: paperSize),
       ),
     );
+  }
+
+  void changeFitMode(ImageFitMode mode) {
+    _replaceWithPlanAndCrop(
+      _state.copyWith(
+        configuration: _state.configuration.copyWith(fitMode: mode),
+      ),
+    );
+  }
+
+  void changeColorMode(ImageColorMode mode) {
+    _replace(
+      _state.copyWith(
+        configuration: _state.configuration.copyWith(colorMode: mode),
+      ),
+    );
+  }
+
+  void changeFocusX(double value) {
+    _changeFocus(_state.configuration.focus.copyWith(x: value));
+  }
+
+  void changeFocusY(double value) {
+    _changeFocus(_state.configuration.focus.copyWith(y: value));
   }
 
   void changeCutMarks(bool value) {
@@ -137,15 +211,42 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
-  void _replaceWithPlan(PrintConfigurationState next) {
+  void _changeFocus(NormalizedPoint focus) {
+    _replaceWithPlanAndCrop(
+      _state.copyWith(
+        configuration: _state.configuration.copyWith(focus: focus),
+      ),
+    );
+  }
+
+  void _replaceWithPlanAndCrop(PrintConfigurationState next) {
+    PrintJobConfiguration configuration = next.configuration;
+    final SourceImageSize? sourceSize = configuration.sourceSize;
+    if (sourceSize != null) {
+      final NormalizedCropRect cropRect =
+          configuration.fitMode == ImageFitMode.fitInside
+          ? NormalizedCropRect.full
+          : _cropPlanner.plan(
+              sourceSize: sourceSize,
+              targetAspectRatio: configuration.photoAspectRatio,
+              focus: configuration.focus,
+            );
+      configuration = configuration.copyWith(cropRect: cropRect);
+    }
+
     try {
-      final SheetPlan plan = _layoutEngine.createPlan(
-        _specFor(next.configuration),
+      final SheetPlan plan = _layoutEngine.createPlan(_specFor(configuration));
+      _replace(
+        next.copyWith(
+          configuration: configuration,
+          previewPlan: plan,
+          layoutError: null,
+        ),
       );
-      _replace(next.copyWith(previewPlan: plan, layoutError: null));
     } on StateError {
       _replace(
         next.copyWith(
+          configuration: configuration,
           previewPlan: null,
           layoutError:
               'La foto no cabe en el papel con estas medidas y márgenes.',
@@ -155,8 +256,17 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void _replace(PrintConfigurationState value) {
+    if (_disposed) {
+      return;
+    }
     _state = value;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   static PrintConfigurationState _initialState(
@@ -172,6 +282,11 @@ final class PrintConfigurationController extends ChangeNotifier {
       margin: PhysicalLength.millimetres(8),
       gap: PhysicalLength.millimetres(2),
       showCutMarks: true,
+      fitMode: ImageFitMode.cropToFill,
+      colorMode: ImageColorMode.color,
+      focus: NormalizedPoint.center,
+      cropRect: NormalizedCropRect.full,
+      sourceSize: null,
     );
     final SheetPlan plan = layoutEngine.createPlan(_specFor(configuration));
     return PrintConfigurationState(
@@ -183,6 +298,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       marginInput: '8',
       gapInput: '2',
       previewPlan: plan,
+      isInspectingImage: true,
     );
   }
 

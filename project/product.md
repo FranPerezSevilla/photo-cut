@@ -18,13 +18,24 @@ scaling, margins, duplication and “fit to page” behaviour.
 
 ## Primary flow
 
+### Step 1 — Prepare in Photo Cut
+
 1. Select one image from the device.
 2. Enter width and height in mm, cm or inches.
-3. Choose crop-to-fill or fit-inside.
-4. Choose A4, Letter or 10 × 15 cm paper.
-5. Choose the number of copies.
-6. Preview the resulting pages.
-7. Export, share or print the PDF.
+3. Choose crop-to-fill or fit-inside and adjust the focus when cropping.
+4. Choose colour or app-owned grayscale.
+5. Choose A4, Letter or 10 × 15 cm paper.
+6. Choose the number of copies, margins, spacing and cut marks.
+7. See the Photo Cut preview update from the same document state.
+
+### Step 2 — Review and print
+
+8. Review the immutable final PDF and a compact settings summary.
+9. Go back to edit, share the PDF or explicitly open native printing.
+10. Use the matching paper at 100% / actual size in the operating-system dialog.
+
+The native print dialog controls the destination printer and printer-specific
+options. It is not a second editor for Photo Cut geometry.
 
 ## MVP requirements
 
@@ -34,6 +45,7 @@ scaling, margins, duplication and “fit to page” behaviour.
 - Automatic portrait/landscape page orientation when it fits more copies.
 - Repeated copies, page overflow and deterministic ordering.
 - Crop-to-fill and fit-inside modes.
+- App-owned colour or grayscale output.
 - Optional cut marks.
 - Resolution warning based on effective DPI.
 - PDF preview, share and native print hand-off.

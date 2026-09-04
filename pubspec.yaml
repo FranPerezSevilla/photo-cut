@@ -12,6 +12,7 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
+  image: 4.9.2
   image_picker: 1.2.3
   pdf: 3.13.0
   printing: 5.15.0

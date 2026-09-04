@@ -1,0 +1,4 @@
+enum ImageColorMode {
+  color,
+  grayscale,
+}
