@@ -29,13 +29,15 @@ void main() {
     final Finder widthField = find.byKey(
       const ValueKey<String>('photo-width-millimetres'),
     );
+    await _scrollTo(tester, widthField);
     await tester.enterText(widthField, '0');
     await tester.pump();
 
     expect(find.text('Introduce una medida mayor que 0.'), findsOneWidget);
-    final FilledButton button = tester.widget<FilledButton>(
-      find.byKey(const Key('review-print-job')),
-    );
+
+    final Finder reviewButton = find.byKey(const Key('review-print-job'));
+    await _scrollTo(tester, reviewButton);
+    final FilledButton button = tester.widget<FilledButton>(reviewButton);
     expect(button.onPressed, isNull);
   });
 
@@ -46,10 +48,11 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder copyField = find.byKey(const Key('copy-count'));
-    await tester.ensureVisible(copyField);
+    await _scrollTo(tester, copyField);
     await tester.enterText(copyField, '40');
     await tester.pump();
 
+    await _scrollTo(tester, find.byKey(const Key('layout-page-summary')));
     expect(find.text('Página 1 de 2 · 40 copias'), findsOneWidget);
   });
 
@@ -71,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder reviewButton = find.byKey(const Key('review-print-job'));
-    await tester.ensureVisible(reviewButton);
+    await _scrollTo(tester, reviewButton);
     await tester.tap(reviewButton);
     await tester.pump();
 
@@ -79,6 +82,15 @@ void main() {
     expect(reviewed?.photoWidth.inMillimetres, 35);
     expect(reviewed?.copyCount, 8);
   });
+}
+
+Future<void> _scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    300,
+    scrollable: find.byType(Scrollable),
+  );
+  await tester.pumpAndSettle();
 }
 
 SelectedImage _image() {
