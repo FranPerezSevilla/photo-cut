@@ -1,0 +1,214 @@
+name: Complete M2-T04
+
+on:
+  push:
+    branches:
+      - task/M2-T04-final-review-print-handoff
+
+permissions:
+  contents: write
+
+concurrency:
+  group: complete-m2-t04
+  cancel-in-progress: false
+
+jobs:
+  quality-android:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T04-final-review-print-handoff
+
+      - name: Set up Java 17
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.47.2
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Format task sources
+        run: dart format lib test integration_test
+
+      - name: Validate, analyze and test
+        run: |
+          python3 tool/normalize_platforms.py --check
+          python3 tool/project.py validate
+          flutter analyze --fatal-infos
+          flutter test
+          flutter test integration_test/print_job_flow_test.dart
+
+      - name: Build Android release test APK
+        run: flutter build apk --release
+
+  ios-simulator:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: macos-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T04-final-review-print-handoff
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.47.2
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Verify iOS simulator build
+        run: |
+          python3 tool/normalize_platforms.py --check
+          flutter build ios --simulator --no-codesign
+
+  complete:
+    if: github.actor != 'github-actions[bot]'
+    needs:
+      - quality-android
+      - ios-simulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout latest task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T04-final-review-print-handoff
+          fetch-depth: 0
+
+      - name: Include any preparation commit
+        run: git pull --rebase origin task/M2-T04-final-review-print-handoff
+
+      - name: Complete task and open resolution guidance
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan_path = Path('project/plan.json')
+          plan = json.loads(plan_path.read_text(encoding='utf-8'))
+          tasks = {task['id']: task for task in plan['tasks']}
+
+          completed = tasks['M2-T04']
+          if completed['status'] not in {'ready', 'done'}:
+              raise SystemExit(f"Unexpected M2-T04 state: {completed['status']}")
+          completed['status'] = 'done'
+          completed['completedAt'] = '2026-09-04'
+          completed['evidence'] = [
+              'lib/features/print_job/print_job_document_factory.dart',
+              'lib/features/print_job/print_job_filename_builder.dart',
+              'lib/features/print_job/print_review_screen.dart',
+              'lib/platform/pdf/sheet_pdf_renderer.dart',
+              'lib/platform/pdf/exact_size_pdf_renderer.dart',
+              'test/features/print_job/print_job_document_factory_test.dart',
+              'test/features/print_job/print_review_screen_test.dart',
+              'integration_test/print_job_flow_test.dart',
+              'project/decisions/ADR-009-immutable-final-pdf-handoff.md',
+              'project/evidence/M2-T04/two-step-handoff.md',
+              'project/evidence/M2-T04/README.md',
+          ]
+          completed['verification'] = [
+              'GitHub Actions Complete M2-T04: quality, Android and integration tests — success',
+              'GitHub Actions Complete M2-T04: iOS simulator build — success',
+          ]
+
+          next_task = tasks['M2-T05']
+          if next_task['status'] == 'backlog':
+              next_task['status'] = 'ready'
+          elif next_task['status'] != 'ready':
+              raise SystemExit(f"Unexpected M2-T05 state: {next_task['status']}")
+
+          plan['updatedAt'] = '2026-09-04'
+          plan_path.write_text(
+              json.dumps(plan, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+
+          tests_path = Path('tool/tests/test_project_cli.py')
+          tests = tests_path.read_text(encoding='utf-8')
+          replacements = {
+              'test_next_returns_final_review_task': 'test_next_returns_resolution_warning_task',
+              "self.assertEqual(task['id'], 'M2-T04')": "self.assertEqual(task['id'], 'M2-T05')",
+              "self.assertIn('M2-T04', result.stdout)": "self.assertIn('M2-T05', result.stdout)",
+          }
+          for old, new in replacements.items():
+              if old not in tests:
+                  raise SystemExit(f'Missing expected CLI test text: {old}')
+              tests = tests.replace(old, new)
+          tests_path.write_text(tests, encoding='utf-8')
+
+          readme_path = Path('README.md')
+          readme = readme_path.read_text(encoding='utf-8')
+          old_state = (
+              'Photo Cut can select a real image, configure exact geometry, choose crop-to-fill\n'
+              'or fit-inside, adjust the focus and preview app-owned colour or grayscale. The\n'
+              'repository remains in **M2 — Usable MVP flow**; the next task builds the final\n'
+              'read-only PDF review, sharing and explicit native print handoff.\n'
+          )
+          new_state = (
+              'Photo Cut now completes the two-step flow: prepare every document setting in\n'
+              'the app, then review one immutable named PDF before sharing or opening native\n'
+              'printing. The repository remains in **M2 — Usable MVP flow**; the next task\n'
+              'adds effective-resolution guidance before physical calibration.\n'
+          )
+          if old_state not in readme:
+              raise SystemExit('README current-state paragraph did not match expected text')
+          readme = readme.replace(old_state, new_state)
+          readme = readme.replace('show M2-T04', 'show M2-T05')
+          readme = readme.replace('verify M2-T04', 'verify M2-T05')
+          readme_path.write_text(readme, encoding='utf-8')
+
+          evidence_path = Path('project/evidence/M2-T04/README.md')
+          evidence_path.parent.mkdir(parents=True, exist_ok=True)
+          evidence_path.write_text(
+              '# M2-T04 evidence — immutable final review and native handoff\n\n'
+              'The cross-platform completion workflow verified Flutter analysis, all unit '
+              'and widget tests, the full fake-gateway integration flow, an Android release '
+              'APK and an unsigned iOS simulator build.\n\n'
+              '`PrintJobDocumentFactory` applies the stored crop, fit, colour, rotation and '
+              'cut-mark choices, produces a stable sanitised filename and returns one '
+              '`PrintDocument`. The Step 2 screen uses that same instance for read-only '
+              'preview, sharing and native printing. Returning from the system screen or '
+              'using `Volver y editar` preserves the underlying configuration route.\n\n'
+              'No real print dialog, share sheet or physical printer operation is claimed '
+              'by this automated evidence. Those remain explicit device and M3 gates.\n',
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Validate repository-owned state
+        run: |
+          python3 tool/project.py validate
+          python3 -m unittest discover -s tool/tests -p 'test_*.py'
+          python3 tool/project.py status
+          python3 tool/project.py next
+
+      - name: Commit completion and remove one-off workflows
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/prepare-m2-t04.yml .github/workflows/complete-m2-t04.yml
+          git add project/plan.json tool/tests/test_project_cli.py README.md project/evidence/M2-T04/README.md
+          git commit -m 'M2-T04: complete final review and open resolution guidance'
+          git restore --worktree .
+          git pull --rebase origin task/M2-T04-final-review-print-handoff
+          git push origin HEAD:task/M2-T04-final-review-print-handoff
