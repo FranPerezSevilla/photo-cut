@@ -24,19 +24,19 @@ class ProjectCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('Plan is valid', result.stdout)
 
-    def test_next_returns_pdf_preview_task(self) -> None:
+    def test_next_returns_image_selection_task(self) -> None:
         result = self.run_cli('next', '--json')
         self.assertEqual(result.returncode, 0, result.stderr)
         task = json.loads(result.stdout)
-        self.assertEqual(task['id'], 'M1-T04')
+        self.assertEqual(task['id'], 'M2-T01')
         self.assertEqual(task['status'], 'ready')
         self.assertEqual(task['executor'], 'agent')
 
     def test_status_mentions_current_milestone(self) -> None:
         result = self.run_cli('status')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('M1 — Geometry and PDF spike', result.stdout)
-        self.assertIn('M1-T04', result.stdout)
+        self.assertIn('M2 — Usable MVP flow', result.stdout)
+        self.assertIn('M2-T01', result.stdout)
 
     def test_unknown_task_fails_cleanly(self) -> None:
         result = self.run_cli('show', 'M99-T99')

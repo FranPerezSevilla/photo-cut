@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.pdfSpikeBuilder});
+
+  final WidgetBuilder? pdfSpikeBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,7 @@ class HomeScreen extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 520),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+                children: <Widget>[
                   const _ProductIllustration(),
                   const SizedBox(height: 32),
                   Text(
@@ -43,9 +48,11 @@ class HomeScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall,
                     textAlign: TextAlign.center,
                   ),
-                  if (kDebugMode) ...[
+                  if (kDebugMode) ...<Widget>[
                     const SizedBox(height: 20),
-                    const _DevelopmentNotice(),
+                    _DevelopmentNotice(
+                      onOpenPdfSpike: () => _openPdfSpike(context),
+                    ),
                   ],
                 ],
               ),
@@ -63,14 +70,24 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _openPdfSpike(BuildContext context) {
+    final WidgetBuilder builder =
+        pdfSpikeBuilder ??
+        (BuildContext context) => PdfSpikeScreen.production();
+    unawaited(
+      Navigator.of(context)
+          .push<void>(MaterialPageRoute<void>(builder: builder)),
+    );
+  }
 }
 
-class _ProductIllustration extends StatelessWidget {
+final class _ProductIllustration extends StatelessWidget {
   const _ProductIllustration();
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Semantics(
       label: 'Hoja con varias copias de una fotografía',
@@ -90,18 +107,31 @@ class _ProductIllustration extends StatelessWidget {
   }
 }
 
-class _DevelopmentNotice extends StatelessWidget {
-  const _DevelopmentNotice();
+final class _DevelopmentNotice extends StatelessWidget {
+  const _DevelopmentNotice({required this.onOpenPdfSpike});
+
+  final VoidCallback onOpenPdfSpike;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(
-          'Build de desarrollo · M0 Foundation',
-          style: Theme.of(context).textTheme.labelLarge,
-          textAlign: TextAlign.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              'Build de desarrollo · M1 Vista previa PDF',
+              style: Theme.of(context).textTheme.labelLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: onOpenPdfSpike,
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              label: const Text('Probar PDF de ejemplo'),
+            ),
+          ],
         ),
       ),
     );
