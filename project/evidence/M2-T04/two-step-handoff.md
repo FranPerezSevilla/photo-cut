@@ -12,3 +12,7 @@ The implementation follows issue #9:
 The integration-style widget test uses fake platform gateways to verify the
 complete happy path without claiming that CI operated a real printer or share
 sheet.
+
+The formatter workflow completed successfully and removed itself. This
+human-authored evidence commit triggers the complete pull-request CI for the
+formatted implementation state.
