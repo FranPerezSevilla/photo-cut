@@ -12,10 +12,10 @@ single lifetime purchase.
 
 ## Current state
 
-Photo Cut can select a real gallery image and configure its exact size, paper,
-copies, margins, spacing and cut marks with a live app-owned preview. The
-repository remains in **M2 — Usable MVP flow**; the next task adds crop-to-fill,
-fit-inside and Photo Cut-owned colour handling before final PDF review.
+Photo Cut can select a real image, configure exact geometry, choose crop-to-fill
+or fit-inside, adjust the focus and preview app-owned colour or grayscale. The
+repository remains in **M2 — Usable MVP flow**; the next task builds the final
+read-only PDF review, sharing and explicit native print handoff.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
@@ -52,8 +52,8 @@ bash tool/bootstrap_platforms.sh
 python3 tool/project.py validate
 python3 tool/project.py status
 python3 tool/project.py next
-python3 tool/project.py show M2-T03
-python3 tool/project.py verify M2-T03
+python3 tool/project.py show M2-T04
+python3 tool/project.py verify M2-T04
 python3 tool/project.py render-status
 ```
 
