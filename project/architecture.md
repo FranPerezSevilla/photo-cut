@@ -44,11 +44,9 @@ Tests use fakes. Planned adapters include:
 - PDF preview/share/print;
 - lifetime purchase and restoration.
 
-`PrintDocument` carries PDF bytes and explicit physical page dimensions. Native
-share and print requests pass through `PrintGateway`; feature code never invokes
-static plugin APIs. The read-only `PdfDocumentPreview` wrapper disables the
-plugin's built-in actions so all user-triggered share/print operations still use
-the gateway and remain replaceable by fakes in tests.
+Gallery selection is exposed through `ImagePickerGateway`. The production
+adapter requests one image, immediately copies its bytes into short-lived app
+state, drops provider paths and checks Android lost data once at startup.
 
 ### UI and state
 
@@ -91,8 +89,9 @@ iOS:     com.frainzzel.photocut
 ## Data and privacy
 
 No backend and no database are needed for the MVP. A selected image is temporary
-job input; it is never uploaded by Photo Cut. Purchase state is derived from the
-store API and minimal local entitlement state where required.
+job input; it is never uploaded by Photo Cut. Provider paths and full metadata are
+not retained. Purchase state is derived from the store API and minimal local
+entitlement state where required.
 
 ## Dependency policy
 

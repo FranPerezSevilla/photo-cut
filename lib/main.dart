@@ -3,5 +3,5 @@ import 'package:photo_cut/app/photo_cut_app.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const PhotoCutApp());
+  runApp(PhotoCutApp());
 }
