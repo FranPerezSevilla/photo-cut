@@ -20,7 +20,7 @@ jobs:
   quality-and-android:
     name: Quality and Android
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
 
     steps:
       - name: Checkout
@@ -45,13 +45,16 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Verify Android/iOS platform configuration
+        run: python3 tool/normalize_platforms.py --check
+
       - name: Repository doctor
         run: python3 tool/project.py doctor --strict
 
       - name: Validate roadmap
         run: python3 tool/project.py validate
 
-      - name: Test roadmap CLI
+      - name: Test repository tooling and Android entry point
         run: python3 -m unittest discover -s tool/tests -p 'test_*.py'
 
       - name: Check formatting
@@ -69,6 +72,9 @@ jobs:
       - name: Build Android debug APK
         run: flutter build apk --debug
 
+      - name: Build installable Android test APK
+        run: flutter build apk --release
+
       - name: Stage generated project scaffold
         run: |
           mkdir -p build/bootstrap-project
@@ -82,12 +88,13 @@ jobs:
           include-hidden-files: true
           retention-days: 7
 
-      - name: Upload Android APK, PDF evidence and coverage
+      - name: Upload Android APKs, PDF evidence and coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: android-pdf-and-coverage-${{ github.sha }}
+          name: android-test-apks-and-evidence-${{ github.sha }}
           path: |
             build/app/outputs/flutter-apk/app-debug.apk
+            build/app/outputs/flutter-apk/app-release.apk
             build/evidence/sample-35x45-a4.pdf
             build/evidence/sample-35x45-a4.geometry.json
             coverage/lcov.info
@@ -114,6 +121,9 @@ jobs:
 
       - name: Resolve dependencies
         run: flutter pub get
+
+      - name: Verify Android/iOS platform configuration
+        run: python3 tool/normalize_platforms.py --check
 
       - name: Build unsigned iOS simulator app
         run: flutter build ios --simulator --no-codesign
