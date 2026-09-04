@@ -18,12 +18,10 @@ void main() {
         home: PdfSpikeScreen(
           documentLoader: () async => document,
           printGateway: gateway,
-          previewBuilder: (
-            BuildContext context,
-            PrintDocument previewDocument,
-          ) {
-            return const Center(child: Text('Synthetic PDF preview'));
-          },
+          previewBuilder:
+              (BuildContext context, PrintDocument previewDocument) {
+                return const Center(child: Text('Synthetic PDF preview'));
+              },
         ),
       ),
     );
@@ -57,10 +55,7 @@ void main() {
         home: PdfSpikeScreen(
           documentLoader: () async => _document(),
           printGateway: gateway,
-          previewBuilder: (
-            BuildContext context,
-            PrintDocument document,
-          ) {
+          previewBuilder: (BuildContext context, PrintDocument document) {
             return const SizedBox();
           },
         ),
@@ -90,10 +85,7 @@ void main() {
             return _document();
           },
           printGateway: _FakePrintGateway(),
-          previewBuilder: (
-            BuildContext context,
-            PrintDocument document,
-          ) {
+          previewBuilder: (BuildContext context, PrintDocument document) {
             return const Center(child: Text('Recovered preview'));
           },
         ),
@@ -120,10 +112,9 @@ PrintDocument _document() {
 }
 
 final class _FakePrintGateway implements PrintGateway {
-  _FakePrintGateway({this.printResult = true, this.shareResult = true});
+  _FakePrintGateway({this.printResult = true});
 
   final bool printResult;
-  final bool shareResult;
   PrintDocument? printed;
   PrintDocument? shared;
 
@@ -136,6 +127,6 @@ final class _FakePrintGateway implements PrintGateway {
   @override
   Future<bool> sharePdf(PrintDocument document) async {
     shared = document;
-    return shareResult;
+    return true;
   }
 }
