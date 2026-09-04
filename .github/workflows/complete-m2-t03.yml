@@ -1,0 +1,143 @@
+name: Complete M2-T03
+
+on:
+  push:
+    branches:
+      - task/M2-T03-crop-fit-grayscale
+
+permissions:
+  contents: write
+
+concurrency:
+  group: complete-m2-t03
+  cancel-in-progress: false
+
+jobs:
+  complete:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T03-crop-fit-grayscale
+          fetch-depth: 0
+
+      - name: Complete task and open final review work
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan_path = Path('project/plan.json')
+          plan = json.loads(plan_path.read_text(encoding='utf-8'))
+          tasks = {task['id']: task for task in plan['tasks']}
+
+          completed = tasks['M2-T03']
+          if completed['status'] not in {'ready', 'done'}:
+              raise SystemExit(f"Unexpected M2-T03 state: {completed['status']}")
+          completed['status'] = 'done'
+          completed['completedAt'] = '2026-09-04'
+          completed['evidence'] = [
+              'lib/core/crop/',
+              'lib/platform/image_processing/',
+              'lib/features/print_job/print_job_configuration.dart',
+              'lib/features/print_job/print_configuration_controller.dart',
+              'lib/features/print_job/print_configuration_screen.dart',
+              'lib/features/print_job/print_sheet_preview.dart',
+              'test/core/crop/crop_planner_test.dart',
+              'test/platform/image_processing/dart_image_processor_test.dart',
+              'test_resources/exif-orientation-6.jpg.base64',
+              'project/decisions/ADR-008-normalized-crop-and-image-processing.md',
+              'project/evidence/crop-spike.md',
+              'project/evidence/M2-T03/README.md',
+          ]
+          completed['verification'] = [
+              'GitHub Actions preparation run 33912381609: analysis and focused tests — success',
+              'GitHub Actions CI run 33912622500: Quality and Android — success',
+              'GitHub Actions CI run 33912622500: iOS simulator build — success',
+          ]
+
+          next_task = tasks['M2-T04']
+          if next_task['status'] == 'backlog':
+              next_task['status'] = 'ready'
+          elif next_task['status'] != 'ready':
+              raise SystemExit(f"Unexpected M2-T04 state: {next_task['status']}")
+
+          plan['updatedAt'] = '2026-09-04'
+          plan_path.write_text(
+              json.dumps(plan, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+
+          tests_path = Path('tool/tests/test_project_cli.py')
+          tests = tests_path.read_text(encoding='utf-8')
+          replacements = {
+              'test_next_returns_crop_and_fit_task': 'test_next_returns_final_review_task',
+              "self.assertEqual(task['id'], 'M2-T03')": "self.assertEqual(task['id'], 'M2-T04')",
+              "self.assertIn('M2-T03', result.stdout)": "self.assertIn('M2-T04', result.stdout)",
+          }
+          for old, new in replacements.items():
+              if old not in tests:
+                  raise SystemExit(f'Missing expected CLI test text: {old}')
+              tests = tests.replace(old, new)
+          tests_path.write_text(tests, encoding='utf-8')
+
+          readme_path = Path('README.md')
+          readme = readme_path.read_text(encoding='utf-8')
+          old_state = (
+              'Photo Cut can select a real gallery image and configure its exact size, paper,\n'
+              'copies, margins, spacing and cut marks with a live app-owned preview. The\n'
+              'repository remains in **M2 — Usable MVP flow**; the next task adds crop-to-fill,\n'
+              'fit-inside and Photo Cut-owned colour handling before final PDF review.\n'
+          )
+          new_state = (
+              'Photo Cut can select a real image, configure exact geometry, choose crop-to-fill\n'
+              'or fit-inside, adjust the focus and preview app-owned colour or grayscale. The\n'
+              'repository remains in **M2 — Usable MVP flow**; the next task builds the final\n'
+              'read-only PDF review, sharing and explicit native print handoff.\n'
+          )
+          if old_state not in readme:
+              raise SystemExit('README current-state paragraph did not match expected text')
+          readme = readme.replace(old_state, new_state)
+          readme = readme.replace('show M2-T03', 'show M2-T04')
+          readme = readme.replace('verify M2-T03', 'verify M2-T04')
+          readme_path.write_text(readme, encoding='utf-8')
+
+          evidence_path = Path('project/evidence/M2-T03/README.md')
+          evidence_path.parent.mkdir(parents=True, exist_ok=True)
+          evidence_path.write_text(
+              '# M2-T03 evidence — crop, fit, orientation and grayscale\n\n'
+              'Focused preparation run `33912381609` and complete Android/iOS PR CI run '
+              '`33912622500` passed.\n\n'
+              'The implementation stores crop state in normalized source coordinates, '
+              'calculates crop-to-fill from the exact target aspect, preserves the whole '
+              'image for fit-inside, bakes EXIF orientation locally and applies app-owned '
+              'grayscale. The Photo Cut preview and final processing state use the same '
+              'fit, focus, crop and colour choices.\n\n'
+              '`crop_your_image` was evaluated and deliberately not retained for the MVP; '
+              'the narrower focus-control approach avoids a second crop state while '
+              'remaining deterministic and testable.\n',
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Validate repository-owned state
+        run: |
+          python3 tool/project.py validate
+          python3 -m unittest discover -s tool/tests -p 'test_*.py'
+          python3 tool/project.py status
+          python3 tool/project.py next
+
+      - name: Commit task completion and remove this workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/complete-m2-t03.yml
+          git add project/plan.json tool/tests/test_project_cli.py README.md project/evidence/M2-T03/README.md
+          git commit -m 'M2-T03: complete crop flow and open final review'
+          git restore --worktree .
+          git pull --rebase origin task/M2-T03-crop-fit-grayscale
+          git push origin HEAD:task/M2-T03-crop-fit-grayscale
