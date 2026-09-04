@@ -35,6 +35,11 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Remove imports made redundant by Flutter services
+        run: |
+          sed -i "/^import 'dart:async';$/d" lib/features/print_job/print_configuration_screen.dart
+          sed -i "/^import 'dart:typed_data';$/d" lib/features/print_job/print_configuration_screen.dart
+
       - name: Format task sources
         run: dart format lib test
 
@@ -44,15 +49,15 @@ jobs:
           flutter analyze --fatal-infos
           flutter test test/features/print_job test/app
 
-      - name: Commit formatted sources
+      - name: Commit prepared sources
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add lib test
           if git diff --cached --quiet; then
-            echo 'Sources were already formatted.'
+            echo 'Sources were already prepared.'
           else
-            git commit -m 'M2-T02: format configuration flow'
+            git commit -m 'M2-T02: prepare configuration flow'
             git restore --worktree .
             git pull --rebase origin task/M2-T02-print-configuration
             git push origin HEAD:task/M2-T02-print-configuration
