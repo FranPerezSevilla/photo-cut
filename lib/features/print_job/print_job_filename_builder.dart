@@ -13,8 +13,9 @@ final class PrintJobFilenameBuilder {
     final String height = _formatMillimetres(
       configuration.photoHeight.inMillimetres,
     );
-    final String colour =
-        configuration.colorMode == ImageColorMode.grayscale ? 'bn' : 'color';
+    final String colour = configuration.colorMode == ImageColorMode.grayscale
+        ? 'bn'
+        : 'color';
 
     return 'photo-cut-$stem-${width}x${height}mm-'
         '${configuration.copyCount}copias-'
@@ -61,8 +62,7 @@ final class PrintJobFilenameBuilder {
       'ç': 'c',
     };
     String result = value;
-    for (final MapEntry<String, String> replacement
-        in replacements.entries) {
+    for (final MapEntry<String, String> replacement in replacements.entries) {
       result = result.replaceAll(replacement.key, replacement.value);
     }
     return result;

@@ -156,23 +156,24 @@ final class _HomeScreenState extends State<HomeScreen> {
             return PrintConfigurationScreen(
               image: image,
               imageProcessor: imageProcessor,
-              onReview: (
-                BuildContext configurationContext,
-                PrintJobConfiguration configuration,
-              ) {
-                unawaited(
-                  Navigator.of(configurationContext).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext reviewContext) {
-                        return PrintReviewScreen.production(
-                          configuration: configuration,
-                          imageProcessor: imageProcessor,
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
+              onReview:
+                  (
+                    BuildContext configurationContext,
+                    PrintJobConfiguration configuration,
+                  ) {
+                    unawaited(
+                      Navigator.of(configurationContext).push<void>(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext reviewContext) {
+                            return PrintReviewScreen.production(
+                              configuration: configuration,
+                              imageProcessor: imageProcessor,
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
             );
           },
         ),

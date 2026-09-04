@@ -23,13 +23,11 @@ void main() {
           configuration: _configuration(),
           documentLoader: () async => document,
           printGateway: gateway,
-          previewBuilder: (
-            BuildContext context,
-            PrintDocument previewDocument,
-          ) {
-            previewed = previewDocument;
-            return const Center(child: Text('Vista previa final'));
-          },
+          previewBuilder:
+              (BuildContext context, PrintDocument previewDocument) {
+                previewed = previewDocument;
+                return const Center(child: Text('Vista previa final'));
+              },
         ),
       ),
     );
@@ -73,10 +71,7 @@ void main() {
           configuration: _configuration(),
           documentLoader: () async => _document(),
           printGateway: gateway,
-          previewBuilder: (
-            BuildContext context,
-            PrintDocument document,
-          ) {
+          previewBuilder: (BuildContext context, PrintDocument document) {
             return const SizedBox();
           },
         ),
@@ -111,10 +106,7 @@ void main() {
             return _document();
           },
           printGateway: _FakePrintGateway(),
-          previewBuilder: (
-            BuildContext context,
-            PrintDocument document,
-          ) {
+          previewBuilder: (BuildContext context, PrintDocument document) {
             return const Center(child: Text('Recovered final preview'));
           },
         ),

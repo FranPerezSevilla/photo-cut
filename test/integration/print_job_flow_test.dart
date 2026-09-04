@@ -30,31 +30,33 @@ void main() {
         home: PrintConfigurationScreen(
           image: _selectedImage(),
           imageProcessor: imageProcessor,
-          onReview: (
-            BuildContext context,
-            PrintJobConfiguration configuration,
-          ) {
-            unawaited(
-              Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (BuildContext routeContext) {
-                    return PrintReviewScreen(
-                      configuration: configuration,
-                      documentLoader: () => documentFactory.build(configuration),
-                      printGateway: printGateway,
-                      previewBuilder: (
-                        BuildContext previewContext,
-                        PrintDocument document,
-                      ) {
-                        reviewedDocument = document;
-                        return const Center(child: Text('Final PDF preview'));
+          onReview:
+              (BuildContext context, PrintJobConfiguration configuration) {
+                unawaited(
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext routeContext) {
+                        return PrintReviewScreen(
+                          configuration: configuration,
+                          documentLoader: () =>
+                              documentFactory.build(configuration),
+                          printGateway: printGateway,
+                          previewBuilder:
+                              (
+                                BuildContext previewContext,
+                                PrintDocument document,
+                              ) {
+                                reviewedDocument = document;
+                                return const Center(
+                                  child: Text('Final PDF preview'),
+                                );
+                              },
+                        );
                       },
-                    );
-                  },
-                ),
-              ),
-            );
-          },
+                    ),
+                  ),
+                );
+              },
         ),
       ),
     );

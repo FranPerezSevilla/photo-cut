@@ -34,18 +34,13 @@ void main() {
     expect(result.pages, hasLength(1));
     expect(result.pages.single.photoBoxes, hasLength(8));
     for (final PlacedPhoto placement in plan.placements) {
-      final PdfRenderedPhotoBox box = result.pages.single.photoBoxes.singleWhere(
-        (PdfRenderedPhotoBox candidate) =>
-            candidate.copyIndex == placement.copyIndex,
-      );
-      expect(
-        box.widthPoints,
-        closeTo(placement.width.inPdfPoints, 0.01),
-      );
-      expect(
-        box.heightPoints,
-        closeTo(placement.height.inPdfPoints, 0.01),
-      );
+      final PdfRenderedPhotoBox box = result.pages.single.photoBoxes
+          .singleWhere(
+            (PdfRenderedPhotoBox candidate) =>
+                candidate.copyIndex == placement.copyIndex,
+          );
+      expect(box.widthPoints, closeTo(placement.width.inPdfPoints, 0.01));
+      expect(box.heightPoints, closeTo(placement.height.inPdfPoints, 0.01));
     }
   });
 }

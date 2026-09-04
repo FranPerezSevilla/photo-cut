@@ -65,45 +65,43 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
       body: SafeArea(
         child: FutureBuilder<PrintDocument>(
           future: _documentFuture,
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<PrintDocument> snapshot,
-          ) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const _PreparingDocument();
-            }
-            final PrintDocument? document = snapshot.data;
-            if (snapshot.hasError || document == null) {
-              return _DocumentError(
-                onBack: _goBack,
-                onRetry: _retryDocument,
-              );
-            }
+          builder:
+              (BuildContext context, AsyncSnapshot<PrintDocument> snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const _PreparingDocument();
+                }
+                final PrintDocument? document = snapshot.data;
+                if (snapshot.hasError || document == null) {
+                  return _DocumentError(
+                    onBack: _goBack,
+                    onRetry: _retryDocument,
+                  );
+                }
 
-            final PrintReviewPreviewBuilder? previewBuilder =
-                widget.previewBuilder;
-            final Widget preview = previewBuilder == null
-                ? PdfDocumentPreview(document: document)
-                : previewBuilder(context, document);
+                final PrintReviewPreviewBuilder? previewBuilder =
+                    widget.previewBuilder;
+                final Widget preview = previewBuilder == null
+                    ? PdfDocumentPreview(document: document)
+                    : previewBuilder(context, document);
 
-            return Column(
-              children: <Widget>[
-                _ReviewSummary(
-                  configuration: widget.configuration,
-                  document: document,
-                ),
-                Expanded(child: preview),
-                _ReviewActions(
-                  actionInProgress: _actionInProgress,
-                  nativePrintLabel: _nativePrintLabel(context),
-                  onBack: _goBack,
-                  onPrint: () => _print(document),
-                  onShare: () => _share(document),
-                  statusMessage: _statusMessage,
-                ),
-              ],
-            );
-          },
+                return Column(
+                  children: <Widget>[
+                    _ReviewSummary(
+                      configuration: widget.configuration,
+                      document: document,
+                    ),
+                    Expanded(child: preview),
+                    _ReviewActions(
+                      actionInProgress: _actionInProgress,
+                      nativePrintLabel: _nativePrintLabel(context),
+                      onBack: _goBack,
+                      onPrint: () => _print(document),
+                      onShare: () => _share(document),
+                      statusMessage: _statusMessage,
+                    ),
+                  ],
+                );
+              },
         ),
       ),
     );
@@ -175,10 +173,7 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
 }
 
 final class _ReviewSummary extends StatelessWidget {
-  const _ReviewSummary({
-    required this.configuration,
-    required this.document,
-  });
+  const _ReviewSummary({required this.configuration, required this.document});
 
   final PrintJobConfiguration configuration;
   final PrintDocument document;

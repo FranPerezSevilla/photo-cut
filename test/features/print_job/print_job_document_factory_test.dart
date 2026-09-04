@@ -21,10 +21,7 @@ void main() {
 
     final document = await factory.build(configuration);
 
-    expect(
-      document.filename,
-      'photo-cut-mi-foto-na-35x45mm-8copias-a4-bn.pdf',
-    );
+    expect(document.filename, 'photo-cut-mi-foto-na-35x45mm-8copias-a4-bn.pdf');
     expect(document.bytes, <int>[37, 80, 68, 70, 45]);
     expect(document.pageWidth, pdfRenderer.plan?.pageWidth);
     expect(document.pageHeight, pdfRenderer.plan?.pageHeight);
@@ -36,10 +33,7 @@ void main() {
     expect(request?.fitMode, ImageFitMode.cropToFill);
     expect(request?.colorMode, ImageColorMode.grayscale);
     expect(request?.cropRect, configuration.cropRect);
-    expect(
-      request?.quarterTurns,
-      pdfRenderer.plan!.photoRotated ? 1 : 0,
-    );
+    expect(request?.quarterTurns, pdfRenderer.plan!.photoRotated ? 1 : 0);
   });
 
   test('filename is deterministic and strips unsafe source characters', () {
