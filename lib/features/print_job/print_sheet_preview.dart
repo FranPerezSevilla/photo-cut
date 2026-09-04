@@ -86,10 +86,7 @@ final class PrintSheetPreview extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(4),
                       boxShadow: const <BoxShadow>[
-                        BoxShadow(
-                          blurRadius: 12,
-                          color: Color(0x26000000),
-                        ),
+                        BoxShadow(blurRadius: 12, color: Color(0x26000000)),
                       ],
                     ),
                     child: ClipRRect(
@@ -176,14 +173,8 @@ final class _PreviewPhoto extends StatelessWidget {
       alignment: alignment,
       gaplessPlayback: true,
       errorBuilder:
-          (
-            BuildContext context,
-            Object error,
-            StackTrace? stackTrace,
-          ) {
-            return const Center(
-              child: Icon(Icons.broken_image_outlined),
-            );
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+            return const Center(child: Icon(Icons.broken_image_outlined));
           },
     );
 

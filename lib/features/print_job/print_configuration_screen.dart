@@ -86,8 +86,7 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Ajuste de la foto',
-                        subtitle:
-                            'El resultado se aplica dentro de Photo Cut antes de abrir la impresión del sistema.',
+                        subtitle: 'El resultado se aplica dentro de Photo Cut antes de abrir la impresión del sistema.',
                       ),
                       const SizedBox(height: 12),
                       SegmentedButton<ImageFitMode>(
@@ -104,17 +103,14 @@ final class _PrintConfigurationScreenState
                             label: Text('Encajar'),
                           ),
                         ],
-                        selected: <ImageFitMode>{
-                          state.configuration.fitMode,
-                        },
+                        selected: <ImageFitMode>{state.configuration.fitMode},
                         onSelectionChanged: (Set<ImageFitMode> selection) {
                           _controller.changeFitMode(selection.single);
                         },
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        state.configuration.fitMode ==
-                                ImageFitMode.cropToFill
+                        state.configuration.fitMode == ImageFitMode.cropToFill
                             ? 'Rellena la medida exacta y recorta lo que sobre.'
                             : 'Muestra la foto completa sin deformarla; pueden quedar bordes blancos.',
                         style: Theme.of(context).textTheme.bodySmall,
@@ -180,20 +176,18 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Tamaño de cada foto',
-                        subtitle:
-                            'Estas son las medidas físicas finales, no píxeles.',
+                        subtitle: 'Estas son las medidas físicas finales, no píxeles.',
                       ),
                       const SizedBox(height: 12),
                       SegmentedButton<LengthUnit>(
                         key: const Key('length-unit-selector'),
                         segments: LengthUnit.values
                             .map(
-                              (LengthUnit unit) =>
-                                  ButtonSegment<LengthUnit>(
-                                    value: unit,
-                                    label: Text(unit.shortLabel),
-                                    tooltip: unit.label,
-                                  ),
+                              (LengthUnit unit) => ButtonSegment<LengthUnit>(
+                                value: unit,
+                                label: Text(unit.shortLabel),
+                                tooltip: unit.label,
+                              ),
                             )
                             .toList(growable: false),
                         selected: <LengthUnit>{state.unit},
@@ -212,8 +206,7 @@ final class _PrintConfigurationScreenState
                               ),
                               initialValue: state.widthInput,
                               decoration: InputDecoration(
-                                labelText:
-                                    'Ancho (${state.unit.shortLabel})',
+                                labelText: 'Ancho (${state.unit.shortLabel})',
                                 errorText: state.widthError,
                               ),
                               keyboardType:
@@ -236,8 +229,7 @@ final class _PrintConfigurationScreenState
                               ),
                               initialValue: state.heightInput,
                               decoration: InputDecoration(
-                                labelText:
-                                    'Alto (${state.unit.shortLabel})',
+                                labelText: 'Alto (${state.unit.shortLabel})',
                                 errorText: state.heightError,
                               ),
                               keyboardType:
@@ -257,8 +249,7 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Hoja y copias',
-                        subtitle:
-                            'Photo Cut distribuirá las copias y elegirá la orientación que aproveche mejor el papel.',
+                        subtitle: 'Photo Cut distribuirá las copias y elegirá la orientación que aproveche mejor el papel.',
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<PaperSize>(
@@ -271,11 +262,10 @@ final class _PrintConfigurationScreenState
                         ),
                         items: PaperSize.presets
                             .map(
-                              (PaperSize paper) =>
-                                  DropdownMenuItem<PaperSize>(
-                                    value: paper,
-                                    child: Text(_paperLabel(paper)),
-                                  ),
+                              (PaperSize paper) => DropdownMenuItem<PaperSize>(
+                                value: paper,
+                                child: Text(_paperLabel(paper)),
+                              ),
                             )
                             .toList(growable: false),
                         onChanged: (PaperSize? paper) {
@@ -301,8 +291,7 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Separación y corte',
-                        subtitle:
-                            'Deja espacio suficiente para que la impresora no recorte los bordes.',
+                        subtitle: 'Deja espacio suficiente para que la impresora no recorte los bordes.',
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -315,8 +304,7 @@ final class _PrintConfigurationScreenState
                               ),
                               initialValue: state.marginInput,
                               decoration: InputDecoration(
-                                labelText:
-                                    'Margen (${state.unit.shortLabel})',
+                                labelText: 'Margen (${state.unit.shortLabel})',
                                 errorText: state.marginError,
                               ),
                               keyboardType:
@@ -334,9 +322,7 @@ final class _PrintConfigurationScreenState
                           const SizedBox(width: 12),
                           Expanded(
                             child: TextFormField(
-                              key: ValueKey<String>(
-                                'gap-${state.unit.name}',
-                              ),
+                              key: ValueKey<String>('gap-${state.unit.name}'),
                               initialValue: state.gapInput,
                               decoration: InputDecoration(
                                 labelText:
@@ -376,10 +362,7 @@ final class _PrintConfigurationScreenState
                       FilledButton.icon(
                         key: const Key('review-print-job'),
                         onPressed: state.canReview
-                            ? () => _review(
-                                context,
-                                state.configuration,
-                              )
+                            ? () => _review(context, state.configuration)
                             : null,
                         icon: const Icon(Icons.navigate_next),
                         label: const Text('Revisar e imprimir'),
@@ -401,10 +384,7 @@ final class _PrintConfigurationScreenState
     );
   }
 
-  void _review(
-    BuildContext context,
-    PrintJobConfiguration configuration,
-  ) {
+  void _review(BuildContext context, PrintJobConfiguration configuration) {
     final PrintJobReviewCallback? callback = widget.onReview;
     if (callback != null) {
       callback(context, configuration);
@@ -412,9 +392,7 @@ final class _PrintConfigurationScreenState
     }
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          'Configuración lista. La revisión se conecta en M2-T04.',
-        ),
+        content: Text('Configuración lista. La revisión se conecta en M2-T04.'),
       ),
     );
   }

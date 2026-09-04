@@ -45,12 +45,7 @@ final class PrintConfigurationController extends ChangeNotifier {
       return;
     }
     _inspectionAttempted = true;
-    _replace(
-      _state.copyWith(
-        isInspectingImage: true,
-        imageError: null,
-      ),
-    );
+    _replace(_state.copyWith(isInspectingImage: true, imageError: null));
 
     try {
       final SourceImageSize sourceSize = await _imageProcessor.inspect(

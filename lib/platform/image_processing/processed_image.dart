@@ -3,10 +3,8 @@ import 'dart:typed_data';
 import 'package:photo_cut/core/crop/source_image_size.dart';
 
 final class ProcessedImage {
-  ProcessedImage({
-    required Uint8List bytes,
-    required this.size,
-  }) : _bytes = _validatedCopy(bytes);
+  ProcessedImage({required Uint8List bytes, required this.size})
+    : _bytes = _validatedCopy(bytes);
 
   final Uint8List _bytes;
   final SourceImageSize size;

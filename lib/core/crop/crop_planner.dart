@@ -30,24 +30,12 @@ final class CropPlanner {
       final double left = (maximumLeft * focus.x)
           .clamp(0.0, maximumLeft)
           .toDouble();
-      return NormalizedCropRect(
-        left: left,
-        top: 0,
-        width: width,
-        height: 1,
-      );
+      return NormalizedCropRect(left: left, top: 0, width: width, height: 1);
     }
 
     final double height = sourceAspectRatio / targetAspectRatio;
     final double maximumTop = 1 - height;
-    final double top = (maximumTop * focus.y)
-        .clamp(0.0, maximumTop)
-        .toDouble();
-    return NormalizedCropRect(
-      left: 0,
-      top: top,
-      width: 1,
-      height: height,
-    );
+    final double top = (maximumTop * focus.y).clamp(0.0, maximumTop).toDouble();
+    return NormalizedCropRect(left: 0, top: top, width: 1, height: height);
   }
 }

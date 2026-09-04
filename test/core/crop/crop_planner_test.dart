@@ -62,17 +62,9 @@ void main() {
   });
 
   test('normalized value objects reject out-of-range data', () {
+    expect(() => NormalizedPoint(x: -0.1, y: 0.5), throwsArgumentError);
     expect(
-      () => NormalizedPoint(x: -0.1, y: 0.5),
-      throwsArgumentError,
-    );
-    expect(
-      () => NormalizedCropRect(
-        left: 0.8,
-        top: 0,
-        width: 0.3,
-        height: 1,
-      ),
+      () => NormalizedCropRect(left: 0.8, top: 0, width: 0.3, height: 1),
       throwsArgumentError,
     );
     expect(

@@ -27,8 +27,14 @@ void main() {
     expect(find.byKey(const Key('source-image-size')), findsOneWidget);
     expect(find.text('Original orientado: 400 × 200 px'), findsOneWidget);
     expect(find.byKey(const Key('layout-page-summary')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('layout-photo-0')), findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('layout-photo-7')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('layout-photo-0')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('layout-photo-7')),
+      findsOneWidget,
+    );
     expect(find.text('8 copias · 1 página'), findsOneWidget);
   });
 
@@ -138,12 +144,10 @@ void main() {
         home: PrintConfigurationScreen(
           image: _image(),
           imageProcessor: _FakeImageProcessor(),
-          onReview: (
-            BuildContext context,
-            PrintJobConfiguration configuration,
-          ) {
-            reviewed = configuration;
-          },
+          onReview:
+              (BuildContext context, PrintJobConfiguration configuration) {
+                reviewed = configuration;
+              },
         ),
       ),
     );

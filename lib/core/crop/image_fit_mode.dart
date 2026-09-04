@@ -1,4 +1,1 @@
-enum ImageFitMode {
-  cropToFill,
-  fitInside,
-}
+enum ImageFitMode { cropToFill, fitInside }

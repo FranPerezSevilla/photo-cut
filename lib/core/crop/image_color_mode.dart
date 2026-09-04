@@ -1,4 +1,1 @@
-enum ImageColorMode {
-  color,
-  grayscale,
-}
+enum ImageColorMode { color, grayscale }

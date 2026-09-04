@@ -37,10 +37,7 @@ final class DartImageProcessor implements ImageProcessor {
 
 SourceImageSize _inspectBytes(Uint8List bytes) {
   final img.Image image = _decodeAndOrient(bytes);
-  return SourceImageSize(
-    widthPixels: image.width,
-    heightPixels: image.height,
-  );
+  return SourceImageSize(widthPixels: image.width, heightPixels: image.height);
 }
 
 ProcessedImage _processBytes({
@@ -98,10 +95,7 @@ img.Image _decodeAndOrient(Uint8List bytes) {
   }
 }
 
-_PixelCrop _toPixelCrop(
-  NormalizedCropRect normalized,
-  img.Image source,
-) {
+_PixelCrop _toPixelCrop(NormalizedCropRect normalized, img.Image source) {
   final int x = (normalized.left * source.width)
       .floor()
       .clamp(0, source.width - 1)
@@ -116,12 +110,7 @@ _PixelCrop _toPixelCrop(
   final int right = requestedRight.clamp(x + 1, source.width).toInt();
   final int bottom = requestedBottom.clamp(y + 1, source.height).toInt();
 
-  return _PixelCrop(
-    x: x,
-    y: y,
-    width: right - x,
-    height: bottom - y,
-  );
+  return _PixelCrop(x: x, y: y, width: right - x, height: bottom - y);
 }
 
 final class _PixelCrop {
