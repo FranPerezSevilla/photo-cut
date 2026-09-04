@@ -1,4 +1,4 @@
-package com.frainzzel.photo_cut
+package com.frainzzel.photocut
 
 import io.flutter.embedding.android.FlutterActivity
 
