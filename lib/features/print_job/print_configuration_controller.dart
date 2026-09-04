@@ -10,15 +10,31 @@ import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 /// Owns validation and canonical physical values for the preparation screen.
 final class PrintConfigurationController extends ChangeNotifier {
-  PrintConfigurationController({
+  factory PrintConfigurationController({
     required SelectedImage image,
     SheetLayoutEngine layoutEngine = const SheetLayoutEngine(),
     CropPlanner cropPlanner = const CropPlanner(),
     ImageProcessor imageProcessor = const DartImageProcessor(),
+  }) {
+    return PrintConfigurationController._(
+      image: image,
+      layoutEngine: layoutEngine,
+      cropPlanner: cropPlanner,
+      imageProcessor: imageProcessor,
+      initialState: _initialState(image, layoutEngine),
+    );
+  }
+
+  PrintConfigurationController._({
+    required SelectedImage image,
+    required SheetLayoutEngine layoutEngine,
+    required CropPlanner cropPlanner,
+    required ImageProcessor imageProcessor,
+    required PrintConfigurationState initialState,
   }) : _layoutEngine = layoutEngine,
        _cropPlanner = cropPlanner,
        _imageProcessor = imageProcessor,
-       _state = _initialState(image, layoutEngine);
+       _state = initialState;
 
   final CropPlanner _cropPlanner;
   final ImageProcessor _imageProcessor;
