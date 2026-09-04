@@ -18,3 +18,4 @@ versions follow semantic versioning where practical for a mobile application.
 - Deterministic repeated-photo sheet layout with orientation, margins, gaps and page overflow.
 - Exact-size PDF rendering from SheetPlan with inspected A4 and photo rectangles.
 - In-app PDF preview plus native share and print gateways for Android and iOS.
+- Local gallery image selection with Android lost-data recovery and no retained provider path.

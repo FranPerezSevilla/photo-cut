@@ -306,7 +306,7 @@
       "id": "M2-T01",
       "milestone": "M2",
       "title": "Select one image robustly",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M1-T04"
@@ -326,15 +326,28 @@
         }
       ],
       "evidence": [
-        "lib/platform/image_picker_gateway.dart",
-        "test/platform/image_picker_gateway_test.dart"
+        "lib/platform/image_picker/",
+        "lib/features/print_job/photo_selection_controller.dart",
+        "lib/features/home/home_screen.dart",
+        "test/platform/image_picker/image_picker_gateway_test.dart",
+        "test/features/print_job/photo_selection_controller_test.dart",
+        "test/app/photo_cut_app_test.dart",
+        "project/decisions/ADR-007-gallery-image-selection.md",
+        "ios/Runner/Info.plist",
+        "project/evidence/M2-T01/README.md"
+      ],
+      "completedAt": "2026-09-04",
+      "verification": [
+        "GitHub Actions preparation run 33905836030: analysis and focused tests — success",
+        "GitHub Actions CI run 33905993143: Quality and Android — success",
+        "GitHub Actions CI run 33905993143: iOS simulator build — success"
       ]
     },
     {
       "id": "M2-T02",
       "milestone": "M2",
       "title": "Build the print-job configuration flow",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M2-T01"
