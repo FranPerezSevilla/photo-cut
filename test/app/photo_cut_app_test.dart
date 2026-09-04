@@ -87,7 +87,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Ajuste de la foto'), findsOneWidget);
+    expect(fitSelector, findsOneWidget);
     expect(find.text('Color'), findsOneWidget);
     expect(find.text('Blanco y negro'), findsOneWidget);
   });
