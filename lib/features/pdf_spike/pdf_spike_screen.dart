@@ -156,7 +156,13 @@ final class _PdfSpikeScreenState extends State<PdfSpikeScreen> {
     final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 92),
+        ),
+      );
   }
 }
 
