@@ -8,8 +8,7 @@ class PhotoCutApp extends StatelessWidget {
     super.key,
     ImagePickerGateway? imagePickerGateway,
     this.pdfSpikeBuilder,
-  }) : imagePickerGateway =
-           imagePickerGateway ?? PluginImagePickerGateway();
+  }) : imagePickerGateway = imagePickerGateway ?? PluginImagePickerGateway();
 
   final ImagePickerGateway imagePickerGateway;
   final WidgetBuilder? pdfSpikeBuilder;

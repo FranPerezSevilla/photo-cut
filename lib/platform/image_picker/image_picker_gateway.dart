@@ -47,17 +47,17 @@ final class SelectedImage {
 
   static Uint8List _validatedCopy(Uint8List bytes) {
     if (bytes.isEmpty) {
-      throw ArgumentError.value(bytes, 'bytes', 'Image bytes must not be empty');
+      throw ArgumentError.value(
+        bytes,
+        'bytes',
+        'Image bytes must not be empty',
+      );
     }
     return Uint8List.fromList(bytes);
   }
 
   static String _safeDisplayName(String value) {
-    final String basename = value
-        .replaceAll('\\', '/')
-        .split('/')
-        .last
-        .trim();
+    final String basename = value.replaceAll('\\', '/').split('/').last.trim();
     return basename.isEmpty ? 'foto' : basename;
   }
 }

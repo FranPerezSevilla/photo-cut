@@ -26,9 +26,7 @@ final class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = PhotoSelectionController(
-      gateway: widget.imagePickerGateway,
-    );
+    _controller = PhotoSelectionController(gateway: widget.imagePickerGateway);
     unawaited(_controller.recoverLostSelection());
   }
 
@@ -99,7 +97,9 @@ final class _HomeScreenState extends State<HomeScreen> {
                         icon: state.isBusy
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.add_photo_alternate_outlined),
                         label: Text(
@@ -136,9 +136,8 @@ final class _HomeScreenState extends State<HomeScreen> {
         widget.pdfSpikeBuilder ??
         (BuildContext context) => PdfSpikeScreen.production();
     unawaited(
-      Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(builder: builder),
-      ),
+      Navigator.of(context)
+          .push<void>(MaterialPageRoute<void>(builder: builder)),
     );
   }
 }
@@ -179,7 +178,11 @@ final class _PhotoHero extends StatelessWidget {
                     fit: BoxFit.contain,
                     gaplessPlayback: true,
                     errorBuilder:
-                        (BuildContext context, Object error, StackTrace? stack) {
+                        (
+                          BuildContext context,
+                          Object error,
+                          StackTrace? stack,
+                        ) {
                           return const Center(
                             child: Text(
                               'No se pudo mostrar la foto.',

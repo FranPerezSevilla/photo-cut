@@ -21,24 +21,27 @@ void main() {
     expect(controller.state.errorMessage, isNull);
   });
 
-  test('cancellation is not treated as an error and keeps prior image', () async {
-    final _FakeImagePickerGateway gateway = _FakeImagePickerGateway(
-      pickResults: <ImageSelectionResult>[
-        ImageSelectionSuccess(_image('first.png')),
-        const ImageSelectionCancelled(),
-      ],
-    );
-    final PhotoSelectionController controller = PhotoSelectionController(
-      gateway: gateway,
-    );
+  test(
+    'cancellation is not treated as an error and keeps prior image',
+    () async {
+      final _FakeImagePickerGateway gateway = _FakeImagePickerGateway(
+        pickResults: <ImageSelectionResult>[
+          ImageSelectionSuccess(_image('first.png')),
+          const ImageSelectionCancelled(),
+        ],
+      );
+      final PhotoSelectionController controller = PhotoSelectionController(
+        gateway: gateway,
+      );
 
-    await controller.selectFromGallery();
-    await controller.selectFromGallery();
+      await controller.selectFromGallery();
+      await controller.selectFromGallery();
 
-    expect(controller.state.image?.displayName, 'first.png');
-    expect(controller.state.errorMessage, isNull);
-    expect(controller.state.isBusy, isFalse);
-  });
+      expect(controller.state.image?.displayName, 'first.png');
+      expect(controller.state.errorMessage, isNull);
+      expect(controller.state.isBusy, isFalse);
+    },
+  );
 
   test('a readable failure keeps the previously selected image', () async {
     final _FakeImagePickerGateway gateway = _FakeImagePickerGateway(
