@@ -138,8 +138,6 @@ jobs:
           )
           PY
 
-          python3 tool/project.py render-status
-
       - name: Validate repository-owned state
         run: |
           python3 tool/project.py validate
@@ -154,7 +152,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add project/plan.json tool/tests/test_project_cli.py README.md CHANGELOG.md STATUS.generated.md project/evidence/M1-T04/README.md
+          git add project/plan.json tool/tests/test_project_cli.py README.md CHANGELOG.md project/evidence/M1-T04/README.md
           git commit -m 'M1-T04: complete PDF spike and open MVP flow'
           git restore --worktree .
           git pull --rebase origin task/M1-T04-pdf-preview-share-spike
