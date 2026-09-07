@@ -1,0 +1,50 @@
+name: Prepare M2 T06
+
+on:
+  push:
+    branches:
+      - task/M2-T06-contextual-help
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T06-contextual-help
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.47.2
+          channel: stable
+          cache: true
+
+      - name: Apply UX hierarchy patch
+        run: python3 tool/apply_m2_t06.py
+
+      - name: Resolve and format
+        run: |
+          flutter pub get
+          dart format lib test
+
+      - name: Verify contextual help UX
+        run: |
+          flutter analyze --fatal-infos
+          flutter test test/features/print_job
+
+      - name: Commit prepared task
+        run: |
+          git config user.name github-actions-bot
+          git config user.email github-actions-bot@users.noreply.github.com
+          git rm .github/workflows/prepare-m2-t06.yml tool/apply_m2_t06.py
+          git add lib test
+          git commit -m 'M2-T06: add contextual help and simplify advanced options'
+          git push origin HEAD:task/M2-T06-contextual-help
