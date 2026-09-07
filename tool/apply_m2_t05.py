@@ -30,6 +30,24 @@ def main() -> None:
         "                      const SizedBox(height: 24),\n",
     )
 
+    test_path = Path('test/features/print_job/print_configuration_screen_test.dart')
+    replace_once(
+        test_path,
+        "    await _scrollTo(tester, fitSelector);\n"
+        "    await tester.tap(find.text('Encajar'));\n",
+        "    await _scrollTo(tester, fitSelector);\n"
+        "    await tester.ensureVisible(find.text('Encajar'));\n"
+        "    await tester.tap(find.text('Encajar'));\n",
+    )
+    replace_once(
+        test_path,
+        "    await _scrollTo(tester, colorSelector);\n"
+        "    await tester.tap(find.text('Blanco y negro'));\n",
+        "    await _scrollTo(tester, colorSelector);\n"
+        "    await tester.ensureVisible(find.text('Blanco y negro'));\n"
+        "    await tester.tap(find.text('Blanco y negro'));\n",
+    )
+
     product_path = Path('project/product.md')
     product = product_path.read_text(encoding='utf-8')
     if '### Effective-resolution guidance' not in product:
