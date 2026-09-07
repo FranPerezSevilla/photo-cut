@@ -1,0 +1,58 @@
+name: Prepare M2 T08
+
+on:
+  push:
+    branches:
+      - task/M2-T08-persistent-pdf-preview
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-m2-t08
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T08-persistent-pdf-preview
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.47.2
+          channel: stable
+          cache: true
+
+      - name: Apply persistent-preview patch
+        run: python3 tool/apply_m2_t08.py
+
+      - name: Resolve and format
+        run: |
+          flutter pub get
+          dart format lib test
+
+      - name: Verify persistent preview
+        run: |
+          python3 tool/project.py validate
+          flutter analyze --fatal-infos
+          flutter test test/features/print_job test/app
+
+      - name: Commit prepared task
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm tool/apply_m2_t08.py .github/workflows/prepare-m2-t08.yml
+          git add lib test project/decisions/ADR-010-persistent-pdf-preview-state.md project/evidence/M2-T08/interaction.md
+          git commit -m 'M2-T08: add persistent zoomable PDF preview'
+          git restore --worktree .
+          git pull --rebase origin task/M2-T08-persistent-pdf-preview
+          git push origin HEAD:task/M2-T08-persistent-pdf-preview
