@@ -27,10 +27,10 @@ Future<void> main() async {
   final File geometryFile = File(
     '${outputDirectory.path}/calibration-a4-50mm.geometry.json',
   );
-  await geometryFile.writeAsString(
-    const JsonEncoder.withIndent('  ').convert(geometry) + '\n',
-    flush: true,
-  );
+  final String encodedGeometry = const JsonEncoder.withIndent(
+    '  ',
+  ).convert(geometry);
+  await geometryFile.writeAsString('$encodedGeometry\n', flush: true);
 
   stdout.writeln(pdfFile.path);
   stdout.writeln(geometryFile.path);
