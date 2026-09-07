@@ -12,10 +12,10 @@ single lifetime purchase.
 
 ## Current state
 
-Photo Cut now explains every configuration control and lets the user frame
-crop-to-fill by moving the photo directly inside the target shape. The
-repository remains in **M2 — Usable MVP flow**; the next task adds a persistent
-one-tap PDF preview with zoom, pan and fit-page reset.
+Photo Cut now completes the usable MVP preparation flow with contextual help,
+visual framing and a persistent one-tap PDF preview with zoom, pan and
+fit-page reset. The repository is now in **M3 — Physical validation**; the
+next task adds the calibration sheet and actual-size print guidance.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
@@ -52,8 +52,8 @@ bash tool/bootstrap_platforms.sh
 python3 tool/project.py validate
 python3 tool/project.py status
 python3 tool/project.py next
-python3 tool/project.py show M2-T08
-python3 tool/project.py verify M2-T08
+python3 tool/project.py show M3-T01
+python3 tool/project.py verify M3-T01
 python3 tool/project.py render-status
 ```
 
