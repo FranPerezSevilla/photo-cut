@@ -40,8 +40,12 @@ void main() {
     await tester.tap(fitHelp);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('configuration-help-sheet')), findsOneWidget);
-    expect(find.text('Rellenar o encajar'), findsOneWidget);
+    final Finder sheet = find.byKey(const Key('configuration-help-sheet'));
+    expect(sheet, findsOneWidget);
+    expect(
+      find.descendant(of: sheet, matching: find.text('Rellenar o encajar')),
+      findsOneWidget,
+    );
     expect(find.text('Qué hace'), findsOneWidget);
     await tester.tap(find.text('Entendido'));
     await tester.pumpAndSettle();
