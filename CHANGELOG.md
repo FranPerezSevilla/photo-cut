@@ -23,3 +23,4 @@ versions follow semantic versioning where practical for a mobile application.
 - Normalized crop-to-fill, fit-inside, EXIF orientation handling and app-owned grayscale preview/processing.
 - Separate immutable final PDF review with stable filenames, sharing and explicit native print handoff.
 - Non-blocking effective-resolution guidance based on post-crop pixels and exact physical output size.
+- Free 50 mm physical calibration sheet with actual-size print guidance and native share/print handoff.

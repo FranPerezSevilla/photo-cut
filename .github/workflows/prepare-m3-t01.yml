@@ -1,0 +1,59 @@
+name: Prepare M3-T01
+
+on:
+  push:
+    branches:
+      - task/M3-T01-calibration-guidance
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-m3-t01
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M3-T01-calibration-guidance
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.47.2
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Format task sources
+        run: dart format lib test tool/generate_calibration_pdf.dart
+
+      - name: Verify task sources
+        run: |
+          python3 tool/project.py validate
+          flutter analyze --fatal-infos
+          flutter test test/features/calibration test/platform/pdf
+          dart run tool/generate_calibration_pdf.dart
+
+      - name: Commit formatted sources
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add lib test tool/generate_calibration_pdf.dart
+          if git diff --cached --quiet; then
+            echo 'Sources were already formatted.'
+          else
+            git commit -m 'M3-T01: format calibration feature'
+            git restore --worktree .
+            git push origin HEAD:task/M3-T01-calibration-guidance
+          fi

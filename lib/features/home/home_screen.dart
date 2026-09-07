@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_cut/features/calibration/calibration.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
@@ -129,6 +130,18 @@ final class _HomeScreenState extends State<HomeScreen> {
                         style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        key: const Key('open-calibration'),
+                        onPressed: _openCalibration,
+                        icon: const Icon(Icons.straighten_outlined),
+                        label: const Text('Calibrar impresión'),
+                      ),
+                      Text(
+                        'Comprueba gratis con un cuadrado de 50 mm si tu impresora respeta el tamaño real.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
                       if (kDebugMode) ...<Widget>[
                         const SizedBox(height: 20),
                         _DevelopmentNotice(
@@ -140,6 +153,18 @@ final class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _openCalibration() {
+    unawaited(
+      Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (BuildContext routeContext) {
+            return CalibrationScreen.production();
           },
         ),
       ),

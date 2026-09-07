@@ -63,6 +63,18 @@ Target domain tolerance for generated PDF geometry: **±0.1 mm**. The separate
 physical-print acceptance target is initially **±1 mm over 50 mm**, because
 printer hardware, drivers and paper handling are outside the app's control.
 
+### Physical calibration
+
+Calibration is available independently of photo selection and before any purchase
+gate. Photo Cut generates a **50 × 50 mm** reference square on the supported paper
+presets. The user must select the same paper in the native print service, print at
+**100% / Actual size / Tamaño real**, disable **Fit to page / Ajustar a página**
+and measure both axes with a ruler.
+
+Automated tests verify the PDF page and reference-square geometry only. A real
+printer is accepted separately: either measured side differing from 50 mm by more
+than 1 mm requires investigation before release. Photo Cut must never present PDF
+geometry tests as proof that a printer driver or physical printer preserves scale.
 
 ### Effective-resolution guidance
 

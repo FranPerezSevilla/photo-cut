@@ -19,10 +19,11 @@ lib/
 ├── platform/
 │   ├── image_picker/       Gallery boundary
 │   ├── image_processing/   EXIF, crop and colour transformations
-│   ├── pdf/                Exact-size document generation
+│   ├── pdf/                Exact-size and calibration document generation
 │   └── print/              Preview/share/native print
 └── features/
-    └── print_job/          State/controller and user-facing pages
+    ├── print_job/          State/controller and user-facing print pages
+    └── calibration/        Free actual-size guidance and calibration UI
 ```
 
 ### Domain
@@ -51,7 +52,7 @@ Tests use fakes. Adapters include:
 
 - image selection;
 - orientation-aware image inspection and processing;
-- exact-size PDF generation;
+- exact-size and calibration PDF generation;
 - PDF preview/share/native print;
 - future temporary/local files and lifetime purchase restoration.
 
@@ -63,6 +64,10 @@ state, drops provider paths and checks Android lost data once at startup.
 bytes off the UI isolate, physically bakes EXIF orientation, applies the normalized
 crop when required, performs app-owned grayscale conversion and returns encoded
 bytes without uploading them.
+
+`CalibrationPdfRenderer` writes one deterministic 50 mm reference square and
+returns its actual laid-out PDF-space rectangle along with the `PrintDocument`.
+Tests verify this geometry independently from the later human physical-print gate.
 
 ### UI and state
 
@@ -78,6 +83,10 @@ The product flow is intentionally split:
    operating-system print service.
 
 The native print screen is a printer handoff, not a second document editor.
+
+Calibration is a separate free feature with no photo or entitlement dependency.
+It reuses `PrintDocument`, `PdfDocumentPreview` and `PrintGateway`, so native
+printing remains a fixed-PDF handoff with `dynamicLayout: false`.
 
 Pure `core/quality` logic calculates effective-resolution guidance from orientation-aware source pixels, normalized crop state and exact physical output size. UI warnings consume that advice but never modify geometry.
 
@@ -98,6 +107,10 @@ engine evaluates portrait and landscape paper plus optional 90-degree photo
 rotation. It selects greatest capacity, then preserves photo orientation, then
 prefers portrait paper as a deterministic tie-breaker. The complete grid is
 centred inside the configured minimum margin; page overflow reuses that grid.
+
+Calibration uses the same `PhysicalLength` conversion boundary. Automated tests
+verify the 50 mm square and serialized PDF page box to ±0.1 mm; they are not
+physical-printer evidence.
 
 ## Supported platforms
 
