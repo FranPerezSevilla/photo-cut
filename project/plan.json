@@ -553,7 +553,7 @@
       "id": "M2-T07",
       "milestone": "M2",
       "title": "Replace abstract framing sliders with visual positioning",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T06"
@@ -573,16 +573,30 @@
         }
       ],
       "evidence": [
-        "https://github.com/FranPerezSevilla/photo-cut/issues/14",
-        "lib/features/print_job/",
-        "test/features/print_job/"
+        "lib/core/crop/visual_framing_mapper.dart",
+        "lib/features/print_job/visual_framing_editor.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/print_configuration_screen.dart",
+        "test/core/crop/visual_framing_mapper_test.dart",
+        "test/features/print_job/visual_framing_editor_test.dart",
+        "test/features/print_job/visual_framing_controller_test.dart",
+        "test/app/photo_cut_app_test.dart",
+        "project/evidence/M2-T07/interaction.md",
+        "project/evidence/M2-T07/README.md",
+        "https://github.com/FranPerezSevilla/photo-cut/issues/14"
+      ],
+      "completedAt": "2026-09-07",
+      "verification": [
+        "GitHub Actions preparation run 34125704380: analysis and focused crop/print-job tests — success",
+        "GitHub Actions CI run 34126333498: Quality and Android — success",
+        "GitHub Actions CI run 34126333498: iOS simulator build — success"
       ]
     },
     {
       "id": "M2-T08",
       "milestone": "M2",
       "title": "Add persistent zoomable PDF preview in Step 1",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M2-T07"

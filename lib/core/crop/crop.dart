@@ -4,3 +4,4 @@ export 'image_fit_mode.dart';
 export 'normalized_crop_rect.dart';
 export 'normalized_point.dart';
 export 'source_image_size.dart';
+export 'visual_framing_mapper.dart';

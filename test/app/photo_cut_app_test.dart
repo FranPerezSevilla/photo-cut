@@ -88,7 +88,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fitSelector, findsOneWidget);
-    expect(find.byKey(const Key('color-mode-selector')), findsOneWidget);
+    expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
+
+    final Finder colorSelector = find.byKey(const Key('color-mode-selector'));
+    await tester.scrollUntilVisible(
+      colorSelector,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(colorSelector, findsOneWidget);
     expect(find.text('Blanco y negro'), findsOneWidget);
   });
 

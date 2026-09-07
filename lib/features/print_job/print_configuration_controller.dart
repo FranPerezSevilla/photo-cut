@@ -202,11 +202,11 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changeFocusX(double value) {
-    _changeFocus(_state.configuration.focus.copyWith(x: value));
+    changeFocus(_state.configuration.focus.copyWith(x: value));
   }
 
   void changeFocusY(double value) {
-    _changeFocus(_state.configuration.focus.copyWith(y: value));
+    changeFocus(_state.configuration.focus.copyWith(y: value));
   }
 
   void changeCutMarks(bool value) {
@@ -217,7 +217,7 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
-  void _changeFocus(NormalizedPoint focus) {
+  void changeFocus(NormalizedPoint focus) {
     _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(focus: focus),
