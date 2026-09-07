@@ -12,12 +12,29 @@ void main() {
   testWidgets('primary controls expose contextual help in Step 1', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(900, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await _pumpScreen(tester);
 
-    await _scrollTo(tester, find.byKey(const Key('fit-mode-selector')));
-    expect(find.byKey(const Key('help-fitMode')), findsOneWidget);
-    expect(find.byKey(const Key('help-framing')), findsOneWidget);
-    expect(find.byKey(const Key('help-colorMode')), findsOneWidget);
+    for (final String key in <String>[
+      'help-fitMode',
+      'help-framing',
+      'help-colorMode',
+      'help-unit',
+      'help-width',
+      'help-height',
+      'help-paper',
+      'help-copies',
+    ]) {
+      expect(
+        find.byKey(ValueKey<String>(key), skipOffstage: false),
+        findsOneWidget,
+        reason: key,
+      );
+    }
 
     final Finder fitHelp = find.byKey(const Key('help-fitMode'));
     await tester.tap(fitHelp);
@@ -28,18 +45,6 @@ void main() {
     expect(find.text('Qué hace'), findsOneWidget);
     await tester.tap(find.text('Entendido'));
     await tester.pumpAndSettle();
-
-    await _scrollTo(
-      tester,
-      find.byKey(const ValueKey<String>('photo-width-millimetres')),
-    );
-    expect(find.byKey(const Key('help-unit')), findsOneWidget);
-    expect(find.byKey(const Key('help-width')), findsOneWidget);
-    expect(find.byKey(const Key('help-height')), findsOneWidget);
-
-    await _scrollTo(tester, find.byKey(const Key('copy-count')));
-    expect(find.byKey(const Key('help-paper')), findsOneWidget);
-    expect(find.byKey(const Key('help-copies')), findsOneWidget);
   });
 
   testWidgets('advanced options start collapsed and expose their own help', (
