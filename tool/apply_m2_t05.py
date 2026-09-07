@@ -20,32 +20,12 @@ def main() -> None:
     )
     replace_once(
         screen_path,
-        "                      _ImageInspectionStatus(state: state),\n"
-        "                      const SizedBox(height: 24),\n",
-        "                      _ImageInspectionStatus(state: state),\n"
-        "                      const SizedBox(height: 8),\n"
+        "                      if (state.layoutError != null) ...<Widget>[\n",
         "                      ResolutionGuidance(\n"
         "                        configuration: state.configuration,\n"
         "                      ),\n"
-        "                      const SizedBox(height: 24),\n",
-    )
-
-    test_path = Path('test/features/print_job/print_configuration_screen_test.dart')
-    replace_once(
-        test_path,
-        "    await _scrollTo(tester, fitSelector);\n"
-        "    await tester.tap(find.text('Encajar'));\n",
-        "    await _scrollTo(tester, fitSelector);\n"
-        "    await tester.ensureVisible(find.text('Encajar'));\n"
-        "    await tester.tap(find.text('Encajar'));\n",
-    )
-    replace_once(
-        test_path,
-        "    await _scrollTo(tester, colorSelector);\n"
-        "    await tester.tap(find.text('Blanco y negro'));\n",
-        "    await _scrollTo(tester, colorSelector);\n"
-        "    await tester.ensureVisible(find.text('Blanco y negro'));\n"
-        "    await tester.tap(find.text('Blanco y negro'));\n",
+        "                      const SizedBox(height: 12),\n"
+        "                      if (state.layoutError != null) ...<Widget>[\n",
     )
 
     product_path = Path('project/product.md')
