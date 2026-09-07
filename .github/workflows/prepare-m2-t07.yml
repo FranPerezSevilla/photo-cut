@@ -1,0 +1,58 @@
+name: Prepare M2 T07
+
+on:
+  push:
+    branches:
+      - task/M2-T07-visual-framing
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-m2-t07
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T07-visual-framing
+          fetch-depth: 0
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.47.2
+          channel: stable
+          cache: true
+
+      - name: Apply visual-framing patch
+        run: python3 tool/apply_m2_t07.py
+
+      - name: Resolve and format
+        run: |
+          flutter pub get
+          dart format lib test
+
+      - name: Verify visual framing
+        run: |
+          python3 tool/project.py validate
+          flutter analyze --fatal-infos
+          flutter test test/core/crop test/features/print_job
+
+      - name: Commit prepared task
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm tool/apply_m2_t07.py .github/workflows/prepare-m2-t07.yml
+          git add lib test project/evidence/M2-T07/interaction.md
+          git commit -m 'M2-T07: replace framing sliders with direct photo movement'
+          git restore --worktree .
+          git pull --rebase origin task/M2-T07-visual-framing
+          git push origin HEAD:task/M2-T07-visual-framing
