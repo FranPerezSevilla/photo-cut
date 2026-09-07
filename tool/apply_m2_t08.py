@@ -52,12 +52,6 @@ if "zoomable_pdf_document_preview.dart" not in text:
         + "import 'package:photo_cut/features/print_job/zoomable_pdf_document_preview.dart';\n",
     )
 
-replace_once(
-    screen,
-    'PLACEHOLDER_NEVER_USED',
-    'PLACEHOLDER_NEVER_USED',
-) if False else None
-
 old_constructor = """    required this.image,
     this.imageProcessor,
     this.onReview,
@@ -175,7 +169,7 @@ new_return = """            final PrintConfigurationState state = _controller.st
               index: _selectedView.index,
               children: <Widget>[
                 CustomScrollView(
-                  key: const PageStorageKey<String>('configuration-settings-scroll'),
+                  key: const Key('configuration-settings-scroll'),
                   slivers: <Widget>[
 """
 if old_return not in text:
