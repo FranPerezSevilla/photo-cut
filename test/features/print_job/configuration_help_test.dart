@@ -20,9 +20,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: ConfigurationHelpButton(
-            topic: ConfigurationHelpTopic.margin,
-          ),
+          body: ConfigurationHelpButton(topic: ConfigurationHelpTopic.margin),
         ),
       ),
     );
