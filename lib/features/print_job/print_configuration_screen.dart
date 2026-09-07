@@ -9,6 +9,7 @@ import 'package:photo_cut/features/print_job/print_configuration_controller.dart
 import 'package:photo_cut/features/print_job/print_configuration_state.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
 import 'package:photo_cut/features/print_job/print_sheet_preview.dart';
+import 'package:photo_cut/features/print_job/resolution_guidance.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
@@ -354,6 +355,8 @@ final class _PrintConfigurationScreenState
                         value: state.configuration.showCutMarks,
                         onChanged: _controller.changeCutMarks,
                       ),
+                      ResolutionGuidance(configuration: state.configuration),
+                      const SizedBox(height: 12),
                       if (state.layoutError != null) ...<Widget>[
                         const SizedBox(height: 12),
                         _InlineError(message: state.layoutError!),

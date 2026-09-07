@@ -12,10 +12,10 @@ single lifetime purchase.
 
 ## Current state
 
-Photo Cut now completes the two-step flow: prepare every document setting in
-the app, then review one immutable named PDF before sharing or opening native
-printing. The repository remains in **M2 — Usable MVP flow**; the next task
-adds effective-resolution guidance before physical calibration.
+Photo Cut completes the two-step prepare/review/print flow and now estimates
+effective print resolution without changing requested geometry. The repository
+remains in **M2 — Usable MVP flow**; real-device feedback is scheduled next as
+a focused UX pass for contextual help, visual framing and persistent zoomable preview.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
@@ -52,8 +52,8 @@ bash tool/bootstrap_platforms.sh
 python3 tool/project.py validate
 python3 tool/project.py status
 python3 tool/project.py next
-python3 tool/project.py show M2-T05
-python3 tool/project.py verify M2-T05
+python3 tool/project.py show M2-T06
+python3 tool/project.py verify M2-T06
 python3 tool/project.py render-status
 ```
 

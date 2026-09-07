@@ -63,6 +63,24 @@ Target domain tolerance for generated PDF geometry: **±0.1 mm**. The separate
 physical-print acceptance target is initially **±1 mm over 50 mm**, because
 printer hardware, drivers and paper handling are outside the app's control.
 
+
+### Effective-resolution guidance
+
+Photo Cut estimates effective image resolution from the pixels that remain after
+crop and the exact physical image size. `Fit inside` measures only the physical
+area occupied by the image, not any white letterboxing.
+
+The MVP thresholds are deliberately guidance, not print guarantees:
+
+- **300 ppp or more:** high reference quality; no warning.
+- **200–299 ppp:** good reference quality; no warning.
+- **150–199 ppp:** caution; detail may look softer.
+- **Below 150 ppp:** low-resolution warning; softness or pixelation is likely.
+
+Warnings never block PDF generation and never change requested physical
+measurements. Printer, paper, viewing distance and source-image quality still
+affect the final result.
+
 ## Commercial model
 
 Planned model:

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M2",
-  "updatedAt": "2026-09-04",
+  "updatedAt": "2026-09-07",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -475,7 +475,7 @@
       "id": "M2-T05",
       "milestone": "M2",
       "title": "Warn about insufficient image resolution",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T04"
@@ -495,7 +495,107 @@
       ],
       "evidence": [
         "lib/core/quality/resolution_advisor.dart",
-        "test/core/quality/resolution_advisor_test.dart"
+        "lib/core/quality/quality.dart",
+        "lib/features/print_job/resolution_guidance.dart",
+        "lib/features/print_job/print_configuration_screen.dart",
+        "test/core/quality/resolution_advisor_test.dart",
+        "test/features/print_job/resolution_guidance_test.dart",
+        "project/product.md",
+        "project/architecture.md",
+        "project/evidence/M2-T05/README.md"
+      ],
+      "completedAt": "2026-09-07",
+      "verification": [
+        "GitHub Actions preparation run 34101018943: analysis and focused tests — success",
+        "GitHub Actions CI run 34101233839: Quality and Android — success",
+        "GitHub Actions CI run 34101233839: iOS simulator build — success"
+      ]
+    },
+    {
+      "id": "M2-T06",
+      "milestone": "M2",
+      "title": "Add contextual help and simplify configuration hierarchy",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T05"
+      ],
+      "objective": "Make every configuration control understandable in-app and reduce the visual weight of advanced settings.",
+      "acceptance": [
+        "Rellenar/Encajar, Encuadre, Ancho/Alto, Unidad, Papel, Copias, Margen, Separación, Marcas de corte and Color expose concise offline help.",
+        "Help explains what changes, when to use it and one concrete example without requiring external documentation.",
+        "Primary controls remain prominent while margin, separation and cut marks move behind an Advanced options section.",
+        "Defaults still allow a useful print job without opening Advanced options.",
+        "Widget tests cover help availability, advanced-section state and unchanged print-job values."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/print_job",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "https://github.com/FranPerezSevilla/photo-cut/issues/14",
+        "lib/features/print_job/",
+        "test/features/print_job/"
+      ]
+    },
+    {
+      "id": "M2-T07",
+      "milestone": "M2",
+      "title": "Replace abstract framing sliders with visual positioning",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T06"
+      ],
+      "objective": "Let users understand crop-to-fill by moving the image or focal point directly inside the target frame.",
+      "acceptance": [
+        "The primary crop interaction is visual and says in user language that the photo can be moved to choose what remains inside.",
+        "Changing the visual framing updates the existing normalized focus/crop state rather than creating a second crop model.",
+        "Rellenar and Encajar are visually distinguishable without relying on documentation.",
+        "Abstract horizontal/vertical sliders are removed as the sole framing interaction; any fallback controls have clear endpoint labels.",
+        "Widget and domain tests cover normalized focus updates and state persistence."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/crop test/features/print_job",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "https://github.com/FranPerezSevilla/photo-cut/issues/14",
+        "lib/features/print_job/",
+        "test/features/print_job/"
+      ]
+    },
+    {
+      "id": "M2-T08",
+      "milestone": "M2",
+      "title": "Add persistent zoomable PDF preview in Step 1",
+      "status": "backlog",
+      "executor": "agent",
+      "dependsOn": [
+        "M2-T07"
+      ],
+      "objective": "Keep the current document preview reachable in one tap from anywhere in Step 1 and support detailed inspection without changing geometry.",
+      "acceptance": [
+        "Step 1 has a persistent one-tap switch between Ajustes and Vista previa without creating a second print job.",
+        "Switching views preserves every print-job setting and the user can return to the prior configuration state.",
+        "The preview supports pinch-to-zoom, pan and a reset/fit-page action.",
+        "Zoom state is viewer-only and never changes generated PDF geometry or physical dimensions.",
+        "Tests cover view switching, state preservation and zoom state independently from document state."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/print_job",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "https://github.com/FranPerezSevilla/photo-cut/issues/14",
+        "lib/features/print_job/",
+        "test/features/print_job/"
       ]
     },
     {
@@ -505,7 +605,7 @@
       "status": "backlog",
       "executor": "agent",
       "dependsOn": [
-        "M2-T05"
+        "M2-T08"
       ],
       "objective": "Provide a 50 mm reference square and precise instructions for actual-size printing.",
       "acceptance": [
