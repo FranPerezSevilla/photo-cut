@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/units/units.dart';
+import 'package:photo_cut/features/print_job/configuration_help.dart';
 import 'package:photo_cut/features/print_job/length_unit.dart';
 import 'package:photo_cut/features/print_job/print_configuration_controller.dart';
 import 'package:photo_cut/features/print_job/print_configuration_state.dart';
@@ -87,9 +88,14 @@ final class _PrintConfigurationScreenState
                       const SizedBox(height: 24),
                       const _SectionTitle(
                         title: 'Ajuste de la foto',
-                        subtitle: 'El resultado se aplica dentro de Photo Cut antes de abrir la impresión del sistema.',
+                        subtitle: 'Decide qué parte de la imagen entra y cómo se verá en el PDF.',
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
+                      const _ControlLabel(
+                        label: 'Rellenar o encajar',
+                        topic: ConfigurationHelpTopic.fitMode,
+                      ),
+                      const SizedBox(height: 6),
                       SegmentedButton<ImageFitMode>(
                         key: const Key('fit-mode-selector'),
                         segments: const <ButtonSegment<ImageFitMode>>[
@@ -118,10 +124,19 @@ final class _PrintConfigurationScreenState
                       ),
                       if (state.configuration.fitMode ==
                           ImageFitMode.cropToFill) ...<Widget>[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
+                        const _ControlLabel(
+                          label: 'Encuadre',
+                          topic: ConfigurationHelpTopic.framing,
+                        ),
                         Text(
-                          'Encuadre horizontal',
-                          style: Theme.of(context).textTheme.labelLarge,
+                          'Ajusta qué parte queda dentro. En el siguiente pase UX podrás mover la foto directamente.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Horizontal · Izquierda — Centro — Derecha',
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Slider(
                           key: const Key('crop-focus-x'),
@@ -136,8 +151,8 @@ final class _PrintConfigurationScreenState
                           ),
                         ),
                         Text(
-                          'Encuadre vertical',
-                          style: Theme.of(context).textTheme.labelLarge,
+                          'Vertical · Arriba — Centro — Abajo',
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Slider(
                           key: const Key('crop-focus-y'),
@@ -152,7 +167,12 @@ final class _PrintConfigurationScreenState
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
+                      const _ControlLabel(
+                        label: 'Color',
+                        topic: ConfigurationHelpTopic.colorMode,
+                      ),
+                      const SizedBox(height: 6),
                       SegmentedButton<ImageColorMode>(
                         key: const Key('color-mode-selector'),
                         segments: const <ButtonSegment<ImageColorMode>>[
@@ -179,7 +199,12 @@ final class _PrintConfigurationScreenState
                         title: 'Tamaño de cada foto',
                         subtitle: 'Estas son las medidas físicas finales, no píxeles.',
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
+                      const _ControlLabel(
+                        label: 'Unidad',
+                        topic: ConfigurationHelpTopic.unit,
+                      ),
+                      const SizedBox(height: 6),
                       SegmentedButton<LengthUnit>(
                         key: const Key('length-unit-selector'),
                         segments: LengthUnit.values
@@ -209,6 +234,9 @@ final class _PrintConfigurationScreenState
                               decoration: InputDecoration(
                                 labelText: 'Ancho (${state.unit.shortLabel})',
                                 errorText: state.widthError,
+                                suffixIcon: const ConfigurationHelpButton(
+                                  topic: ConfigurationHelpTopic.width,
+                                ),
                               ),
                               keyboardType:
                                   const TextInputType.numberWithOptions(
@@ -232,6 +260,9 @@ final class _PrintConfigurationScreenState
                               decoration: InputDecoration(
                                 labelText: 'Alto (${state.unit.shortLabel})',
                                 errorText: state.heightError,
+                                suffixIcon: const ConfigurationHelpButton(
+                                  topic: ConfigurationHelpTopic.height,
+                                ),
                               ),
                               keyboardType:
                                   const TextInputType.numberWithOptions(
@@ -260,6 +291,9 @@ final class _PrintConfigurationScreenState
                         initialValue: state.configuration.paperSize,
                         decoration: const InputDecoration(
                           labelText: 'Tamaño del papel',
+                          suffixIcon: ConfigurationHelpButton(
+                            topic: ConfigurationHelpTopic.paper,
+                          ),
                         ),
                         items: PaperSize.presets
                             .map(
@@ -282,6 +316,9 @@ final class _PrintConfigurationScreenState
                         decoration: InputDecoration(
                           labelText: 'Número de copias',
                           errorText: state.copyCountError,
+                          suffixIcon: const ConfigurationHelpButton(
+                            topic: ConfigurationHelpTopic.copies,
+                          ),
                         ),
                         keyboardType: TextInputType.number,
                         inputFormatters: <TextInputFormatter>[
@@ -289,72 +326,107 @@ final class _PrintConfigurationScreenState
                         ],
                         onChanged: _controller.changeCopyCount,
                       ),
-                      const SizedBox(height: 24),
-                      const _SectionTitle(
-                        title: 'Separación y corte',
-                        subtitle: 'Deja espacio suficiente para que la impresora no recorte los bordes.',
+                      const SizedBox(height: 20),
+                      Card(
+                        child: ExpansionTile(
+                          key: const Key('advanced-options'),
+                          initiallyExpanded: false,
+                          title: const Text('Opciones avanzadas'),
+                          subtitle: const Text(
+                            'Margen, separación y marcas de corte',
+                          ),
+                          childrenPadding: const EdgeInsets.fromLTRB(
+                            16,
+                            0,
+                            16,
+                            16,
+                          ),
+                          children: <Widget>[
+                            Text(
+                              'Los valores por defecto funcionan para la mayoría de impresiones.',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Expanded(
+                                  child: TextFormField(
+                                    key: ValueKey<String>(
+                                      'margin-${state.unit.name}',
+                                    ),
+                                    initialValue: state.marginInput,
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          'Margen (${state.unit.shortLabel})',
+                                      errorText: state.marginError,
+                                      suffixIcon: const ConfigurationHelpButton(
+                                        topic: ConfigurationHelpTopic.margin,
+                                      ),
+                                    ),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9.,]'),
+                                      ),
+                                    ],
+                                    onChanged: _controller.changeMargin,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: TextFormField(
+                                    key: ValueKey<String>(
+                                      'gap-${state.unit.name}',
+                                    ),
+                                    initialValue: state.gapInput,
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          'Separación (${state.unit.shortLabel})',
+                                      errorText: state.gapError,
+                                      suffixIcon: const ConfigurationHelpButton(
+                                        topic: ConfigurationHelpTopic.gap,
+                                      ),
+                                    ),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[0-9.,]'),
+                                      ),
+                                    ],
+                                    onChanged: _controller.changeGap,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            SwitchListTile.adaptive(
+                              key: const Key('cut-marks'),
+                              contentPadding: EdgeInsets.zero,
+                              title: const Row(
+                                children: <Widget>[
+                                  Expanded(child: Text('Marcas de corte')),
+                                  ConfigurationHelpButton(
+                                    topic: ConfigurationHelpTopic.cutMarks,
+                                  ),
+                                ],
+                              ),
+                              subtitle: const Text(
+                                'Añade guías finas alrededor de cada copia.',
+                              ),
+                              value: state.configuration.showCutMarks,
+                              onChanged: _controller.changeCutMarks,
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: TextFormField(
-                              key: ValueKey<String>(
-                                'margin-${state.unit.name}',
-                              ),
-                              initialValue: state.marginInput,
-                              decoration: InputDecoration(
-                                labelText: 'Margen (${state.unit.shortLabel})',
-                                errorText: state.marginError,
-                              ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.,]'),
-                                ),
-                              ],
-                              onChanged: _controller.changeMargin,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextFormField(
-                              key: ValueKey<String>('gap-${state.unit.name}'),
-                              initialValue: state.gapInput,
-                              decoration: InputDecoration(
-                                labelText:
-                                    'Separación (${state.unit.shortLabel})',
-                                errorText: state.gapError,
-                              ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'[0-9.,]'),
-                                ),
-                              ],
-                              onChanged: _controller.changeGap,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      SwitchListTile.adaptive(
-                        key: const Key('cut-marks'),
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Marcas de corte'),
-                        subtitle: const Text(
-                          'Añade guías finas alrededor de cada copia.',
-                        ),
-                        value: state.configuration.showCutMarks,
-                        onChanged: _controller.changeCutMarks,
-                      ),
                       ResolutionGuidance(configuration: state.configuration),
                       const SizedBox(height: 12),
                       if (state.layoutError != null) ...<Widget>[
@@ -434,6 +506,25 @@ final class _ImageInspectionStatus extends StatelessWidget {
       key: const Key('source-image-size'),
       style: Theme.of(context).textTheme.bodySmall,
       textAlign: TextAlign.center,
+    );
+  }
+}
+
+final class _ControlLabel extends StatelessWidget {
+  const _ControlLabel({required this.label, required this.topic});
+
+  final String label;
+  final ConfigurationHelpTopic topic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(label, style: Theme.of(context).textTheme.labelLarge),
+        ),
+        ConfigurationHelpButton(topic: topic),
+      ],
     );
   }
 }

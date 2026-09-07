@@ -86,12 +86,9 @@ void main() {
 
     expect(find.byKey(const Key('crop-focus-x')), findsNothing);
     expect(find.byKey(const Key('crop-focus-y')), findsNothing);
-    expect(
-      find.text(
-        'Muestra la foto completa sin deformarla; pueden quedar bordes blancos.',
-      ),
-      findsOneWidget,
-    );
+    final SegmentedButton<ImageFitMode> fitControl = tester
+        .widget<SegmentedButton<ImageFitMode>>(fitSelector);
+    expect(fitControl.selected, <ImageFitMode>{ImageFitMode.fitInside});
 
     final Finder colorSelector = find.byKey(const Key('color-mode-selector'));
     await _scrollTo(tester, colorSelector);
