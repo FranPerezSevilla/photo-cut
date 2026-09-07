@@ -134,14 +134,16 @@ final class VisualFramingEditor extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 2,
           children: <Widget>[
             Icon(
               cropToFill ? Icons.crop_free : Icons.fit_screen_outlined,
               size: 18,
             ),
-            const SizedBox(width: 6),
             Text(
               cropToFill
                   ? canDrag
@@ -151,14 +153,12 @@ final class VisualFramingEditor extends StatelessWidget {
               key: const Key('visual-framing-mode-label'),
               style: Theme.of(context).textTheme.labelMedium,
             ),
-            if (cropToFill && configuration.focus != NormalizedPoint.center) ...<Widget>[
-              const SizedBox(width: 8),
+            if (cropToFill && configuration.focus != NormalizedPoint.center)
               TextButton(
                 key: const Key('center-framing'),
                 onPressed: () => onFocusChanged(NormalizedPoint.center),
                 child: const Text('Centrar'),
               ),
-            ],
           ],
         ),
       ],
