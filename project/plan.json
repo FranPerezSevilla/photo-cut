@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": "photo-cut",
-  "currentMilestone": "M2",
+  "currentMilestone": "M3",
   "updatedAt": "2026-09-07",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
@@ -596,7 +596,7 @@
       "id": "M2-T08",
       "milestone": "M2",
       "title": "Add persistent zoomable PDF preview in Step 1",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T07"
@@ -616,16 +616,28 @@
         }
       ],
       "evidence": [
-        "https://github.com/FranPerezSevilla/photo-cut/issues/14",
-        "lib/features/print_job/",
-        "test/features/print_job/"
+        "lib/features/print_job/step_one_pdf_preview.dart",
+        "lib/features/print_job/zoomable_pdf_document_preview.dart",
+        "lib/features/print_job/print_configuration_screen.dart",
+        "test/features/print_job/persistent_pdf_preview_test.dart",
+        "test/features/print_job/zoomable_pdf_document_preview_test.dart",
+        "project/decisions/ADR-010-persistent-pdf-preview-state.md",
+        "project/evidence/M2-T08/interaction.md",
+        "project/evidence/M2-T08/README.md",
+        "https://github.com/FranPerezSevilla/photo-cut/issues/14"
+      ],
+      "completedAt": "2026-09-07",
+      "verification": [
+        "GitHub Actions preparation run 34129229485: analysis and focused Step 1 tests — success",
+        "GitHub Actions CI run 34129453514: Quality and Android — success",
+        "GitHub Actions CI run 34129453514: iOS simulator build — success"
       ]
     },
     {
       "id": "M3-T01",
       "milestone": "M3",
       "title": "Generate calibration and print guidance",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M2-T08"
