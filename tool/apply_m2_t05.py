@@ -14,8 +14,8 @@ def main() -> None:
     screen_path = Path('lib/features/print_job/print_configuration_screen.dart')
     replace_once(
         screen_path,
-        "import 'package:photo_cut/features/print_job/print_job_configuration.dart';\n",
-        "import 'package:photo_cut/features/print_job/print_job_configuration.dart';\n"
+        "import 'package:photo_cut/features/print_job/print_sheet_preview.dart';\n",
+        "import 'package:photo_cut/features/print_job/print_sheet_preview.dart';\n"
         "import 'package:photo_cut/features/print_job/resolution_guidance.dart';\n",
     )
     replace_once(
@@ -55,7 +55,10 @@ Warnings never block PDF generation and never change requested physical
 measurements. Printer, paper, viewing distance and source-image quality still
 affect the final result.
 """
-        product_path.write_text(product.replace(marker, block + marker, 1), encoding='utf-8')
+        product_path.write_text(
+            product.replace(marker, block + marker, 1),
+            encoding='utf-8',
+        )
 
     architecture_path = Path('project/architecture.md')
     architecture = architecture_path.read_text(encoding='utf-8')
@@ -81,7 +84,10 @@ affect the final result.
         'and exact physical output size.\n'
     )
     if addition not in changelog:
-        changelog_path.write_text(changelog.rstrip() + '\n' + addition, encoding='utf-8')
+        changelog_path.write_text(
+            changelog.rstrip() + '\n' + addition,
+            encoding='utf-8',
+        )
 
 
 if __name__ == '__main__':
