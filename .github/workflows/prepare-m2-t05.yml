@@ -1,4 +1,4 @@
-name: Prepare M2-T05
+name: Prepare M2 T05
 
 on:
   push:
@@ -8,108 +8,28 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: prepare-m2-t05
-  cancel-in-progress: false
-
 jobs:
   prepare:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 25
-
     steps:
-      - name: Checkout task branch
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: task/M2-T05-resolution-guidance
           fetch-depth: 0
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.47.2
           channel: stable
           cache: true
 
-      - name: Integrate guidance into Step 1 and document thresholds
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
+      - name: Apply task patch
+        run: python3 tool/apply_m2_t05.py
 
-          screen_path = Path('lib/features/print_job/print_configuration_screen.dart')
-          screen = screen_path.read_text(encoding='utf-8')
-          import_anchor = "import 'package:photo_cut/features/print_job/print_job_configuration.dart';\n"
-          import_line = "import 'package:photo_cut/features/print_job/resolution_guidance.dart';\n"
-          if import_line not in screen:
-              if import_anchor not in screen:
-                  raise SystemExit('Missing print configuration import anchor')
-              screen = screen.replace(import_anchor, import_anchor + import_line)
-
-          preview_anchor = "                      _ImageInspectionStatus(state: state),\n                      const SizedBox(height: 24),\n"
-          preview_replacement = (
-              "                      _ImageInspectionStatus(state: state),\n"
-              "                      const SizedBox(height: 8),\n"
-              "                      ResolutionGuidance(\n"
-              "                        configuration: state.configuration,\n"
-              "                      ),\n"
-              "                      const SizedBox(height: 24),\n"
-          )
-          if "ResolutionGuidance(" not in screen:
-              if preview_anchor not in screen:
-                  raise SystemExit('Missing image inspection anchor')
-              screen = screen.replace(preview_anchor, preview_replacement)
-          screen_path.write_text(screen, encoding='utf-8')
-
-          product_path = Path('project/product.md')
-          product = product_path.read_text(encoding='utf-8')
-          threshold_block = """
-
-### Effective-resolution guidance
-
-Photo Cut estimates effective image resolution from the pixels that remain after
-crop and the exact physical image size. `Fit inside` measures only the physical
-area occupied by the image, not any white letterboxing.
-
-The MVP thresholds are deliberately guidance, not print guarantees:
-
-- **300 ppp or more:** high reference quality; no warning.
-- **200–299 ppp:** good reference quality; no warning.
-- **150–199 ppp:** caution; detail may look softer.
-- **Below 150 ppp:** low-resolution warning; softness or pixelation is likely.
-
-Warnings never block PDF generation and never change requested physical
-measurements. Printer, paper, viewing distance and source-image quality still
-affect the final result.
-"""
-          marker = "\n## Commercial model\n"
-          if "### Effective-resolution guidance" not in product:
-              if marker not in product:
-                  raise SystemExit('Missing product commercial-model marker')
-              product = product.replace(marker, threshold_block + marker)
-          product_path.write_text(product, encoding='utf-8')
-
-          architecture_path = Path('project/architecture.md')
-          architecture = architecture_path.read_text(encoding='utf-8')
-          if 'effective-resolution guidance' not in architecture:
-              architecture = architecture.replace(
-                  'The native print screen is a printer handoff, not a second document editor.\n',
-                  'The native print screen is a printer handoff, not a second document editor.\n\n'
-                  'Pure `core/quality` logic calculates effective-resolution guidance from '\
-                  'orientation-aware source pixels, normalized crop state and exact physical '\
-                  'output size. UI warnings consume that advice but never modify geometry.\n',
-              )
-          architecture_path.write_text(architecture, encoding='utf-8')
-
-          changelog_path = Path('CHANGELOG.md')
-          changelog = changelog_path.read_text(encoding='utf-8')
-          addition = '- Non-blocking effective-resolution guidance based on post-crop pixels and exact physical output size.\n'
-          if addition not in changelog:
-              changelog = changelog.rstrip() + '\n' + addition
-          changelog_path.write_text(changelog, encoding='utf-8')
-          PY
-
-      - name: Resolve dependencies and format
+      - name: Resolve and format
         run: |
           flutter pub get
           dart format lib test
@@ -119,11 +39,12 @@ affect the final result.
           flutter analyze --fatal-infos
           flutter test test/core/quality test/features/print_job/resolution_guidance_test.dart test/features/print_job/print_configuration_screen_test.dart
 
-      - name: Commit prepared task and remove one-off workflow
+      - name: Commit prepared task
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name github-actions-bot
+          git config user.email github-actions-bot@users.noreply.github.com
           git rm .github/workflows/prepare-m2-t05.yml
+          git rm tool/apply_m2_t05.py
           git add lib test project/product.md project/architecture.md CHANGELOG.md
           git commit -m 'M2-T05: integrate effective resolution guidance'
           git push origin HEAD:task/M2-T05-resolution-guidance
