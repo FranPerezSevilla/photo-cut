@@ -20,8 +20,10 @@ void main() {
       dragDeltaY: 80,
     );
 
-    expect(mapper.axisFor(sourceSize: source, targetAspectRatio: 1),
-        VisualFramingAxis.horizontal);
+    expect(
+      mapper.axisFor(sourceSize: source, targetAspectRatio: 1),
+      VisualFramingAxis.horizontal,
+    );
     expect(moved.x, closeTo(0, 0.000001));
     expect(moved.y, 0.5);
   });
@@ -42,8 +44,10 @@ void main() {
       dragDeltaY: 100,
     );
 
-    expect(mapper.axisFor(sourceSize: source, targetAspectRatio: 1),
-        VisualFramingAxis.vertical);
+    expect(
+      mapper.axisFor(sourceSize: source, targetAspectRatio: 1),
+      VisualFramingAxis.vertical,
+    );
     expect(moved.x, 0.5);
     expect(moved.y, closeTo(0, 0.000001));
   });
@@ -94,8 +98,10 @@ void main() {
       dragDeltaY: 100,
     );
 
-    expect(mapper.axisFor(sourceSize: source, targetAspectRatio: 0.75),
-        VisualFramingAxis.none);
+    expect(
+      mapper.axisFor(sourceSize: source, targetAspectRatio: 0.75),
+      VisualFramingAxis.none,
+    );
     expect(moved, original);
   });
 

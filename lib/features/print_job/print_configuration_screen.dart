@@ -11,6 +11,7 @@ import 'package:photo_cut/features/print_job/print_configuration_state.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
 import 'package:photo_cut/features/print_job/print_sheet_preview.dart';
 import 'package:photo_cut/features/print_job/resolution_guidance.dart';
+import 'package:photo_cut/features/print_job/visual_framing_editor.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
@@ -122,51 +123,23 @@ final class _PrintConfigurationScreenState
                             : 'Muestra la foto completa sin deformarla; pueden quedar bordes blancos.',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      if (state.configuration.fitMode ==
-                          ImageFitMode.cropToFill) ...<Widget>[
-                        const SizedBox(height: 14),
-                        const _ControlLabel(
-                          label: 'Encuadre',
-                          topic: ConfigurationHelpTopic.framing,
-                        ),
-                        Text(
-                          'Ajusta qué parte queda dentro. En el siguiente pase UX podrás mover la foto directamente.',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Horizontal · Izquierda — Centro — Derecha',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        Slider(
-                          key: const Key('crop-focus-x'),
-                          value: state.configuration.focus.x,
-                          onChanged: _controller.changeFocusX,
-                          divisions: 100,
-                          label: _focusLabel(
-                            state.configuration.focus.x,
-                            start: 'Izquierda',
-                            middle: 'Centro',
-                            end: 'Derecha',
-                          ),
-                        ),
-                        Text(
-                          'Vertical · Arriba — Centro — Abajo',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        Slider(
-                          key: const Key('crop-focus-y'),
-                          value: state.configuration.focus.y,
-                          onChanged: _controller.changeFocusY,
-                          divisions: 100,
-                          label: _focusLabel(
-                            state.configuration.focus.y,
-                            start: 'Arriba',
-                            middle: 'Centro',
-                            end: 'Abajo',
-                          ),
-                        ),
-                      ],
+                      const SizedBox(height: 14),
+                      const _ControlLabel(
+                        label: 'Encuadre',
+                        topic: ConfigurationHelpTopic.framing,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        state.configuration.fitMode == ImageFitMode.cropToFill
+                            ? 'Mueve la foto para elegir qué parte queda dentro.'
+                            : 'La foto completa quedará dentro del marco, sin recorte.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 10),
+                      VisualFramingEditor(
+                        configuration: state.configuration,
+                        onFocusChanged: _controller.changeFocus,
+                      ),
                       const SizedBox(height: 14),
                       const _ControlLabel(
                         label: 'Color',
@@ -569,21 +542,6 @@ final class _InlineError extends StatelessWidget {
       ),
     );
   }
-}
-
-String _focusLabel(
-  double value, {
-  required String start,
-  required String middle,
-  required String end,
-}) {
-  if (value < 0.34) {
-    return start;
-  }
-  if (value > 0.66) {
-    return end;
-  }
-  return middle;
 }
 
 String _paperLabel(PaperSize paper) {

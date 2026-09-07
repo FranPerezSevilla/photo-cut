@@ -71,7 +71,11 @@ final class VisualFramingMapper {
 
   static void _validatePositiveFinite(double value, String name) {
     if (!value.isFinite || value <= 0) {
-      throw ArgumentError.value(value, name, 'Value must be finite and positive');
+      throw ArgumentError.value(
+        value,
+        name,
+        'Value must be finite and positive',
+      );
     }
   }
 

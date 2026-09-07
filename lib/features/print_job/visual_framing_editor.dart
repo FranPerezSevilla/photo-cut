@@ -240,9 +240,7 @@ final class _FramingSurface extends StatelessWidget {
             ),
             if (canDrag)
               const Center(
-                child: IgnorePointer(
-                  child: Icon(Icons.open_with, size: 34),
-                ),
+                child: IgnorePointer(child: Icon(Icons.open_with, size: 34)),
               ),
           ],
         ),
