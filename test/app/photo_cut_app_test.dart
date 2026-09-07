@@ -88,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fitSelector, findsOneWidget);
-    expect(find.text('Color'), findsOneWidget);
+    expect(find.byKey(const Key('color-mode-selector')), findsOneWidget);
     expect(find.text('Blanco y negro'), findsOneWidget);
   });
 
