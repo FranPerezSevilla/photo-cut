@@ -1,0 +1,210 @@
+name: Complete M2 T05
+
+on:
+  push:
+    branches:
+      - task/M2-T05-resolution-guidance
+
+permissions:
+  contents: write
+
+jobs:
+  complete:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout task branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: task/M2-T05-resolution-guidance
+          fetch-depth: 0
+
+      - name: Complete resolution guidance and schedule UX pass
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          plan_path = Path('project/plan.json')
+          plan = json.loads(plan_path.read_text(encoding='utf-8'))
+          tasks = plan['tasks']
+          by_id = {task['id']: task for task in tasks}
+
+          completed = by_id['M2-T05']
+          if completed['status'] not in {'ready', 'done'}:
+              raise SystemExit(f"Unexpected M2-T05 state: {completed['status']}")
+          completed['status'] = 'done'
+          completed['completedAt'] = '2026-09-07'
+          completed['evidence'] = [
+              'lib/core/quality/resolution_advisor.dart',
+              'lib/core/quality/quality.dart',
+              'lib/features/print_job/resolution_guidance.dart',
+              'lib/features/print_job/print_configuration_screen.dart',
+              'test/core/quality/resolution_advisor_test.dart',
+              'test/features/print_job/resolution_guidance_test.dart',
+              'project/product.md',
+              'project/architecture.md',
+              'project/evidence/M2-T05/README.md',
+          ]
+          completed['verification'] = [
+              'GitHub Actions preparation run 34101018943: analysis and focused tests — success',
+              'GitHub Actions CI run 34101233839: Quality and Android — success',
+              'GitHub Actions CI run 34101233839: iOS simulator build — success',
+          ]
+
+          ux_tasks = [
+              {
+                  'id': 'M2-T06',
+                  'milestone': 'M2',
+                  'title': 'Add contextual help and simplify configuration hierarchy',
+                  'status': 'ready',
+                  'executor': 'agent',
+                  'dependsOn': ['M2-T05'],
+                  'objective': 'Make every configuration control understandable in-app and reduce the visual weight of advanced settings.',
+                  'acceptance': [
+                      'Rellenar/Encajar, Encuadre, Ancho/Alto, Unidad, Papel, Copias, Margen, Separación, Marcas de corte and Color expose concise offline help.',
+                      'Help explains what changes, when to use it and one concrete example without requiring external documentation.',
+                      'Primary controls remain prominent while margin, separation and cut marks move behind an Advanced options section.',
+                      'Defaults still allow a useful print job without opening Advanced options.',
+                      'Widget tests cover help availability, advanced-section state and unchanged print-job values.',
+                  ],
+                  'checks': [
+                      {'command': 'flutter test test/features/print_job', 'runner': 'any'},
+                  ],
+                  'evidence': [
+                      'https://github.com/FranPerezSevilla/photo-cut/issues/14',
+                      'lib/features/print_job/',
+                      'test/features/print_job/',
+                  ],
+              },
+              {
+                  'id': 'M2-T07',
+                  'milestone': 'M2',
+                  'title': 'Replace abstract framing sliders with visual positioning',
+                  'status': 'backlog',
+                  'executor': 'agent',
+                  'dependsOn': ['M2-T06'],
+                  'objective': 'Let users understand crop-to-fill by moving the image or focal point directly inside the target frame.',
+                  'acceptance': [
+                      'The primary crop interaction is visual and says in user language that the photo can be moved to choose what remains inside.',
+                      'Changing the visual framing updates the existing normalized focus/crop state rather than creating a second crop model.',
+                      'Rellenar and Encajar are visually distinguishable without relying on documentation.',
+                      'Abstract horizontal/vertical sliders are removed as the sole framing interaction; any fallback controls have clear endpoint labels.',
+                      'Widget and domain tests cover normalized focus updates and state persistence.',
+                  ],
+                  'checks': [
+                      {'command': 'flutter test test/core/crop test/features/print_job', 'runner': 'any'},
+                  ],
+                  'evidence': [
+                      'https://github.com/FranPerezSevilla/photo-cut/issues/14',
+                      'lib/features/print_job/',
+                      'test/features/print_job/',
+                  ],
+              },
+              {
+                  'id': 'M2-T08',
+                  'milestone': 'M2',
+                  'title': 'Add persistent zoomable PDF preview in Step 1',
+                  'status': 'backlog',
+                  'executor': 'agent',
+                  'dependsOn': ['M2-T07'],
+                  'objective': 'Keep the current document preview reachable in one tap from anywhere in Step 1 and support detailed inspection without changing geometry.',
+                  'acceptance': [
+                      'Step 1 has a persistent one-tap switch between Ajustes and Vista previa without creating a second print job.',
+                      'Switching views preserves every print-job setting and the user can return to the prior configuration state.',
+                      'The preview supports pinch-to-zoom, pan and a reset/fit-page action.',
+                      'Zoom state is viewer-only and never changes generated PDF geometry or physical dimensions.',
+                      'Tests cover view switching, state preservation and zoom state independently from document state.',
+                  ],
+                  'checks': [
+                      {'command': 'flutter test test/features/print_job', 'runner': 'any'},
+                  ],
+                  'evidence': [
+                      'https://github.com/FranPerezSevilla/photo-cut/issues/14',
+                      'lib/features/print_job/',
+                      'test/features/print_job/',
+                  ],
+              },
+          ]
+
+          if 'M2-T06' not in by_id:
+              insert_at = next(i for i, task in enumerate(tasks) if task['id'] == 'M2-T05') + 1
+              tasks[insert_at:insert_at] = ux_tasks
+          else:
+              for task in ux_tasks:
+                  existing = by_id[task['id']]
+                  if existing['status'] != task['status'] and existing['status'] != 'done':
+                      raise SystemExit(f"Unexpected pre-existing UX task state: {existing['id']}={existing['status']}")
+
+          by_id = {task['id']: task for task in tasks}
+          calibration = by_id['M3-T01']
+          calibration['dependsOn'] = ['M2-T08']
+
+          plan['updatedAt'] = '2026-09-07'
+          plan_path.write_text(
+              json.dumps(plan, ensure_ascii=False, indent=2) + '\n',
+              encoding='utf-8',
+          )
+
+          tests_path = Path('tool/tests/test_project_cli.py')
+          tests = tests_path.read_text(encoding='utf-8')
+          replacements = {
+              'test_next_returns_resolution_warning_task': 'test_next_returns_contextual_help_task',
+              "self.assertEqual(task['id'], 'M2-T05')": "self.assertEqual(task['id'], 'M2-T06')",
+              "self.assertIn('M2-T05', result.stdout)": "self.assertIn('M2-T06', result.stdout)",
+          }
+          for old, new in replacements.items():
+              if old not in tests:
+                  raise SystemExit(f'Missing expected CLI test text: {old}')
+              tests = tests.replace(old, new)
+          tests_path.write_text(tests, encoding='utf-8')
+
+          readme_path = Path('README.md')
+          readme = readme_path.read_text(encoding='utf-8')
+          old_state = (
+              'Photo Cut now completes the two-step flow: prepare every document setting in\n'
+              'the app, then review one immutable named PDF before sharing or opening native\n'
+              'printing. The repository remains in **M2 — Usable MVP flow**; the next task\n'
+              'adds effective-resolution guidance before physical calibration.\n'
+          )
+          new_state = (
+              'Photo Cut completes the two-step prepare/review/print flow and now estimates\n'
+              'effective print resolution without changing requested geometry. The repository\n'
+              'remains in **M2 — Usable MVP flow**; real-device feedback is scheduled next as\n'
+              'a focused UX pass for contextual help, visual framing and persistent zoomable preview.\n'
+          )
+          if old_state not in readme:
+              raise SystemExit('README current-state paragraph did not match expected text')
+          readme = readme.replace(old_state, new_state)
+          readme = readme.replace('show M2-T05', 'show M2-T06')
+          readme = readme.replace('verify M2-T05', 'verify M2-T06')
+          readme_path.write_text(readme, encoding='utf-8')
+
+          evidence_path = Path('project/evidence/M2-T05/README.md')
+          evidence_path.parent.mkdir(parents=True, exist_ok=True)
+          evidence_path.write_text(
+              '# M2-T05 evidence — effective resolution guidance\n\n'
+              'Photo Cut estimates effective DPI from orientation-aware source pixels that remain after crop and the exact physical image area. Fit-inside excludes white letterboxing from the physical image-area calculation.\n\n'
+              'The product thresholds are guidance only: 300+ ppp high, 200–299 good, 150–199 caution, and below 150 low. Warnings never block review/export and never alter physical dimensions.\n\n'
+              'Preparation run `34101018943` passed focused analysis/tests. PR CI run `34101233839` passed the full Android quality/build pipeline and iOS simulator build.\n\n'
+              'Real-device UX feedback is captured in issue #14 and is deliberately scheduled as M2-T06 through M2-T08 before physical calibration.\n',
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Validate repository-owned state
+        run: |
+          python3 tool/project.py validate
+          python3 -m unittest discover -s tool/tests -p 'test_*.py'
+          python3 tool/project.py status
+          python3 tool/project.py next
+
+      - name: Commit completion and remove workflow
+        run: |
+          git config user.name github-actions-bot
+          git config user.email github-actions-bot@users.noreply.github.com
+          git rm .github/workflows/complete-m2-t05.yml
+          git add project/plan.json tool/tests/test_project_cli.py README.md project/evidence/M2-T05/README.md
+          git commit -m 'M2-T05: complete resolution guidance and schedule UX pass'
+          git push origin HEAD:task/M2-T05-resolution-guidance
