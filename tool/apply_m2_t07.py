@@ -39,7 +39,7 @@ controller.write_text(controller_text, encoding='utf-8')
 screen = ROOT / 'lib/features/print_job/print_configuration_screen.dart'
 screen_text = screen.read_text(encoding='utf-8')
 import_line = (
-    "import 'package:photo_cut/features/print_job/print_sheet_preview.dart';\n"
+    "import 'package:photo_cut/features/print_job/resolution_guidance.dart';\n"
 )
 if "visual_framing_editor.dart" not in screen_text:
     screen_text = screen_text.replace(
