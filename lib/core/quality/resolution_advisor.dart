@@ -3,12 +3,7 @@ import 'dart:math' as math;
 import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/units/units.dart';
 
-enum ResolutionQuality {
-  high,
-  good,
-  caution,
-  low,
-}
+enum ResolutionQuality { high, good, caution, low }
 
 final class ResolutionAdvice {
   const ResolutionAdvice({

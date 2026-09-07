@@ -79,6 +79,8 @@ The product flow is intentionally split:
 
 The native print screen is a printer handoff, not a second document editor.
 
+Pure `core/quality` logic calculates effective-resolution guidance from orientation-aware source pixels, normalized crop state and exact physical output size. UI warnings consume that advice but never modify geometry.
+
 ## Physical geometry
 
 PDF uses typographic points, where 1 inch is 72 points:

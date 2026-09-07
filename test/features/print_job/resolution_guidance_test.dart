@@ -15,10 +15,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ResolutionGuidance(
-            configuration: _configuration(
-              sourcePixels: 300,
-              outputInches: 1,
-            ),
+            configuration: _configuration(sourcePixels: 300, outputInches: 1),
           ),
         ),
       ),
@@ -54,7 +51,10 @@ void main() {
     expect(find.text('Resolución justa'), findsOneWidget);
     expect(find.textContaining('180 ppp'), findsOneWidget);
     expect(find.text('Continuar'), findsOneWidget);
-    expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNotNull);
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNotNull,
+    );
   });
 
   testWidgets('labels very low resolution separately', (
@@ -64,10 +64,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ResolutionGuidance(
-            configuration: _configuration(
-              sourcePixels: 100,
-              outputInches: 1,
-            ),
+            configuration: _configuration(sourcePixels: 100, outputInches: 1),
           ),
         ),
       ),
