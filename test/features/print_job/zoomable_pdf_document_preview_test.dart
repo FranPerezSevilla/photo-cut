@@ -24,10 +24,7 @@ void main() {
           body: ZoomablePdfDocumentPreview(
             document: _document(),
             transformationController: controller,
-            previewBuilder: (
-              BuildContext context,
-              PrintDocument document,
-            ) {
+            previewBuilder: (BuildContext context, PrintDocument document) {
               return const ColoredBox(
                 color: Colors.white,
                 child: Center(child: Text('Synthetic PDF page')),

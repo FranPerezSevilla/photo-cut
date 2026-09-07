@@ -63,10 +63,7 @@ final class _StepOnePdfPreviewState extends State<StepOnePdfPreview> {
 
     return FutureBuilder<PrintDocument>(
       future: future,
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<PrintDocument> snapshot,
-      ) {
+      builder: (BuildContext context, AsyncSnapshot<PrintDocument> snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const _PreviewLoading();
         }
