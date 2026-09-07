@@ -14,23 +14,12 @@ void main() {
   ) async {
     await _pumpScreen(tester);
 
-    for (final String key in <String>[
-      'help-fitMode',
-      'help-framing',
-      'help-colorMode',
-      'help-unit',
-      'help-width',
-      'help-height',
-      'help-paper',
-      'help-copies',
-    ]) {
-      final Finder finder = find.byKey(ValueKey<String>(key));
-      await _scrollTo(tester, finder);
-      expect(finder, findsOneWidget, reason: key);
-    }
+    await _scrollTo(tester, find.byKey(const Key('fit-mode-selector')));
+    expect(find.byKey(const Key('help-fitMode')), findsOneWidget);
+    expect(find.byKey(const Key('help-framing')), findsOneWidget);
+    expect(find.byKey(const Key('help-colorMode')), findsOneWidget);
 
     final Finder fitHelp = find.byKey(const Key('help-fitMode'));
-    await _scrollTo(tester, fitHelp);
     await tester.tap(fitHelp);
     await tester.pumpAndSettle();
 
@@ -39,6 +28,18 @@ void main() {
     expect(find.text('Qué hace'), findsOneWidget);
     await tester.tap(find.text('Entendido'));
     await tester.pumpAndSettle();
+
+    await _scrollTo(
+      tester,
+      find.byKey(const ValueKey<String>('photo-width-millimetres')),
+    );
+    expect(find.byKey(const Key('help-unit')), findsOneWidget);
+    expect(find.byKey(const Key('help-width')), findsOneWidget);
+    expect(find.byKey(const Key('help-height')), findsOneWidget);
+
+    await _scrollTo(tester, find.byKey(const Key('copy-count')));
+    expect(find.byKey(const Key('help-paper')), findsOneWidget);
+    expect(find.byKey(const Key('help-copies')), findsOneWidget);
   });
 
   testWidgets('advanced options start collapsed and expose their own help', (
