@@ -7,8 +7,8 @@ void main() {
     const CalibrationPdfGenerator generator = CalibrationPdfGenerator();
 
     final CalibrationPdfResult result = await generator.generate();
-    final double expectedSquarePoints =
-        PhysicalLength.millimetres(50).inPdfPoints;
+    final double expectedSquarePoints = PhysicalLength.millimetres(50)
+        .inPdfPoints;
 
     expect(result.document.bytes, isNotEmpty);
     expect(result.document.filename, 'photo-cut-calibration-50mm.pdf');
