@@ -8,59 +8,60 @@ import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 
 void main() {
-  testWidgets('framing opens a dedicated focus mode before drag updates focus', (
-    WidgetTester tester,
-  ) async {
-    NormalizedPoint focus = NormalizedPoint.center;
+  testWidgets(
+    'framing opens a dedicated focus mode before drag updates focus',
+    (WidgetTester tester) async {
+      NormalizedPoint focus = NormalizedPoint.center;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Center(
-                child: SizedBox(
-                  width: 320,
-                  child: VisualFramingEditor(
-                    configuration: _configuration(focus: focus),
-                    onFocusChanged: (NormalizedPoint next) {
-                      setState(() {
-                        focus = next;
-                      });
-                    },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: SizedBox(
+                    width: 320,
+                    child: VisualFramingEditor(
+                      configuration: _configuration(focus: focus),
+                      onFocusChanged: (NormalizedPoint next) {
+                        setState(() {
+                          focus = next;
+                        });
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
-    expect(find.byKey(const Key('open-framing-focus')), findsOneWidget);
+      expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
+      expect(find.byKey(const Key('open-framing-focus')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('open-framing-focus')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('open-framing-focus')));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
-    expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
+      expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
+      expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
 
-    await tester.drag(
-      find.byKey(const Key('visual-framing-editor')),
-      const Offset(80, 0),
-    );
-    await tester.pumpAndSettle();
+      await tester.drag(
+        find.byKey(const Key('visual-framing-editor')),
+        const Offset(80, 0),
+      );
+      await tester.pumpAndSettle();
 
-    expect(focus.x, lessThan(0.5));
-    expect(focus.y, 0.5);
-    expect(find.byKey(const Key('center-framing')), findsOneWidget);
+      expect(focus.x, lessThan(0.5));
+      expect(focus.y, 0.5);
+      expect(find.byKey(const Key('center-framing')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('center-framing')));
-    await tester.pumpAndSettle();
-    expect(focus, NormalizedPoint.center);
-  });
+      await tester.tap(find.byKey(const Key('center-framing')));
+      await tester.pumpAndSettle();
+      expect(focus, NormalizedPoint.center);
+    },
+  );
 
   testWidgets('fit-inside stays static and does not offer framing adjustment', (
     WidgetTester tester,
