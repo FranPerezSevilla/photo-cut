@@ -144,11 +144,13 @@ final class _FramingFocusScreen extends StatefulWidget {
 
 final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
   late NormalizedPoint _focus;
+  late final Object _imageSessionKey;
 
   @override
   void initState() {
     super.initState();
     _focus = widget.configuration.focus;
+    _imageSessionKey = Object();
   }
 
   @override
@@ -228,6 +230,7 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
                               child: _FramingSurface(
                                 configuration: configuration,
                                 cropToFill: true,
+                                imageKey: ObjectKey(_imageSessionKey),
                               ),
                             );
                           },
@@ -275,10 +278,12 @@ final class _FramingSurface extends StatelessWidget {
     super.key,
     required this.configuration,
     required this.cropToFill,
+    this.imageKey,
   });
 
   final PrintJobConfiguration configuration;
   final bool cropToFill;
+  final Key? imageKey;
 
   @override
   Widget build(BuildContext context) {
@@ -289,9 +294,10 @@ final class _FramingSurface extends StatelessWidget {
 
     Widget image = Image.memory(
       configuration.image.bytes,
+      key: imageKey,
       fit: cropToFill ? BoxFit.cover : BoxFit.contain,
       alignment: alignment,
-      gaplessPlayback: true,
+      gaplessPlayback: false,
       errorBuilder: (BuildContext context, Object error, StackTrace? stack) {
         return const Center(child: Icon(Icons.broken_image_outlined, size: 42));
       },

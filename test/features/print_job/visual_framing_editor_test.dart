@@ -63,6 +63,49 @@ void main() {
     },
   );
 
+  testWidgets('focused framing can close and reopen without losing its image', (
+    WidgetTester tester,
+  ) async {
+    NormalizedPoint focus = NormalizedPoint.center;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: SizedBox(
+                  width: 320,
+                  child: VisualFramingEditor(
+                    configuration: _configuration(focus: focus),
+                    onFocusChanged: (NormalizedPoint next) {
+                      setState(() => focus = next);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (int attempt = 0; attempt < 2; attempt += 1) {
+      await tester.tap(find.byKey(const Key('open-framing-focus')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
+      expect(find.byType(Image), findsWidgets);
+      final Image image = tester.widget<Image>(find.byType(Image).first);
+      expect(image.image, isA<MemoryImage>());
+
+      await tester.tap(find.text('Guardar encuadre'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('framing-focus-screen')), findsNothing);
+    }
+  });
+
   testWidgets('fit-inside stays static and does not offer framing adjustment', (
     WidgetTester tester,
   ) async {
