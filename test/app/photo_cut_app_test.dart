@@ -53,7 +53,7 @@ void main() {
     expect(find.text('Elegir otra foto'), findsOneWidget);
   });
 
-  testWidgets('selected image opens the guided Photo Cut configuration', (
+  testWidgets('selected image opens the polished four-step wizard', (
     WidgetTester tester,
   ) async {
     final _FakeImagePickerGateway gateway = _FakeImagePickerGateway(
@@ -77,18 +77,16 @@ void main() {
     await tester.tap(configure);
     await tester.pumpAndSettle();
 
-    expect(find.text('Configurar impresión'), findsOneWidget);
-    expect(find.textContaining('Paso 1 de 5 · Tamaño final'), findsOneWidget);
+    expect(find.text('Preparar foto'), findsOneWidget);
+    expect(find.textContaining('Paso 1 de 4 · Tamaño'), findsOneWidget);
     expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
-    expect(
-      find.text('¿Qué tamaño quieres que tenga la foto en el papel?'),
-      findsOneWidget,
-    );
+    expect(find.text('¿Qué tamaño quieres imprimir?'), findsOneWidget);
+    expect(find.byKey(const Key('size-preset-35x45')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Paso 2 de 5 · Encuadre'), findsOneWidget);
+    expect(find.textContaining('Paso 2 de 4 · Encuadre'), findsOneWidget);
     expect(find.byKey(const Key('wizard-fit-mode')), findsOneWidget);
     expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
   });
