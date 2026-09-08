@@ -8,53 +8,62 @@ import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 
 void main() {
-  testWidgets('dragging the image updates the existing normalized focus', (
-    WidgetTester tester,
-  ) async {
-    NormalizedPoint focus = NormalizedPoint.center;
+  testWidgets(
+    'framing opens a dedicated focus mode before drag updates focus',
+    (WidgetTester tester) async {
+      NormalizedPoint focus = NormalizedPoint.center;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Center(
-                child: SizedBox(
-                  width: 320,
-                  child: VisualFramingEditor(
-                    configuration: _configuration(focus: focus),
-                    onFocusChanged: (NormalizedPoint next) {
-                      setState(() {
-                        focus = next;
-                      });
-                    },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: SizedBox(
+                    width: 320,
+                    child: VisualFramingEditor(
+                      configuration: _configuration(focus: focus),
+                      onFocusChanged: (NormalizedPoint next) {
+                        setState(() {
+                          focus = next;
+                        });
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Rellenar · recorte activo'), findsOneWidget);
-    await tester.drag(
-      find.byKey(const Key('visual-framing-editor')),
-      const Offset(80, 0),
-    );
-    await tester.pumpAndSettle();
+      expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
+      expect(find.byKey(const Key('open-framing-focus')), findsOneWidget);
 
-    expect(focus.x, lessThan(0.5));
-    expect(focus.y, 0.5);
-    expect(find.byKey(const Key('center-framing')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('open-framing-focus')));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('center-framing')));
-    await tester.pumpAndSettle();
-    expect(focus, NormalizedPoint.center);
-  });
+      expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
+      expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
 
-  testWidgets('fit-inside is visibly complete and does not drag focus', (
+      await tester.drag(
+        find.byKey(const Key('visual-framing-editor')),
+        const Offset(80, 0),
+      );
+      await tester.pumpAndSettle();
+
+      expect(focus.x, lessThan(0.5));
+      expect(focus.y, 0.5);
+      expect(find.byKey(const Key('center-framing')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('center-framing')));
+      await tester.pumpAndSettle();
+      expect(focus, NormalizedPoint.center);
+    },
+  );
+
+  testWidgets('fit-inside stays static and does not offer framing adjustment', (
     WidgetTester tester,
   ) async {
     int updates = 0;
@@ -82,17 +91,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Encajar · foto completa'), findsOneWidget);
+    expect(find.byKey(const Key('open-framing-focus')), findsNothing);
     expect(
-      find.text('Encajar muestra la foto completa y no recorta ninguna parte.'),
+      find.text('La foto completa queda dentro del marco.'),
       findsOneWidget,
     );
-
-    await tester.drag(
-      find.byKey(const Key('visual-framing-editor')),
-      const Offset(100, 0),
-    );
-    await tester.pumpAndSettle();
     expect(updates, 0);
   });
 }
