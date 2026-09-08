@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_cut/core/theme/photo_cut_brand.dart';
 import 'package:photo_cut/features/calibration/calibration.dart';
 import 'package:photo_cut/features/home/selected_photo_info.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
@@ -49,7 +50,7 @@ final class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Photo Cut'),
+        title: const PhotoCutBrand(compact: true),
         actions: <Widget>[
           PopupMenuButton<String>(
             key: const Key('more-actions'),
