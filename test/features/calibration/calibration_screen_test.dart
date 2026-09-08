@@ -7,7 +7,7 @@ import 'package:photo_cut/features/calibration/calibration.dart';
 import 'package:photo_cut/platform/print/print.dart';
 
 void main() {
-  testWidgets('explains actual-size printing and warns against fit to page', (
+  testWidgets('explains scale verification without implying app calibration', (
     WidgetTester tester,
   ) async {
     final _FakePrintGateway gateway = _FakePrintGateway();
@@ -25,6 +25,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Calibration PDF preview'), findsOneWidget);
+    expect(find.text('Prueba de escala de impresión'), findsOneWidget);
+    expect(find.textContaining('ya genera el PDF con medidas físicas exactas'), findsOneWidget);
+    expect(find.textContaining('no calibra ni modifica Photo Cut'), findsOneWidget);
     expect(find.textContaining('100 %'), findsOneWidget);
     expect(find.textContaining('Tamaño real'), findsOneWidget);
     expect(find.textContaining('Ajustar a página'), findsOneWidget);
