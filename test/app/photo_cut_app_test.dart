@@ -48,11 +48,12 @@ void main() {
     expect(gateway.pickCalls, 1);
     expect(find.byKey(const Key('selected-image-preview')), findsOneWidget);
     expect(find.text('portrait.png'), findsOneWidget);
-    expect(find.text('Configurar impresión'), findsOneWidget);
+    expect(find.text('400 × 200 px'), findsOneWidget);
+    expect(find.text('Elegir tamaño y configurar'), findsOneWidget);
     expect(find.text('Elegir otra foto'), findsOneWidget);
   });
 
-  testWidgets('selected image opens the Photo Cut configuration step', (
+  testWidgets('selected image opens the guided Photo Cut configuration', (
     WidgetTester tester,
   ) async {
     final _FakeImagePickerGateway gateway = _FakeImagePickerGateway(
@@ -76,30 +77,17 @@ void main() {
     await tester.tap(configure);
     await tester.pumpAndSettle();
 
-    expect(find.text('Preparar en Photo Cut'), findsOneWidget);
-    expect(find.text('Paso 1 de 2 · Configura el documento'), findsOneWidget);
+    expect(find.text('Configurar impresión'), findsOneWidget);
+    expect(find.textContaining('Paso 1 de 5 · Tamaño final'), findsOneWidget);
+    expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
+    expect(find.text('¿Qué tamaño quieres que tenga la foto en el papel?'), findsOneWidget);
 
-    final Finder fitSelector = find.byKey(const Key('fit-mode-selector'));
-    await tester.scrollUntilVisible(
-      fitSelector,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
 
-    expect(fitSelector, findsOneWidget);
+    expect(find.textContaining('Paso 2 de 5 · Encuadre'), findsOneWidget);
+    expect(find.byKey(const Key('wizard-fit-mode')), findsOneWidget);
     expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
-
-    final Finder colorSelector = find.byKey(const Key('color-mode-selector'));
-    await tester.scrollUntilVisible(
-      colorSelector,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-
-    expect(colorSelector, findsOneWidget);
-    expect(find.text('Blanco y negro'), findsOneWidget);
   });
 
   testWidgets('recovers a selection returned after Android restarts the app', (
