@@ -82,7 +82,9 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                           ),
-                          Text('${((_step + 1) / _stepTitles.length * 100).round()} %'),
+                          Text(
+                            '${((_step + 1) / _stepTitles.length * 100).round()} %',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -314,7 +316,9 @@ final class _PaperCopiesStep extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         DropdownButtonFormField<PaperSize>(
-          key: ValueKey<String>('wizard-paper-${state.configuration.paperSize.id}'),
+          key: ValueKey<String>(
+            'wizard-paper-${state.configuration.paperSize.id}',
+          ),
           initialValue: state.configuration.paperSize,
           decoration: const InputDecoration(labelText: 'Papel'),
           items: PaperSize.presets
@@ -346,7 +350,9 @@ final class _PaperCopiesStep extends StatelessWidget {
           onChanged: controller.changeCopyCount,
         ),
         const SizedBox(height: 8),
-        const Text('La vista previa te muestra inmediatamente cómo se distribuyen.'),
+        const Text(
+          'La vista previa te muestra inmediatamente cómo se distribuyen.',
+        ),
       ],
     );
   }
