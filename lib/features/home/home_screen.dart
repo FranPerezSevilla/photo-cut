@@ -143,10 +143,8 @@ final class _HomeScreenState extends State<HomeScreen> {
                       else ...<Widget>[
                         FilledButton.icon(
                           key: const Key('configure-photo'),
-                          onPressed: () => _openConfiguration(
-                            state.image!,
-                            imageProcessor,
-                          ),
+                          onPressed: () =>
+                              _openConfiguration(state.image!, imageProcessor),
                           icon: const Icon(Icons.arrow_forward),
                           label: const Text('Elegir tamaño y configurar'),
                         ),
