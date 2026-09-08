@@ -71,12 +71,14 @@ abstract final class AppTheme {
         ),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: canvas,
+        backgroundColor: surface,
         foregroundColor: ink,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
+        toolbarHeight: 64,
+        shape: Border(bottom: BorderSide(color: outline)),
         titleTextStyle: TextStyle(
           color: ink,
           fontSize: 20,
