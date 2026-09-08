@@ -58,13 +58,14 @@ final class _HomeScreenState extends State<HomeScreen> {
                 _openCalibration(context);
               }
             },
-            itemBuilder: (BuildContext context) => const <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                key: Key('open-calibration'),
-                value: _printScaleTestAction,
-                child: Text('Prueba de escala de impresión'),
-              ),
-            ],
+            itemBuilder: (BuildContext context) =>
+                const <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    key: Key('open-calibration'),
+                    value: _printScaleTestAction,
+                    child: Text('Prueba de escala de impresión'),
+                  ),
+                ],
           ),
         ],
       ),
