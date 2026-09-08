@@ -126,6 +126,14 @@ final class PrintSheetPreview extends StatelessWidget {
                                     pageHeight *
                                     constraints.maxHeight,
                                 child: _PreviewPhoto(
+                                  key: ValueKey<String>(
+                                    'preview-photo-${placement.copyIndex}-'
+                                    '${currentPlan.photoRotated}-'
+                                    '${configuration.fitMode.name}-'
+                                    '${configuration.paperSize.id}-'
+                                    '${configuration.photoWidth.inMillimetres}-'
+                                    '${configuration.photoHeight.inMillimetres}',
+                                  ),
                                   bytes: bytes,
                                   copyIndex: placement.copyIndex,
                                   configuration: configuration,
@@ -158,6 +166,7 @@ final class PrintSheetPreview extends StatelessWidget {
 
 final class _PreviewPhoto extends StatelessWidget {
   const _PreviewPhoto({
+    super.key,
     required this.bytes,
     required this.copyIndex,
     required this.configuration,
@@ -175,17 +184,24 @@ final class _PreviewPhoto extends StatelessWidget {
       configuration.focus.x * 2 - 1,
       configuration.focus.y * 2 - 1,
     );
-    Widget photo = Image.memory(
-      bytes,
-      fit: configuration.fitMode == ImageFitMode.cropToFill
-          ? BoxFit.cover
-          : BoxFit.contain,
-      alignment: alignment,
-      gaplessPlayback: true,
-      errorBuilder:
-          (BuildContext context, Object error, StackTrace? stackTrace) {
-            return const Center(child: Icon(Icons.broken_image_outlined));
-          },
+    Widget photo = SizedBox.expand(
+      child: Image.memory(
+        bytes,
+        key: ValueKey<String>(
+          'preview-image-$copyIndex-${rotated ? 'rotated' : 'upright'}',
+        ),
+        width: double.infinity,
+        height: double.infinity,
+        fit: configuration.fitMode == ImageFitMode.cropToFill
+            ? BoxFit.cover
+            : BoxFit.contain,
+        alignment: alignment,
+        gaplessPlayback: false,
+        errorBuilder:
+            (BuildContext context, Object error, StackTrace? stackTrace) {
+              return const Center(child: Icon(Icons.broken_image_outlined));
+            },
+      ),
     );
 
     if (configuration.colorMode == ImageColorMode.grayscale) {
@@ -196,7 +212,10 @@ final class _PreviewPhoto extends StatelessWidget {
       );
     }
     if (rotated) {
-      photo = RotatedBox(quarterTurns: 1, child: photo);
+      photo = RotatedBox(
+        quarterTurns: 1,
+        child: SizedBox.expand(child: photo),
+      );
     }
 
     return DecoratedBox(
@@ -206,7 +225,7 @@ final class _PreviewPhoto extends StatelessWidget {
             ? Border.all(color: Colors.black54, width: 0.5)
             : null,
       ),
-      child: photo,
+      child: ClipRect(child: photo),
     );
   }
 }
