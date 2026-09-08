@@ -10,6 +10,22 @@ import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 void main() {
+  testWidgets('shows branded splash before the home screen', (tester) async {
+    await tester.pumpWidget(
+      PhotoCutApp(
+        imagePickerGateway: _FakeImagePickerGateway(),
+        imageProcessor: _FakeImageProcessor(),
+      ),
+    );
+
+    expect(find.byKey(const Key('photo-cut-splash')), findsOneWidget);
+    expect(find.text('Tamaño exacto. Sin complicaciones.'), findsOneWidget);
+
+    await _settleSplash(tester);
+    expect(find.byKey(const Key('photo-cut-splash')), findsNothing);
+    expect(find.text('Imprime fotos al tamaño exacto'), findsOneWidget);
+  });
+
   testWidgets('renders the product promise and primary action', (tester) async {
     await tester.pumpWidget(
       PhotoCutApp(
@@ -17,7 +33,7 @@ void main() {
         imageProcessor: _FakeImageProcessor(),
       ),
     );
-    await tester.pumpAndSettle();
+    await _settleSplash(tester);
 
     expect(find.text('Photo Cut'), findsOneWidget);
     expect(find.text('Imprime fotos al tamaño exacto'), findsOneWidget);
@@ -38,7 +54,7 @@ void main() {
         imageProcessor: _FakeImageProcessor(),
       ),
     );
-    await tester.pumpAndSettle();
+    await _settleSplash(tester);
 
     final Finder choosePhoto = find.byKey(const Key('choose-photo'));
     await tester.ensureVisible(choosePhoto);
@@ -65,7 +81,7 @@ void main() {
         imageProcessor: _FakeImageProcessor(),
       ),
     );
-    await tester.pumpAndSettle();
+    await _settleSplash(tester);
 
     final Finder choosePhoto = find.byKey(const Key('choose-photo'));
     await tester.ensureVisible(choosePhoto);
@@ -88,7 +104,8 @@ void main() {
 
     expect(find.textContaining('Paso 2 de 4 · Encuadre'), findsOneWidget);
     expect(find.byKey(const Key('wizard-fit-mode')), findsOneWidget);
-    expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
+    expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
+    expect(find.byKey(const Key('open-framing-focus')), findsOneWidget);
   });
 
   testWidgets('recovers a selection returned after Android restarts the app', (
@@ -103,7 +120,7 @@ void main() {
         imageProcessor: _FakeImageProcessor(),
       ),
     );
-    await tester.pumpAndSettle();
+    await _settleSplash(tester);
 
     expect(gateway.recoveryCalls, 1);
     expect(find.text('recovered.png'), findsOneWidget);
@@ -120,7 +137,7 @@ void main() {
         imageProcessor: _FakeImageProcessor(),
       ),
     );
-    await tester.pumpAndSettle();
+    await _settleSplash(tester);
 
     final Finder choosePhoto = find.byKey(const Key('choose-photo'));
     await tester.ensureVisible(choosePhoto);
@@ -154,6 +171,11 @@ void main() {
 
     expect(find.text('PDF spike open'), findsOneWidget);
   });
+}
+
+Future<void> _settleSplash(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 850));
+  await tester.pumpAndSettle();
 }
 
 SelectedImage _selectedImage(String name) {
