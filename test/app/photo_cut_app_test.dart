@@ -80,7 +80,10 @@ void main() {
     expect(find.text('Configurar impresión'), findsOneWidget);
     expect(find.textContaining('Paso 1 de 5 · Tamaño final'), findsOneWidget);
     expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
-    expect(find.text('¿Qué tamaño quieres que tenga la foto en el papel?'), findsOneWidget);
+    expect(
+      find.text('¿Qué tamaño quieres que tenga la foto en el papel?'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
