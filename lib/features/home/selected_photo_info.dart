@@ -56,32 +56,45 @@ final class _SelectedPhotoInfoState extends State<SelectedPhotoInfo> {
         }
 
         final SourceImageSize size = snapshot.requireData;
-        return Card(
+        return Container(
           key: const Key('selected-photo-info'),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  '${size.widthPixels} × ${size.heightPixels} px',
-                  style: Theme.of(context).textTheme.titleSmall,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Tamaño de impresión orientativo según resolución:',
-                  style: Theme.of(context).textTheme.bodySmall,
+                child: Icon(
+                  Icons.high_quality_rounded,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(height: 8),
-                Text('A 300 ppp · ${_physicalSizeLabel(size, 300)}'),
-                Text('A 600 ppp · ${_physicalSizeLabel(size, 600)}'),
-                const SizedBox(height: 6),
-                Text(
-                  'La foto digital no tiene una medida física única: tú eliges el tamaño final en el siguiente paso.',
-                  style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      '${size.widthPixels} × ${size.heightPixels} px',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Hasta aprox. ${_physicalSizeLabel(size, 300)} con calidad fotográfica.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
