@@ -4,7 +4,7 @@ import 'package:photo_cut/features/home/home_screen.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 
 void main() {
-  testWidgets('home exposes calibration before selecting a photo', (
+  testWidgets('home keeps print scale test secondary and available before purchase', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -13,7 +13,7 @@ void main() {
           imagePickerGateway: _CancelledImagePickerGateway(),
           calibrationBuilder: (BuildContext context) {
             return const Scaffold(
-              body: Center(child: Text('Calibration route open')),
+              body: Center(child: Text('Print scale test route open')),
             );
           },
         ),
@@ -21,15 +21,20 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('open-calibration')), findsOneWidget);
     expect(find.text('Elegir foto'), findsOneWidget);
+    expect(find.text('Prueba de escala de impresión'), findsNothing);
+    expect(find.byKey(const Key('more-actions')), findsOneWidget);
 
-    final Finder calibration = find.byKey(const Key('open-calibration'));
-    await tester.ensureVisible(calibration);
-    await tester.tap(calibration);
+    await tester.tap(find.byKey(const Key('more-actions')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Calibration route open'), findsOneWidget);
+    expect(find.byKey(const Key('open-calibration')), findsOneWidget);
+    expect(find.text('Prueba de escala de impresión'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('open-calibration')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Print scale test route open'), findsOneWidget);
   });
 }
 
