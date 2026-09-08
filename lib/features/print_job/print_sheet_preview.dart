@@ -212,10 +212,7 @@ final class _PreviewPhoto extends StatelessWidget {
       );
     }
     if (rotated) {
-      photo = RotatedBox(
-        quarterTurns: 1,
-        child: SizedBox.expand(child: photo),
-      );
+      photo = RotatedBox(quarterTurns: 1, child: SizedBox.expand(child: photo));
     }
 
     return DecoratedBox(
