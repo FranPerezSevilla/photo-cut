@@ -4,11 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:photo_cut/features/calibration/calibration_pdf_generator.dart';
 import 'package:photo_cut/platform/print/print.dart';
 
+typedef CalibrationPreviewBuilder = Widget Function(
+  BuildContext context,
+  PrintDocument document,
+);
+
 final class CalibrationScreen extends StatefulWidget {
   const CalibrationScreen({
     super.key,
     required this.generateDocument,
     required this.printGateway,
+    this.previewBuilder,
   });
 
   factory CalibrationScreen.production() {
@@ -21,6 +27,7 @@ final class CalibrationScreen extends StatefulWidget {
 
   final Future<CalibrationPdfResult> Function() generateDocument;
   final PrintGateway printGateway;
+  final CalibrationPreviewBuilder? previewBuilder;
 
   @override
   State<CalibrationScreen> createState() => _CalibrationScreenState();
@@ -61,11 +68,13 @@ final class _CalibrationScreenState extends State<CalibrationScreen> {
             }
 
             final CalibrationPdfResult result = snapshot.requireData;
+            final CalibrationPreviewBuilder previewBuilder =
+                widget.previewBuilder ??
+                (BuildContext context, PrintDocument document) =>
+                    PdfDocumentPreview(document: document);
             return Column(
               children: <Widget>[
-                Expanded(
-                  child: PdfDocumentPreview(document: result.document),
-                ),
+                Expanded(child: previewBuilder(context, result.document)),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
