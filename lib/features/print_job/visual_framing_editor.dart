@@ -34,11 +34,13 @@ final class VisualFramingEditor extends StatelessWidget {
     required this.configuration,
     required this.onFocusChanged,
     this.mapper = const VisualFramingMapper(),
+    this.maxHeight = 300,
   });
 
   final PrintJobConfiguration configuration;
   final VisualFramingMapper mapper;
   final ValueChanged<NormalizedPoint> onFocusChanged;
+  final double maxHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +85,7 @@ final class VisualFramingEditor extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Semantics(
           label: cropToFill
               ? 'Encuadre visual. Mueve la foto para elegir qué parte queda dentro.'
@@ -93,7 +95,7 @@ final class VisualFramingEditor extends StatelessWidget {
               : null,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300),
+              constraints: BoxConstraints(maxHeight: maxHeight),
               child: AspectRatio(
                 aspectRatio: configuration.photoAspectRatio,
                 child: LayoutBuilder(
@@ -124,7 +126,6 @@ final class VisualFramingEditor extends StatelessWidget {
                       child: _FramingSurface(
                         configuration: configuration,
                         cropToFill: cropToFill,
-                        canDrag: canDrag,
                       ),
                     );
                   },
@@ -133,7 +134,7 @@ final class VisualFramingEditor extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Wrap(
           alignment: WrapAlignment.center,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -170,10 +171,8 @@ final class _FramingSurface extends StatelessWidget {
   const _FramingSurface({
     required this.configuration,
     required this.cropToFill,
-    required this.canDrag,
   });
 
-  final bool canDrag;
   final PrintJobConfiguration configuration;
   final bool cropToFill;
 
@@ -203,13 +202,13 @@ final class _FramingSurface extends StatelessWidget {
 
     final ColorScheme colors = Theme.of(context).colorScheme;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(18),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(
             color: cropToFill ? colors.primary : colors.outline,
-            width: cropToFill ? 3 : 1.5,
+            width: cropToFill ? 2 : 1.5,
           ),
         ),
         child: Stack(
@@ -217,12 +216,12 @@ final class _FramingSurface extends StatelessWidget {
           children: <Widget>[
             image,
             Positioned(
-              left: 8,
-              top: 8,
+              left: 10,
+              top: 10,
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: colors.surface.withValues(alpha: 0.88),
+                    color: colors.surface.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Padding(
@@ -231,17 +230,13 @@ final class _FramingSurface extends StatelessWidget {
                       vertical: 6,
                     ),
                     child: Text(
-                      cropToFill ? 'Rellenar' : 'Encajar',
+                      cropToFill ? 'Rellenar' : 'Foto completa',
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                   ),
                 ),
               ),
             ),
-            if (canDrag)
-              const Center(
-                child: IgnorePointer(child: Icon(Icons.open_with, size: 34)),
-              ),
           ],
         ),
       ),
@@ -252,9 +247,9 @@ final class _FramingSurface extends StatelessWidget {
 String _dragInstruction(VisualFramingAxis axis) {
   return switch (axis) {
     VisualFramingAxis.horizontal =>
-      'Mueve la foto a izquierda o derecha para elegir qué parte queda dentro.',
+      'Desliza la foto a izquierda o derecha para elegir el encuadre.',
     VisualFramingAxis.vertical =>
-      'Mueve la foto arriba o abajo para elegir qué parte queda dentro.',
+      'Desliza la foto arriba o abajo para elegir el encuadre.',
     VisualFramingAxis.none =>
       'La foto ya tiene esta proporción: no hace falta moverla.',
   };
