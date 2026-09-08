@@ -47,7 +47,7 @@ final class _CalibrationScreenState extends State<CalibrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Calibrar impresión')),
+      appBar: AppBar(title: const Text('Prueba de escala de impresión')),
       body: SafeArea(
         child: FutureBuilder<CalibrationPdfResult>(
           future: _result,
@@ -57,7 +57,7 @@ final class _CalibrationScreenState extends State<CalibrationScreen> {
                 child: Padding(
                   padding: EdgeInsets.all(24),
                   child: Text(
-                    'No se pudo generar la hoja de calibración.',
+                    'No se pudo generar la hoja de prueba.',
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -88,18 +88,23 @@ final class _CalibrationScreenState extends State<CalibrationScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       Text(
-                        'Comprueba un cuadrado de 50 × 50 mm',
+                        'Comprueba cómo imprime tu sistema',
                         style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Photo Cut ya genera el PDF con medidas físicas exactas. '
+                        'Esta prueba no calibra ni modifica Photo Cut: solo comprueba si el sistema y la impresora respetan la escala del PDF al llevarlo al papel.',
                       ),
                       const SizedBox(height: 8),
                       const Text(
                         '1. Imprime al 100 % o “Tamaño real”.\n'
                         '2. No uses “Ajustar a página” ni opciones equivalentes.\n'
-                        '3. Mide el cuadrado con una regla: debe medir 50 mm en ambos lados.',
+                        '3. Mide el cuadrado: debe medir 50 × 50 mm.',
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Photo Cut genera el PDF con medidas físicas exactas, pero no puede controlar el escalado que aplique la impresora, el sistema o su controlador.',
+                        'Photo Cut controla la geometría del PDF, pero no puede controlar el escalado que aplique la impresora, el sistema o su controlador.',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       if (_message != null) ...<Widget>[
@@ -116,7 +121,7 @@ final class _CalibrationScreenState extends State<CalibrationScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.print_outlined),
-                        label: const Text('Imprimir calibración'),
+                        label: const Text('Imprimir prueba de 50 mm'),
                       ),
                     ],
                   ),
