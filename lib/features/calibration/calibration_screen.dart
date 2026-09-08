@@ -51,84 +51,95 @@ final class _CalibrationScreenState extends State<CalibrationScreen> {
       body: SafeArea(
         child: FutureBuilder<CalibrationPdfResult>(
           future: _result,
-          builder: (BuildContext context, AsyncSnapshot<CalibrationPdfResult> snapshot) {
-            if (snapshot.hasError) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text(
-                    'No se pudo generar la hoja de prueba.',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          builder:
+              (
+                BuildContext context,
+                AsyncSnapshot<CalibrationPdfResult> snapshot,
+              ) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: Text(
+                        'No se pudo generar la hoja de prueba.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            final CalibrationPdfResult result = snapshot.requireData;
-            final CalibrationPreviewBuilder previewBuilder =
-                widget.previewBuilder ??
-                (BuildContext context, PrintDocument document) =>
-                    PdfDocumentPreview(document: document);
-            return Column(
-              children: <Widget>[
-                Expanded(child: previewBuilder(context, result.document)),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    boxShadow: const <BoxShadow>[
-                      BoxShadow(blurRadius: 8, color: Color(0x22000000)),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Text(
-                        'Comprueba cómo imprime tu sistema',
-                        style: Theme.of(context).textTheme.titleMedium,
+                final CalibrationPdfResult result = snapshot.requireData;
+                final CalibrationPreviewBuilder previewBuilder =
+                    widget.previewBuilder ??
+                    (BuildContext context, PrintDocument document) =>
+                        PdfDocumentPreview(document: document);
+                return Column(
+                  children: <Widget>[
+                    Expanded(child: previewBuilder(context, result.document)),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        boxShadow: const <BoxShadow>[
+                          BoxShadow(blurRadius: 8, color: Color(0x22000000)),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Photo Cut ya genera el PDF con medidas físicas exactas. '
-                        'Esta prueba no calibra ni modifica Photo Cut: solo comprueba si el sistema y la impresora respetan la escala del PDF al llevarlo al papel.',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Text(
+                            'Comprueba cómo imprime tu sistema',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Photo Cut ya genera el PDF con medidas físicas exactas. '
+                            'Esta prueba no calibra ni modifica Photo Cut: solo comprueba si el sistema y la impresora respetan la escala del PDF al llevarlo al papel.',
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            '1. Imprime al 100 % o “Tamaño real”.\n'
+                            '2. No uses “Ajustar a página” ni opciones equivalentes.\n'
+                            '3. Mide el cuadrado: debe medir 50 × 50 mm.',
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Photo Cut controla la geometría del PDF, pero no puede controlar el escalado que aplique la impresora, el sistema o su controlador.',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (_message != null) ...<Widget>[
+                            const SizedBox(height: 8),
+                            Text(
+                              _message!,
+                              key: const Key('calibration-message'),
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          FilledButton.icon(
+                            key: const Key('print-calibration'),
+                            onPressed: _isPrinting
+                                ? null
+                                : () => _print(result.document),
+                            icon: _isPrinting
+                                ? const SizedBox.square(
+                                    dimension: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.print_outlined),
+                            label: const Text('Imprimir prueba de 50 mm'),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        '1. Imprime al 100 % o “Tamaño real”.\n'
-                        '2. No uses “Ajustar a página” ni opciones equivalentes.\n'
-                        '3. Mide el cuadrado: debe medir 50 × 50 mm.',
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Photo Cut controla la geometría del PDF, pero no puede controlar el escalado que aplique la impresora, el sistema o su controlador.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      if (_message != null) ...<Widget>[
-                        const SizedBox(height: 8),
-                        Text(_message!, key: const Key('calibration-message')),
-                      ],
-                      const SizedBox(height: 12),
-                      FilledButton.icon(
-                        key: const Key('print-calibration'),
-                        onPressed: _isPrinting ? null : () => _print(result.document),
-                        icon: _isPrinting
-                            ? const SizedBox.square(
-                                dimension: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.print_outlined),
-                        label: const Text('Imprimir prueba de 50 mm'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
+                    ),
+                  ],
+                );
+              },
         ),
       ),
     );
