@@ -27,6 +27,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 final class _HomeScreenState extends State<HomeScreen> {
+  static const String _printScaleTestAction = 'print-scale-test';
+
   late final PhotoSelectionController _controller;
 
   @override
@@ -45,7 +47,27 @@ final class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Photo Cut')),
+      appBar: AppBar(
+        title: const Text('Photo Cut'),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            key: const Key('more-actions'),
+            tooltip: 'Más opciones',
+            onSelected: (String action) {
+              if (action == _printScaleTestAction) {
+                _openCalibration(context);
+              }
+            },
+            itemBuilder: (BuildContext context) => const <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                key: Key('open-calibration'),
+                value: _printScaleTestAction,
+                child: Text('Prueba de escala de impresión'),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: _controller,
@@ -126,13 +148,6 @@ final class _HomeScreenState extends State<HomeScreen> {
                           label: const Text('Elegir otra foto'),
                         ),
                       ],
-                      const SizedBox(height: 10),
-                      OutlinedButton.icon(
-                        key: const Key('open-calibration'),
-                        onPressed: () => _openCalibration(context),
-                        icon: const Icon(Icons.straighten_outlined),
-                        label: const Text('Comprobar tamaño de impresión'),
-                      ),
                       const SizedBox(height: 12),
                       Text(
                         'La foto se procesa en este dispositivo y no se sube.',
