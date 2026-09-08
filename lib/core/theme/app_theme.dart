@@ -1,5 +1,23 @@
 import 'package:flutter/material.dart';
 
+final class PhotoCutScrollBehavior extends MaterialScrollBehavior {
+  const PhotoCutScrollBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics();
+  }
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
+  }
+}
+
 abstract final class AppTheme {
   static ThemeData light() {
     const Color ink = Color(0xFF172033);
