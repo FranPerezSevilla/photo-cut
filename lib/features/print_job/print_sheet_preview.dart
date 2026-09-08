@@ -35,29 +35,34 @@ final class PrintSheetPreview extends StatelessWidget {
     required this.plan,
     required this.configuration,
     required this.errorMessage,
+    this.maxPageHeight = 360,
   });
 
   final PrintJobConfiguration configuration;
   final String? errorMessage;
+  final double maxPageHeight;
   final SheetPlan? plan;
 
   @override
   Widget build(BuildContext context) {
     final SheetPlan? currentPlan = plan;
     if (currentPlan == null) {
-      return AspectRatio(
-        aspectRatio: 4 / 3,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                errorMessage ?? 'No se puede crear la vista previa.',
-                textAlign: TextAlign.center,
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxPageHeight),
+        child: AspectRatio(
+          aspectRatio: 4 / 3,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  errorMessage ?? 'No se puede crear la vista previa.',
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ),
@@ -73,10 +78,11 @@ final class PrintSheetPreview extends StatelessWidget {
         .toList(growable: false);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 360),
+            constraints: BoxConstraints(maxHeight: maxPageHeight),
             child: AspectRatio(
               aspectRatio: pageWidth / pageHeight,
               child: LayoutBuilder(
@@ -84,13 +90,17 @@ final class PrintSheetPreview extends StatelessWidget {
                   return DecoratedBox(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(6),
                       boxShadow: const <BoxShadow>[
-                        BoxShadow(blurRadius: 12, color: Color(0x26000000)),
+                        BoxShadow(
+                          blurRadius: 22,
+                          offset: Offset(0, 8),
+                          color: Color(0x1F14213D),
+                        ),
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(6),
                       child: Stack(
                         clipBehavior: Clip.hardEdge,
                         children: firstPage
