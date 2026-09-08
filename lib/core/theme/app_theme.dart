@@ -8,19 +8,20 @@ abstract final class AppTheme {
     const Color surface = Color(0xFFFFFFFF);
     const Color outline = Color(0xFFDCE2EC);
 
-    final ColorScheme colorScheme = ColorScheme.fromSeed(
-      seedColor: accent,
-      brightness: Brightness.light,
-      surface: surface,
-    ).copyWith(
-      primary: accent,
-      onSurface: ink,
-      outline: outline,
-      surfaceContainerLowest: surface,
-      surfaceContainerLow: const Color(0xFFF9FAFC),
-      surfaceContainer: const Color(0xFFF3F5F9),
-      surfaceContainerHigh: const Color(0xFFEFF2F7),
-    );
+    final ColorScheme colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: accent,
+          brightness: Brightness.light,
+          surface: surface,
+        ).copyWith(
+          primary: accent,
+          onSurface: ink,
+          outline: outline,
+          surfaceContainerLowest: surface,
+          surfaceContainerLow: const Color(0xFFF9FAFC),
+          surfaceContainer: const Color(0xFFF3F5F9),
+          surfaceContainerHigh: const Color(0xFFEFF2F7),
+        );
 
     final TextTheme baseText = ThemeData.light().textTheme;
 
@@ -44,13 +45,8 @@ abstract final class AppTheme {
           fontWeight: FontWeight.w700,
           color: ink,
         ),
-        labelLarge: baseText.labelLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-        ),
-        bodyLarge: baseText.bodyLarge?.copyWith(
-          height: 1.35,
-          color: ink,
-        ),
+        labelLarge: baseText.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+        bodyLarge: baseText.bodyLarge?.copyWith(height: 1.35, color: ink),
         bodyMedium: baseText.bodyMedium?.copyWith(
           height: 1.35,
           color: const Color(0xFF566176),
