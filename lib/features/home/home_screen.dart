@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_cut/features/calibration/calibration.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
@@ -13,11 +14,13 @@ class HomeScreen extends StatefulWidget {
     required this.imagePickerGateway,
     this.imageProcessor,
     this.pdfSpikeBuilder,
+    this.calibrationBuilder,
   });
 
   final ImagePickerGateway imagePickerGateway;
   final ImageProcessor? imageProcessor;
   final WidgetBuilder? pdfSpikeBuilder;
+  final WidgetBuilder? calibrationBuilder;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -123,6 +126,13 @@ final class _HomeScreenState extends State<HomeScreen> {
                           label: const Text('Elegir otra foto'),
                         ),
                       ],
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        key: const Key('open-calibration'),
+                        onPressed: () => _openCalibration(context),
+                        icon: const Icon(Icons.straighten_outlined),
+                        label: const Text('Comprobar tamaño de impresión'),
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         'La foto se procesa en este dispositivo y no se sube.',
@@ -178,6 +188,16 @@ final class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
+    );
+  }
+
+  void _openCalibration(BuildContext context) {
+    final WidgetBuilder builder =
+        widget.calibrationBuilder ??
+        (BuildContext routeContext) => CalibrationScreen.production();
+    unawaited(
+      Navigator.of(context)
+          .push<void>(MaterialPageRoute<void>(builder: builder)),
     );
   }
 
