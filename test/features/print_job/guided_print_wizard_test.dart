@@ -8,7 +8,7 @@ import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 void main() {
-  testWidgets('keeps a live preview while advancing through focused steps', (
+  testWidgets('keeps compact preview while advancing through four focused steps', (
     WidgetTester tester,
   ) async {
     final SelectedImage image = SelectedImage(
@@ -27,19 +27,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
-    expect(find.textContaining('Paso 1 de 5'), findsOneWidget);
-    expect(find.textContaining('¿Qué tamaño quieres'), findsOneWidget);
+    expect(find.textContaining('Paso 1 de 4'), findsOneWidget);
+    expect(find.text('¿Qué tamaño quieres imprimir?'), findsOneWidget);
+    expect(find.byKey(const Key('size-preset-35x45')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
-    expect(find.textContaining('Paso 2 de 5'), findsOneWidget);
+    expect(find.textContaining('Paso 2 de 4'), findsOneWidget);
     expect(find.byKey(const Key('wizard-fit-mode')), findsOneWidget);
 
+    await tester.tap(find.text('Foto completa'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('fit-inside-static-notice')), findsOneWidget);
+    expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
+
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Paso 3 de 5'), findsOneWidget);
+    expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
     expect(find.byKey(const Key('wizard-copy-count')), findsOneWidget);
+    expect(find.byKey(const Key('copies-plus')), findsOneWidget);
+    expect(find.byKey(const Key('wizard-advanced-options')), findsOneWidget);
   });
 }
 
