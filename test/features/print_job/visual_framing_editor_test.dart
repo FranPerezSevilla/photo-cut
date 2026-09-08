@@ -8,7 +8,7 @@ import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 
 void main() {
-  testWidgets('dragging the image updates the existing normalized focus', (
+  testWidgets('framing opens a dedicated focus mode before drag updates focus', (
     WidgetTester tester,
   ) async {
     NormalizedPoint focus = NormalizedPoint.center;
@@ -38,7 +38,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Rellenar · recorte activo'), findsOneWidget);
+    expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
+    expect(find.byKey(const Key('open-framing-focus')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('open-framing-focus')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
+    expect(find.byKey(const Key('visual-framing-editor')), findsOneWidget);
+
     await tester.drag(
       find.byKey(const Key('visual-framing-editor')),
       const Offset(80, 0),
@@ -54,7 +62,7 @@ void main() {
     expect(focus, NormalizedPoint.center);
   });
 
-  testWidgets('fit-inside is visibly complete and does not drag focus', (
+  testWidgets('fit-inside stays static and does not offer framing adjustment', (
     WidgetTester tester,
   ) async {
     int updates = 0;
@@ -82,17 +90,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Encajar · foto completa'), findsOneWidget);
+    expect(find.byKey(const Key('open-framing-focus')), findsNothing);
     expect(
-      find.text('Encajar muestra la foto completa y no recorta ninguna parte.'),
+      find.text('La foto completa queda dentro del marco.'),
       findsOneWidget,
     );
-
-    await tester.drag(
-      find.byKey(const Key('visual-framing-editor')),
-      const Offset(100, 0),
-    );
-    await tester.pumpAndSettle();
     expect(updates, 0);
   });
 }
