@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_cut/features/calibration/calibration.dart';
+import 'package:photo_cut/features/home/selected_photo_info.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
@@ -74,6 +75,8 @@ final class _HomeScreenState extends State<HomeScreen> {
           animation: _controller,
           builder: (BuildContext context, Widget? child) {
             final PhotoSelectionState state = _controller.state;
+            final ImageProcessor imageProcessor =
+                widget.imageProcessor ?? const DartImageProcessor();
             return Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -92,8 +95,8 @@ final class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       Text(
                         state.image == null
-                            ? 'Elige una foto, indica sus medidas y crea una hoja lista para imprimir.'
-                            : 'Foto seleccionada. Ahora configura el documento dentro de Photo Cut.',
+                            ? 'Elige una foto y Photo Cut te guiará paso a paso hasta el PDF listo para imprimir.'
+                            : 'Foto seleccionada. Antes de elegir el tamaño final, mira qué resolución tiene.',
                         style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -106,6 +109,11 @@ final class _HomeScreenState extends State<HomeScreen> {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 12),
+                        SelectedPhotoInfo(
+                          image: state.image!,
+                          imageProcessor: imageProcessor,
                         ),
                       ],
                       if (state.errorMessage != null) ...<Widget>[
@@ -135,9 +143,10 @@ final class _HomeScreenState extends State<HomeScreen> {
                       else ...<Widget>[
                         FilledButton.icon(
                           key: const Key('configure-photo'),
-                          onPressed: () => _openConfiguration(state.image!),
-                          icon: const Icon(Icons.tune),
-                          label: const Text('Configurar impresión'),
+                          onPressed: () =>
+                              _openConfiguration(state.image!, imageProcessor),
+                          icon: const Icon(Icons.arrow_forward),
+                          label: const Text('Elegir tamaño y configurar'),
                         ),
                         const SizedBox(height: 10),
                         OutlinedButton.icon(
@@ -172,14 +181,12 @@ final class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _openConfiguration(SelectedImage image) {
-    final ImageProcessor imageProcessor =
-        widget.imageProcessor ?? const DartImageProcessor();
+  void _openConfiguration(SelectedImage image, ImageProcessor imageProcessor) {
     unawaited(
       Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
           builder: (BuildContext routeContext) {
-            return PrintConfigurationScreen(
+            return GuidedPrintWizard(
               image: image,
               imageProcessor: imageProcessor,
               onReview:

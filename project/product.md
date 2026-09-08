@@ -18,21 +18,33 @@ scaling, margins, duplication and “fit to page” behaviour.
 
 ## Primary flow
 
-### Step 1 — Prepare in Photo Cut
+### Select and understand the photo
 
 1. Select one image from the device.
-2. Enter width and height in mm, cm or inches.
-3. Choose crop-to-fill or fit-inside and adjust the focus when cropping.
-4. Choose colour or app-owned grayscale.
-5. Choose A4, Letter or 10 × 15 cm paper.
-6. Choose the number of copies, margins, spacing and cut marks.
-7. See the Photo Cut preview update from the same document state.
+2. Show its pixel dimensions immediately.
+3. Show illustrative physical sizes at reference resolutions such as 300 and
+   600 ppp, while stating clearly that a digital image has no single physical
+   size until the user chooses one.
 
-### Step 2 — Review and print
+### Guided configuration
 
-8. Review the immutable final PDF and a compact settings summary.
-9. Go back to edit, share the PDF or explicitly open native printing.
-10. Use the matching paper at 100% / actual size in the operating-system dialog.
+4. Ask for the exact final width and height first, in mm, cm or inches.
+5. Keep a live sheet preview visible while the user advances through the wizard.
+6. Choose crop-to-fill or fit-inside and adjust the visual framing when needed.
+7. Choose paper and copy count and see the layout update immediately.
+8. Choose colour/grayscale and optionally open advanced margin, spacing and
+   cut-mark controls.
+9. Review a compact summary before producing the final PDF.
+
+The wizard presents one decision group at a time. It must not expose the whole
+configuration form at once or make the user switch between a settings screen and
+a separate preview screen for ordinary configuration.
+
+### Review and print
+
+10. Review the immutable final PDF and a compact settings summary.
+11. Go back to edit, share the PDF or explicitly open native printing.
+12. Use the matching paper at 100% / actual size in the operating-system dialog.
 
 The native print dialog controls the destination printer and printer-specific
 options. It is not a second editor for Photo Cut geometry.
@@ -62,7 +74,6 @@ the user to print at 100% / actual size and offer a calibration sheet.
 Target domain tolerance for generated PDF geometry: **±0.1 mm**. The separate
 physical-print acceptance target is initially **±1 mm over 50 mm**, because
 printer hardware, drivers and paper handling are outside the app's control.
-
 
 ### Effective-resolution guidance
 
