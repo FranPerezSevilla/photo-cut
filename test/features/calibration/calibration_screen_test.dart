@@ -26,12 +26,21 @@ void main() {
 
     expect(find.text('Calibration PDF preview'), findsOneWidget);
     expect(find.text('Prueba de escala de impresión'), findsOneWidget);
-    expect(find.textContaining('ya genera el PDF con medidas físicas exactas'), findsOneWidget);
-    expect(find.textContaining('no calibra ni modifica Photo Cut'), findsOneWidget);
+    expect(
+      find.textContaining('ya genera el PDF con medidas físicas exactas'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('no calibra ni modifica Photo Cut'),
+      findsOneWidget,
+    );
     expect(find.textContaining('100 %'), findsOneWidget);
     expect(find.textContaining('Tamaño real'), findsOneWidget);
     expect(find.textContaining('Ajustar a página'), findsOneWidget);
-    expect(find.textContaining('no puede controlar el escalado'), findsOneWidget);
+    expect(
+      find.textContaining('no puede controlar el escalado'),
+      findsOneWidget,
+    );
     expect(find.textContaining('50 × 50 mm'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('print-calibration')));
