@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_cut/features/calibration/calibration.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
@@ -13,17 +14,21 @@ class HomeScreen extends StatefulWidget {
     required this.imagePickerGateway,
     this.imageProcessor,
     this.pdfSpikeBuilder,
+    this.calibrationBuilder,
   });
 
   final ImagePickerGateway imagePickerGateway;
   final ImageProcessor? imageProcessor;
   final WidgetBuilder? pdfSpikeBuilder;
+  final WidgetBuilder? calibrationBuilder;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 final class _HomeScreenState extends State<HomeScreen> {
+  static const String _printScaleTestAction = 'print-scale-test';
+
   late final PhotoSelectionController _controller;
 
   @override
@@ -42,7 +47,28 @@ final class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Photo Cut')),
+      appBar: AppBar(
+        title: const Text('Photo Cut'),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            key: const Key('more-actions'),
+            tooltip: 'Más opciones',
+            onSelected: (String action) {
+              if (action == _printScaleTestAction) {
+                _openCalibration(context);
+              }
+            },
+            itemBuilder: (BuildContext context) =>
+                const <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    key: Key('open-calibration'),
+                    value: _printScaleTestAction,
+                    child: Text('Prueba de escala de impresión'),
+                  ),
+                ],
+          ),
+        ],
+      ),
       body: SafeArea(
         child: AnimatedBuilder(
           animation: _controller,
@@ -178,6 +204,16 @@ final class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
+    );
+  }
+
+  void _openCalibration(BuildContext context) {
+    final WidgetBuilder builder =
+        widget.calibrationBuilder ??
+        (BuildContext routeContext) => CalibrationScreen.production();
+    unawaited(
+      Navigator.of(context)
+          .push<void>(MaterialPageRoute<void>(builder: builder)),
     );
   }
 
