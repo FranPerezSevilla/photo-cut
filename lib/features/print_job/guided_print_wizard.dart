@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_cut/core/crop/crop.dart';
@@ -48,7 +50,7 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
       image: widget.image,
       imageProcessor: widget.imageProcessor ?? const DartImageProcessor(),
     );
-    _controller.inspectImage();
+    unawaited(_controller.inspectImage());
   }
 
   @override
