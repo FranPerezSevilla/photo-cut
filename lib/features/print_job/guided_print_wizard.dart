@@ -80,10 +80,7 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                   stepCount: _stepTitles.length,
                   title: _stepTitles[_step],
                 ),
-                _PreviewPanel(
-                  height: previewHeight,
-                  state: state,
-                ),
+                _PreviewPanel(height: previewHeight, state: state),
                 Expanded(
                   child: DecoratedBox(
                     decoration: const BoxDecoration(
@@ -521,10 +518,7 @@ final class _ReviewStep extends StatelessWidget {
               label: 'Papel',
               value: _paperLabel(configuration.paperSize),
             ),
-            _SummaryRow(
-              label: 'Copias',
-              value: '${configuration.copyCount}',
-            ),
+            _SummaryRow(label: 'Copias', value: '${configuration.copyCount}'),
             _SummaryRow(
               label: 'Imagen',
               value: configuration.colorMode == ImageColorMode.color
@@ -756,9 +750,8 @@ final class _CopyStepper extends StatelessWidget {
                 child: Text(
                   '$value',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(context).textTheme.headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.w800),
                 ),
               ),
               _StepperButton(
@@ -782,7 +775,11 @@ final class _CopyStepper extends StatelessWidget {
 }
 
 final class _StepperButton extends StatelessWidget {
-  const _StepperButton({super.key, required this.icon, required this.onPressed});
+  const _StepperButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+  });
 
   final IconData icon;
   final VoidCallback? onPressed;
@@ -973,7 +970,10 @@ void _openSheetSettings(
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 20),
-                  Text('Imagen', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Imagen',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     children: <Widget>[
@@ -983,8 +983,10 @@ void _openSheetSettings(
                           title: 'Color',
                           subtitle: 'Original',
                           selected:
-                              state.configuration.colorMode == ImageColorMode.color,
-                          onTap: () => controller.changeColorMode(ImageColorMode.color),
+                              state.configuration.colorMode ==
+                              ImageColorMode.color,
+                          onTap: () =>
+                              controller.changeColorMode(ImageColorMode.color),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -993,7 +995,8 @@ void _openSheetSettings(
                           icon: Icons.monochrome_photos_outlined,
                           title: 'B/N',
                           subtitle: 'Escala de grises',
-                          selected: state.configuration.colorMode ==
+                          selected:
+                              state.configuration.colorMode ==
                               ImageColorMode.grayscale,
                           onTap: () => controller.changeColorMode(
                             ImageColorMode.grayscale,
@@ -1003,7 +1006,10 @@ void _openSheetSettings(
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text('Distribución', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Distribución',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1040,7 +1046,9 @@ void _openSheetSettings(
                     key: const Key('wizard-cut-marks'),
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Marcas de corte'),
-                    subtitle: const Text('Añade guías para recortar después de imprimir.'),
+                    subtitle: const Text(
+                      'Añade guías para recortar después de imprimir.',
+                    ),
                     value: state.configuration.showCutMarks,
                     onChanged: controller.changeCutMarks,
                   ),
