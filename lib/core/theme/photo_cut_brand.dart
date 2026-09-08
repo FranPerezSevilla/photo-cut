@@ -28,10 +28,11 @@ final class PhotoCutBrand extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           'Photo Cut',
-          style: (compact
-                  ? Theme.of(context).textTheme.titleMedium
-                  : Theme.of(context).textTheme.titleLarge)
-              ?.copyWith(color: foreground, fontWeight: FontWeight.w800),
+          style:
+              (compact
+                      ? Theme.of(context).textTheme.titleMedium
+                      : Theme.of(context).textTheme.titleLarge)
+                  ?.copyWith(color: foreground, fontWeight: FontWeight.w800),
         ),
       ],
     );
