@@ -82,24 +82,69 @@ final class _PhotoCutSplash extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('photo-cut-splash'),
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: const SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              PhotoCutBrand(light: true),
-              SizedBox(height: 14),
-              Text(
-                'Tamaño exacto. Sin complicaciones.',
-                style: TextStyle(
-                  color: Color(0xD9FFFFFF),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              Color(0xFF071B4A),
+              Color(0xFF0A3D9A),
+              Color(0xFF0B63FF),
+            ],
+            stops: <double>[0, 0.62, 1],
+          ),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            const Positioned(
+              top: -160,
+              left: -120,
+              child: _SplashOrb(size: 360, opacity: 0.16),
+            ),
+            const Positioned(
+              bottom: -220,
+              right: -180,
+              child: _SplashOrb(size: 460, opacity: 0.12),
+            ),
+            SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: const PhotoCutBrand(light: true, hero: true),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _SplashOrb extends StatelessWidget {
+  const _SplashOrb({required this.size, required this.opacity});
+
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: const Color(0xFF24D7F4).withValues(alpha: opacity),
+          width: 2.5,
+        ),
+        gradient: RadialGradient(
+          colors: <Color>[
+            const Color(0xFF24D7F4).withValues(alpha: opacity * 0.45),
+            Colors.transparent,
+          ],
         ),
       ),
     );
