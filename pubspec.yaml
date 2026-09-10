@@ -8,8 +8,6 @@ environment:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/branding/photo_cut_icon.png
 
 dependencies:
   flutter:
