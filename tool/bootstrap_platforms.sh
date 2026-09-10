@@ -33,5 +33,6 @@ if [[ "$needs_generation" == true ]]; then
 fi
 
 python3 tool/normalize_platforms.py
+python3 tool/generate_branding_assets.py
 
-echo "Android/iOS platform scaffolds are present and normalised."
+echo "Android/iOS platform scaffolds and Photo Cut branding are present and normalised."

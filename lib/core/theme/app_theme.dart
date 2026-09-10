@@ -19,12 +19,16 @@ final class PhotoCutScrollBehavior extends MaterialScrollBehavior {
 }
 
 abstract final class AppTheme {
+  static const Color navy = Color(0xFF071B4A);
+  static const Color electricBlue = Color(0xFF0B63FF);
+  static const Color cyan = Color(0xFF19C6F2);
+  static const Color canvas = Color(0xFFF5F8FE);
+
   static ThemeData light() {
-    const Color ink = Color(0xFF172033);
-    const Color accent = Color(0xFF2D5BFF);
-    const Color canvas = Color(0xFFF5F7FB);
+    const Color ink = navy;
+    const Color accent = electricBlue;
     const Color surface = Color(0xFFFFFFFF);
-    const Color outline = Color(0xFFDCE2EC);
+    const Color outline = Color(0xFFD9E3F2);
 
     final ColorScheme colorScheme =
         ColorScheme.fromSeed(
@@ -33,12 +37,13 @@ abstract final class AppTheme {
           surface: surface,
         ).copyWith(
           primary: accent,
+          secondary: cyan,
           onSurface: ink,
           outline: outline,
           surfaceContainerLowest: surface,
-          surfaceContainerLow: const Color(0xFFF9FAFC),
-          surfaceContainer: const Color(0xFFF3F5F9),
-          surfaceContainerHigh: const Color(0xFFEFF2F7),
+          surfaceContainerLow: const Color(0xFFFAFCFF),
+          surfaceContainer: const Color(0xFFF1F5FB),
+          surfaceContainerHigh: const Color(0xFFEAF0F8),
         );
 
     final TextTheme baseText = ThemeData.light().textTheme;
@@ -115,6 +120,8 @@ abstract final class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: accent,
+          foregroundColor: Colors.white,
           minimumSize: const Size(0, 52),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -125,6 +132,7 @@ abstract final class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
+          foregroundColor: ink,
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           side: const BorderSide(color: outline),

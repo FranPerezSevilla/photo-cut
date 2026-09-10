@@ -248,22 +248,30 @@ final class _PhotoHero extends StatelessWidget {
 
     return Semantics(
       label: selected == null
-          ? 'Hoja con varias copias de una fotografía'
+          ? 'Identidad visual de Photo Cut'
           : 'Vista previa de la fotografía seleccionada',
       child: AspectRatio(
         aspectRatio: 4 / 3,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
+            gradient: selected == null
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      Color(0xFF071B4A),
+                      Color(0xFF0A3D9A),
+                      Color(0xFF0B63FF),
+                    ],
+                  )
+                : null,
+            color: selected == null
+                ? null
+                : colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(28),
           ),
           child: selected == null
-              ? const Center(
-                  child: Icon(
-                    Icons.photo_size_select_large_outlined,
-                    size: 104,
-                  ),
-                )
+              ? const Center(child: PhotoCutBrand(light: true, hero: true))
               : ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child: Image.memory(

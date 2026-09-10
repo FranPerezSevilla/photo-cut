@@ -10,7 +10,9 @@ import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
 void main() {
-  testWidgets('shows branded splash before the home screen', (tester) async {
+  testWidgets('shows language-neutral branded splash before the home screen', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       PhotoCutApp(
         imagePickerGateway: _FakeImagePickerGateway(),
@@ -19,7 +21,9 @@ void main() {
     );
 
     expect(find.byKey(const Key('photo-cut-splash')), findsOneWidget);
-    expect(find.text('Tamaño exacto. Sin complicaciones.'), findsOneWidget);
+    expect(find.byKey(const Key('photo-cut-brand-icon')), findsOneWidget);
+    expect(find.byKey(const Key('photo-cut-wordmark')), findsOneWidget);
+    expect(find.text('Tamaño exacto. Sin complicaciones.'), findsNothing);
 
     await _settleSplash(tester);
     expect(find.byKey(const Key('photo-cut-splash')), findsNothing);
@@ -35,7 +39,8 @@ void main() {
     );
     await _settleSplash(tester);
 
-    expect(find.text('Photo Cut'), findsOneWidget);
+    expect(find.byKey(const Key('photo-cut-wordmark')), findsNWidgets(2));
+    expect(find.byKey(const Key('photo-cut-brand-icon')), findsNWidgets(2));
     expect(find.text('Imprime fotos al tamaño exacto'), findsOneWidget);
     expect(find.text('Elegir foto'), findsOneWidget);
     expect(find.byIcon(Icons.add_photo_alternate_outlined), findsOneWidget);
