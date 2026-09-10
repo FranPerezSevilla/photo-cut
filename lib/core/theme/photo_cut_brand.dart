@@ -36,7 +36,10 @@ final class PhotoCutBrand extends StatelessWidget {
         Text.rich(
           TextSpan(
             children: <InlineSpan>[
-              TextSpan(text: 'Photo', style: TextStyle(color: photoColor)),
+              TextSpan(
+                text: 'Photo',
+                style: TextStyle(color: photoColor),
+              ),
               const TextSpan(
                 text: ' Cut',
                 style: TextStyle(color: Color(0xFF19C6F2)),
