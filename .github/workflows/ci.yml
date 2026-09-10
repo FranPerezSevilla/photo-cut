@@ -58,10 +58,7 @@ jobs:
         run: python3 -m unittest discover -s tool/tests -p 'test_*.py'
 
       - name: Check formatting
-        run: |
-          dart format lib test
-          git diff -- lib test
-          test -z "$(git status --short -- lib test)"
+        run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze
         run: flutter analyze --fatal-infos
