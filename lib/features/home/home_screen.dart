@@ -271,15 +271,7 @@ final class _PhotoHero extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
           ),
           child: selected == null
-              ? Center(
-                  child: Image.asset(
-                    PhotoCutBrandAssets.icon,
-                    key: const Key('home-brand-icon'),
-                    width: 132,
-                    height: 132,
-                    filterQuality: FilterQuality.high,
-                  ),
-                )
+              ? const Center(child: PhotoCutBrand(light: true, hero: true))
               : ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child: Image.memory(
