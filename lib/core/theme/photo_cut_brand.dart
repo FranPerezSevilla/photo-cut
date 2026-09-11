@@ -14,45 +14,78 @@ final class PhotoCutBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double markSize = hero ? 112 : (compact ? 32 : 40);
+    final double markSize = hero ? 84 : (compact ? 28 : 36);
     final TextStyle? baseStyle = hero
-        ? Theme.of(context).textTheme.headlineMedium
+        ? Theme.of(context).textTheme.headlineSmall
         : compact
-        ? Theme.of(context).textTheme.titleMedium
-        : Theme.of(context).textTheme.titleLarge;
+        ? Theme.of(context).textTheme.titleSmall
+        : Theme.of(context).textTheme.titleMedium;
     final Color photoColor = light ? Colors.white : const Color(0xFF071B4A);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        SizedBox.square(
-          dimension: markSize,
-          child: const CustomPaint(
-            key: Key('photo-cut-brand-icon'),
-            painter: _PhotoCutMarkPainter(),
-          ),
-        ),
-        SizedBox(width: hero ? 18 : 10),
-        Text.rich(
+    final Widget mark = SizedBox.square(
+      dimension: markSize,
+      child: const CustomPaint(
+        key: Key('photo-cut-brand-icon'),
+        painter: _PhotoCutMarkPainter(),
+      ),
+    );
+
+    final Widget wordmark = Text.rich(
+      TextSpan(
+        children: <InlineSpan>[
           TextSpan(
-            children: <InlineSpan>[
-              TextSpan(
-                text: 'Photo',
-                style: TextStyle(color: photoColor),
-              ),
-              const TextSpan(
-                text: ' Cut',
-                style: TextStyle(color: Color(0xFF19C6F2)),
-              ),
-            ],
+            text: 'Photo',
+            style: TextStyle(color: photoColor),
           ),
-          key: const Key('photo-cut-wordmark'),
-          style: baseStyle?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: hero ? -1.1 : -0.4,
+          const TextSpan(
+            text: ' Cut',
+            style: TextStyle(color: Color(0xFF19C6F2)),
           ),
+        ],
+      ),
+      key: const Key('photo-cut-wordmark'),
+      maxLines: 1,
+      overflow: TextOverflow.visible,
+      textHeightBehavior: const TextHeightBehavior(
+        applyHeightToFirstAscent: false,
+        applyHeightToLastDescent: false,
+      ),
+      style: baseStyle?.copyWith(
+        fontWeight: FontWeight.w900,
+        letterSpacing: hero ? -0.8 : -0.3,
+        height: 1.05,
+      ),
+    );
+
+    if (hero) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          mark,
+          const SizedBox(height: 14),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: FittedBox(fit: BoxFit.scaleDown, child: wordmark),
+          ),
+          const SizedBox(height: 4),
+        ],
+      );
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: compact ? 168 : 208),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            mark,
+            SizedBox(width: compact ? 8 : 10),
+            wordmark,
+          ],
         ),
-      ],
+      ),
     );
   }
 }
