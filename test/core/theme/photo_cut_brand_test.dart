@@ -13,9 +13,7 @@ void main() {
             child: SizedBox(
               width: 240,
               height: 140,
-              child: Center(
-                child: PhotoCutBrand(light: true, hero: true),
-              ),
+              child: Center(child: PhotoCutBrand(light: true, hero: true)),
             ),
           ),
         ),
