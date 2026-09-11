@@ -27,11 +27,10 @@ void main() {
     final Rect icon = tester.getRect(
       find.byKey(const Key('photo-cut-brand-icon')),
     );
-    final Rect wordmark = tester.getRect(
-      find.byKey(const Key('photo-cut-wordmark')),
-    );
+    final Size brandSize = tester.getSize(find.byType(PhotoCutBrand));
 
     expect(icon.height, lessThanOrEqualTo(84));
-    expect(wordmark.bottom, lessThanOrEqualTo(140));
+    expect(brandSize.height, lessThanOrEqualTo(140));
+    expect(brandSize.width, lessThanOrEqualTo(240));
   });
 }
