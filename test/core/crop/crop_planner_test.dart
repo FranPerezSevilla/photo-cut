@@ -61,7 +61,35 @@ void main() {
     expect(crop, NormalizedCropRect.full);
   });
 
-  test('normalized value objects reject out-of-range data', () {
+  test('zoom reduces the source rectangle around the chosen focus', () {
+    final NormalizedCropRect crop = planner.plan(
+      sourceSize: SourceImageSize(widthPixels: 400, heightPixels: 200),
+      targetAspectRatio: 1,
+      focus: NormalizedPoint.center,
+      zoom: 2,
+    );
+
+    expect(crop.width, closeTo(0.25, 0.000001));
+    expect(crop.height, closeTo(0.5, 0.000001));
+    expect(crop.left, closeTo(0.375, 0.000001));
+    expect(crop.top, closeTo(0.25, 0.000001));
+  });
+
+  test('zoom enables cropping even when source and target aspects match', () {
+    final NormalizedCropRect crop = planner.plan(
+      sourceSize: SourceImageSize(widthPixels: 350, heightPixels: 450),
+      targetAspectRatio: 35 / 45,
+      focus: NormalizedPoint(x: 1, y: 0),
+      zoom: 2,
+    );
+
+    expect(crop.width, closeTo(0.5, 0.000001));
+    expect(crop.height, closeTo(0.5, 0.000001));
+    expect(crop.left, closeTo(0.5, 0.000001));
+    expect(crop.top, 0);
+  });
+
+  test('normalized value objects and zoom reject out-of-range data', () {
     expect(() => NormalizedPoint(x: -0.1, y: 0.5), throwsArgumentError);
     expect(
       () => NormalizedCropRect(left: 0.8, top: 0, width: 0.3, height: 1),
@@ -72,6 +100,15 @@ void main() {
         sourceSize: SourceImageSize(widthPixels: 100, heightPixels: 100),
         targetAspectRatio: 0,
         focus: NormalizedPoint.center,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => planner.plan(
+        sourceSize: SourceImageSize(widthPixels: 100, heightPixels: 100),
+        targetAspectRatio: 1,
+        focus: NormalizedPoint.center,
+        zoom: 4.1,
       ),
       throwsArgumentError,
     );
