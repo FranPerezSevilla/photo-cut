@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -38,6 +39,8 @@ final class PrintSheetPreview extends StatelessWidget {
     this.maxPageHeight = 360,
   });
 
+  static const double _summaryReserve = 24;
+
   final PrintJobConfiguration configuration;
   final String? errorMessage;
   final double maxPageHeight;
@@ -77,89 +80,102 @@ final class PrintSheetPreview extends StatelessWidget {
         .placementsForPage(0)
         .toList(growable: false);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxPageHeight),
-            child: AspectRatio(
-              aspectRatio: pageWidth / pageHeight,
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  return DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
-                      boxShadow: const <BoxShadow>[
-                        BoxShadow(
-                          blurRadius: 22,
-                          offset: Offset(0, 8),
-                          color: Color(0x1F14213D),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Stack(
-                        clipBehavior: Clip.hardEdge,
-                        children: firstPage
-                            .map(
-                              (PlacedPhoto placement) => Positioned(
-                                key: ValueKey<String>(
-                                  'layout-photo-${placement.copyIndex}',
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints outerConstraints) {
+        final double availableHeight = outerConstraints.maxHeight;
+        final double fittedPageHeight = availableHeight.isFinite
+            ? math.max(
+                0,
+                math.min(maxPageHeight, availableHeight - _summaryReserve),
+              )
+            : maxPageHeight;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: fittedPageHeight),
+                child: AspectRatio(
+                  aspectRatio: pageWidth / pageHeight,
+                  child: LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                          return DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                              boxShadow: const <BoxShadow>[
+                                BoxShadow(
+                                  blurRadius: 22,
+                                  offset: Offset(0, 8),
+                                  color: Color(0x1F14213D),
                                 ),
-                                left:
-                                    placement.left.inMillimetres /
-                                    pageWidth *
-                                    constraints.maxWidth,
-                                top:
-                                    placement.top.inMillimetres /
-                                    pageHeight *
-                                    constraints.maxHeight,
-                                width:
-                                    placement.width.inMillimetres /
-                                    pageWidth *
-                                    constraints.maxWidth,
-                                height:
-                                    placement.height.inMillimetres /
-                                    pageHeight *
-                                    constraints.maxHeight,
-                                child: _PreviewPhoto(
-                                  key: ValueKey<String>(
-                                    'preview-photo-${placement.copyIndex}-'
-                                    '${currentPlan.photoRotated}-'
-                                    '${configuration.fitMode.name}-'
-                                    '${configuration.paperSize.id}-'
-                                    '${configuration.photoWidth.inMillimetres}-'
-                                    '${configuration.photoHeight.inMillimetres}',
-                                  ),
-                                  bytes: bytes,
-                                  copyIndex: placement.copyIndex,
-                                  configuration: configuration,
-                                  rotated: currentPlan.photoRotated,
-                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Stack(
+                                clipBehavior: Clip.hardEdge,
+                                children: firstPage
+                                    .map(
+                                      (PlacedPhoto placement) => Positioned(
+                                        key: ValueKey<String>(
+                                          'layout-photo-${placement.copyIndex}',
+                                        ),
+                                        left:
+                                            placement.left.inMillimetres /
+                                            pageWidth *
+                                            constraints.maxWidth,
+                                        top:
+                                            placement.top.inMillimetres /
+                                            pageHeight *
+                                            constraints.maxHeight,
+                                        width:
+                                            placement.width.inMillimetres /
+                                            pageWidth *
+                                            constraints.maxWidth,
+                                        height:
+                                            placement.height.inMillimetres /
+                                            pageHeight *
+                                            constraints.maxHeight,
+                                        child: _PreviewPhoto(
+                                          key: ValueKey<String>(
+                                            'preview-photo-${placement.copyIndex}-'
+                                            '${currentPlan.photoRotated}-'
+                                            '${configuration.fitMode.name}-'
+                                            '${configuration.paperSize.id}-'
+                                            '${configuration.photoWidth.inMillimetres}-'
+                                            '${configuration.photoHeight.inMillimetres}',
+                                          ),
+                                          bytes: bytes,
+                                          copyIndex: placement.copyIndex,
+                                          configuration: configuration,
+                                          rotated: currentPlan.photoRotated,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(growable: false),
                               ),
-                            )
-                            .toList(growable: false),
-                      ),
-                    ),
-                  );
-                },
+                            ),
+                          );
+                        },
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          currentPlan.pageCount == 1
-              ? '${currentPlan.placements.length} copias · 1 página'
-              : 'Página 1 de ${currentPlan.pageCount} · '
-                    '${currentPlan.placements.length} copias',
-          key: const Key('layout-page-summary'),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
+            const SizedBox(height: 8),
+            Text(
+              currentPlan.pageCount == 1
+                  ? '${currentPlan.placements.length} copias · 1 página'
+                  : 'Página 1 de ${currentPlan.pageCount} · '
+                        '${currentPlan.placements.length} copias',
+              key: const Key('layout-page-summary'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        );
+      },
     );
   }
 }
