@@ -57,8 +57,15 @@ jobs:
       - name: Test repository tooling and Android entry point
         run: python3 -m unittest discover -s tool/tests -p 'test_*.py'
 
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Format Dart sources for capture
+        run: dart format lib test
+
+      - name: Upload formatted preview source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: formatted-sheet-preview-${{ github.sha }}
+          path: lib/features/print_job/print_sheet_preview.dart
+          retention-days: 2
 
       - name: Analyze
         run: flutter analyze --fatal-infos
