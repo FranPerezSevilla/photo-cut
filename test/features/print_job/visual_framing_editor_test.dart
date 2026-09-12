@@ -98,10 +98,11 @@ void main() {
         return tester.widget<Image>(previewImage).image as MemoryImage;
       }
 
-      final MemoryImage initialPreview = previewProvider();
-      expect(initialPreview.bytes, isNotEmpty);
+      MemoryImage currentPreview = previewProvider();
+      expect(currentPreview.bytes, isNotEmpty);
 
       for (int attempt = 0; attempt < 2; attempt += 1) {
+        final MemoryImage inlineBefore = currentPreview;
         await tester.tap(find.byKey(const Key('open-framing-focus')));
         await tester.pumpAndSettle();
 
@@ -114,12 +115,18 @@ void main() {
         final MemoryImage focusedProvider =
             tester.widget<Image>(focusedImage).image as MemoryImage;
         expect(focusedProvider.bytes, isNotEmpty);
-        expect(identical(focusedProvider.bytes, previewProvider().bytes), isFalse);
+        expect(
+          identical(focusedProvider.bytes, inlineBefore.bytes),
+          isFalse,
+        );
 
         await tester.tap(find.text('Guardar encuadre'));
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('framing-focus-screen')), findsNothing);
-        expect(previewProvider().bytes, isNotEmpty);
+
+        currentPreview = previewProvider();
+        expect(currentPreview.bytes, isNotEmpty);
+        expect(identical(currentPreview.bytes, inlineBefore.bytes), isFalse);
       }
     },
   );
