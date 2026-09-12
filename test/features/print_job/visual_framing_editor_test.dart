@@ -126,7 +126,10 @@ void main() {
 
         currentPreview = previewProvider();
         expect(currentPreview.bytes, isNotEmpty);
-        expect(identical(currentPreview.bytes, inlineBefore.bytes), isFalse);
+        expect(
+          identical(currentPreview.bytes, inlineBefore.bytes),
+          isFalse,
+        );
       }
     },
   );
