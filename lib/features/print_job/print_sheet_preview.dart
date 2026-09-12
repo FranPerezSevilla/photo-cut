@@ -40,6 +40,7 @@ final class PrintSheetPreview extends StatelessWidget {
   });
 
   static const double _summaryReserve = 13;
+  static const double _compactPreviewThreshold = 180;
 
   final PrintJobConfiguration configuration;
   final String? errorMessage;
@@ -83,7 +84,12 @@ final class PrintSheetPreview extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints outerConstraints) {
         final double availableHeight = outerConstraints.maxHeight;
-        final double fittedPageHeight = availableHeight.isFinite
+        final bool compactPreview =
+            availableHeight.isFinite &&
+            availableHeight < _compactPreviewThreshold;
+        final double fittedPageHeight = compactPreview
+            ? availableHeight
+            : availableHeight.isFinite
             ? math.max(
                 0,
                 math.min(maxPageHeight, availableHeight - _summaryReserve),
@@ -165,18 +171,20 @@ final class PrintSheetPreview extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              currentPlan.pageCount == 1
-                  ? '${currentPlan.placements.length} copias · 1 página'
-                  : 'Página 1 de ${currentPlan.pageCount} · '
-                        '${currentPlan.placements.length} copias',
-              key: const Key('layout-page-summary'),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 10.5,
-                height: 1,
+            if (!compactPreview) ...<Widget>[
+              const SizedBox(height: 2),
+              Text(
+                currentPlan.pageCount == 1
+                    ? '${currentPlan.placements.length} copias · 1 página'
+                    : 'Página 1 de ${currentPlan.pageCount} · '
+                          '${currentPlan.placements.length} copias',
+                key: const Key('layout-page-summary'),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 10.5,
+                  height: 1,
+                ),
               ),
-            ),
+            ],
           ],
         );
       },

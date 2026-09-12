@@ -496,9 +496,7 @@ final class _ZoomQualityNotice extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              warning
-                  ? 'Este zoom deja aprox. ${advice.effectiveDpi.round()} ppp y puede perder calidad al imprimir.'
-                  : 'Al ampliar recortas más píxeles. Calidad estimada: ${advice.effectiveDpi.round()} ppp.',
+              'El zoom reduce la calidad del resultado final. Calidad estimada: ${advice.effectiveDpi.round()} ppp.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
