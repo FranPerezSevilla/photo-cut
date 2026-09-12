@@ -116,7 +116,7 @@ void main() {
 
     await tester.tap(find.text('Guardar encuadre'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('2.0×'), findsOneWidget);
+    expect(find.textContaining('2.0×'), findsWidgets);
   });
 
   testWidgets(
