@@ -32,6 +32,7 @@ void main() {
       expect(state.configuration.showCutMarks, isTrue);
       expect(state.configuration.fitMode, ImageFitMode.cropToFill);
       expect(state.configuration.colorMode, ImageColorMode.color);
+      expect(state.configuration.framingZoom, 1);
       expect(state.configuration.sourceSize?.widthPixels, 400);
       expect(state.configuration.cropRect.width, lessThan(1));
       expect(state.previewPlan?.placements.length, 8);
@@ -81,7 +82,7 @@ void main() {
   });
 
   test(
-    'fit, colour and focus update immutable document configuration',
+    'fit, colour, focus and zoom update immutable document configuration',
     () async {
       final PrintConfigurationController controller =
           PrintConfigurationController(
@@ -102,6 +103,14 @@ void main() {
       expect(cropped.focus, NormalizedPoint(x: 1, y: 0));
       expect(cropped.colorMode, ImageColorMode.grayscale);
       expect(cropped.cropRect.right, closeTo(1, 0.000001));
+
+      final double widthBeforeZoom = cropped.cropRect.width;
+      final double heightBeforeZoom = cropped.cropRect.height;
+      controller.changeFramingZoom(2);
+      final PrintJobConfiguration zoomed = controller.state.configuration;
+      expect(zoomed.framingZoom, 2);
+      expect(zoomed.cropRect.width, lessThan(widthBeforeZoom));
+      expect(zoomed.cropRect.height, lessThan(heightBeforeZoom));
 
       controller.changeFitMode(ImageFitMode.fitInside);
       final PrintJobConfiguration fitted = controller.state.configuration;

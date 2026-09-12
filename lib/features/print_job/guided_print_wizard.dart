@@ -91,8 +91,8 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
           builder: (BuildContext context, Widget? child) {
             final PrintConfigurationState state = _controller.state;
             final double previewHeight = math.min(
-              128,
-              MediaQuery.sizeOf(context).height * 0.16,
+              142,
+              MediaQuery.sizeOf(context).height * 0.175,
             );
             return Column(
               children: <Widget>[
@@ -406,6 +406,7 @@ final class _FramingStep extends StatelessWidget {
           VisualFramingEditor(
             configuration: state.configuration,
             onFocusChanged: controller.changeFocus,
+            onZoomChanged: controller.changeFramingZoom,
             maxHeight: 145,
           )
         else
@@ -532,7 +533,9 @@ final class _ReviewStep extends StatelessWidget {
             _SummaryRow(
               label: 'Encuadre',
               value: configuration.fitMode == ImageFitMode.cropToFill
-                  ? 'Rellenar'
+                  ? configuration.framingZoom > 1.01
+                        ? 'Rellenar · ${configuration.framingZoom.toStringAsFixed(1)}×'
+                        : 'Rellenar'
                   : 'Foto completa',
             ),
             _SummaryRow(

@@ -197,6 +197,7 @@ final class _PrintConfigurationScreenState
                           VisualFramingEditor(
                             configuration: state.configuration,
                             onFocusChanged: _controller.changeFocus,
+                            onZoomChanged: _controller.changeFramingZoom,
                           ),
                           const SizedBox(height: 14),
                           const _ControlLabel(

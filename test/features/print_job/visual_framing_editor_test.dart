@@ -12,6 +12,7 @@ void main() {
     'framing opens a dedicated focus mode before drag updates focus',
     (WidgetTester tester) async {
       NormalizedPoint focus = NormalizedPoint.center;
+      double zoom = 1;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -22,9 +23,12 @@ void main() {
                   child: SizedBox(
                     width: 320,
                     child: VisualFramingEditor(
-                      configuration: _configuration(focus: focus),
+                      configuration: _configuration(focus: focus, zoom: zoom),
                       onFocusChanged: (NormalizedPoint next) {
                         setState(() => focus = next);
+                      },
+                      onZoomChanged: (double next) {
+                        setState(() => zoom = next);
                       },
                     ),
                   ),
@@ -58,13 +62,68 @@ void main() {
       await tester.tap(find.byKey(const Key('center-framing')));
       await tester.pumpAndSettle();
       expect(focus, NormalizedPoint.center);
+      expect(zoom, 1);
     },
   );
+
+  testWidgets('focused framing exposes zoom and print-quality guidance', (
+    WidgetTester tester,
+  ) async {
+    NormalizedPoint focus = NormalizedPoint.center;
+    double zoom = 1;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: SizedBox(
+                  width: 320,
+                  child: VisualFramingEditor(
+                    configuration: _configuration(focus: focus, zoom: zoom),
+                    onFocusChanged: (NormalizedPoint next) {
+                      setState(() => focus = next);
+                    },
+                    onZoomChanged: (double next) {
+                      setState(() => zoom = next);
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('open-framing-focus')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('framing-zoom-slider')), findsOneWidget);
+    expect(find.byKey(const Key('framing-zoom-quality')), findsNothing);
+
+    final Slider slider = tester.widget<Slider>(
+      find.byKey(const Key('framing-zoom-slider')),
+    );
+    slider.onChanged!(2);
+    await tester.pumpAndSettle();
+
+    expect(zoom, closeTo(2, 0.0001));
+    expect(find.byKey(const Key('framing-zoom-quality')), findsOneWidget);
+    expect(find.textContaining('ppp'), findsOneWidget);
+
+    await tester.tap(find.text('Guardar encuadre'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('2.0×'), findsWidgets);
+  });
 
   testWidgets(
     'fill preview and focused editor keep independent image sessions',
     (WidgetTester tester) async {
       NormalizedPoint focus = NormalizedPoint.center;
+      double zoom = 1;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -75,9 +134,12 @@ void main() {
                   child: SizedBox(
                     width: 320,
                     child: VisualFramingEditor(
-                      configuration: _configuration(focus: focus),
+                      configuration: _configuration(focus: focus, zoom: zoom),
                       onFocusChanged: (NormalizedPoint next) {
                         setState(() => focus = next);
+                      },
+                      onZoomChanged: (double next) {
+                        setState(() => zoom = next);
                       },
                     ),
                   ),
@@ -131,7 +193,8 @@ void main() {
   testWidgets('fit-inside stays static and does not offer framing adjustment', (
     WidgetTester tester,
   ) async {
-    int updates = 0;
+    int focusUpdates = 0;
+    int zoomUpdates = 0;
     final PrintJobConfiguration configuration = _configuration(
       focus: NormalizedPoint.center,
       fitMode: ImageFitMode.fitInside,
@@ -146,7 +209,10 @@ void main() {
               child: VisualFramingEditor(
                 configuration: configuration,
                 onFocusChanged: (NormalizedPoint next) {
-                  updates += 1;
+                  focusUpdates += 1;
+                },
+                onZoomChanged: (double next) {
+                  zoomUpdates += 1;
                 },
               ),
             ),
@@ -161,13 +227,15 @@ void main() {
       find.text('La foto completa queda dentro del marco.'),
       findsOneWidget,
     );
-    expect(updates, 0);
+    expect(focusUpdates, 0);
+    expect(zoomUpdates, 0);
   });
 }
 
 PrintJobConfiguration _configuration({
   required NormalizedPoint focus,
   ImageFitMode fitMode = ImageFitMode.cropToFill,
+  double zoom = 1,
 }) {
   return PrintJobConfiguration(
     image: SelectedImage(
@@ -188,6 +256,7 @@ PrintJobConfiguration _configuration({
     fitMode: fitMode,
     colorMode: ImageColorMode.color,
     focus: focus,
+    framingZoom: zoom,
     cropRect: NormalizedCropRect.full,
     sourceSize: SourceImageSize(widthPixels: 400, heightPixels: 200),
   );
