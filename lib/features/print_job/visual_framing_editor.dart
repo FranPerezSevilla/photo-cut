@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/core/quality/resolution_advisor.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
 
 const List<double> _grayscaleMatrix = <double>[
@@ -36,6 +37,7 @@ final class VisualFramingEditor extends StatefulWidget {
     super.key,
     required this.configuration,
     required this.onFocusChanged,
+    required this.onZoomChanged,
     this.mapper = const VisualFramingMapper(),
     this.maxHeight = 150,
   });
@@ -43,6 +45,7 @@ final class VisualFramingEditor extends StatefulWidget {
   final PrintJobConfiguration configuration;
   final VisualFramingMapper mapper;
   final ValueChanged<NormalizedPoint> onFocusChanged;
+  final ValueChanged<double> onZoomChanged;
   final double maxHeight;
 
   @override
@@ -104,11 +107,6 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
 
     final bool cropToFill =
         widget.configuration.fitMode == ImageFitMode.cropToFill;
-    final VisualFramingAxis axis = widget.mapper.axisFor(
-      sourceSize: sourceSize,
-      targetAspectRatio: widget.configuration.photoAspectRatio,
-    );
-    final bool canAdjust = cropToFill && axis != VisualFramingAxis.none;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -131,7 +129,7 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
           ),
         ),
         const SizedBox(height: 8),
-        if (canAdjust)
+        if (cropToFill)
           FilledButton.tonalIcon(
             key: const Key('open-framing-focus'),
             onPressed: () {
@@ -145,6 +143,7 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
                             configuration: widget.configuration,
                             mapper: widget.mapper,
                             onFocusChanged: widget.onFocusChanged,
+                            onZoomChanged: widget.onZoomChanged,
                             imageBytes: focusedBytes,
                           );
                         },
@@ -159,13 +158,15 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
               );
             },
             icon: const Icon(Icons.center_focus_strong_rounded),
-            label: const Text('Ajustar encuadre'),
+            label: Text(
+              widget.configuration.framingZoom > 1.01
+                  ? 'Ajustar encuadre · ${widget.configuration.framingZoom.toStringAsFixed(1)}×'
+                  : 'Ajustar encuadre',
+            ),
           )
         else
           Text(
-            cropToFill
-                ? 'La foto ya tiene esta proporción: no hace falta ajustarla.'
-                : 'La foto completa queda dentro del marco.',
+            'La foto completa queda dentro del marco.',
             key: const Key('visual-framing-instruction'),
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
@@ -180,12 +181,14 @@ final class _FramingFocusScreen extends StatefulWidget {
     required this.configuration,
     required this.mapper,
     required this.onFocusChanged,
+    required this.onZoomChanged,
     required this.imageBytes,
   });
 
   final PrintJobConfiguration configuration;
   final VisualFramingMapper mapper;
   final ValueChanged<NormalizedPoint> onFocusChanged;
+  final ValueChanged<double> onZoomChanged;
   final Uint8List imageBytes;
 
   @override
@@ -193,7 +196,13 @@ final class _FramingFocusScreen extends StatefulWidget {
 }
 
 final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
+  static const CropPlanner _cropPlanner = CropPlanner();
+  static const ResolutionAdvisor _resolutionAdvisor = ResolutionAdvisor();
+
   late NormalizedPoint _focus;
+  late double _zoom;
+  late double _gestureStartZoom;
+  Offset? _gestureLastFocalPoint;
   late final Uint8List _imageBytes;
   late final Object _imageSessionKey;
 
@@ -201,21 +210,37 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
   void initState() {
     super.initState();
     _focus = widget.configuration.focus;
+    _zoom = widget.configuration.framingZoom;
+    _gestureStartZoom = _zoom;
     _imageBytes = Uint8List.fromList(widget.imageBytes);
     _imageSessionKey = Object();
   }
 
   @override
   Widget build(BuildContext context) {
+    final SourceImageSize sourceSize = widget.configuration.sourceSize!;
+    final NormalizedCropRect cropRect = _cropPlanner.plan(
+      sourceSize: sourceSize,
+      targetAspectRatio: widget.configuration.photoAspectRatio,
+      focus: _focus,
+      zoom: _zoom,
+    );
     final PrintJobConfiguration configuration = widget.configuration.copyWith(
       focus: _focus,
+      framingZoom: _zoom,
+      cropRect: cropRect,
     );
-    final SourceImageSize sourceSize = configuration.sourceSize!;
     final VisualFramingAxis axis = widget.mapper.axisFor(
       sourceSize: sourceSize,
       targetAspectRatio: configuration.photoAspectRatio,
     );
-    final bool canDrag = axis != VisualFramingAxis.none;
+    final ResolutionAdvice advice = _resolutionAdvisor.evaluate(
+      sourceSize: sourceSize,
+      cropRect: cropRect,
+      fitMode: ImageFitMode.cropToFill,
+      outputWidth: configuration.photoWidth,
+      outputHeight: configuration.photoHeight,
+    );
 
     return Scaffold(
       key: const Key('framing-focus-screen'),
@@ -235,18 +260,16 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Elige qué parte queda dentro',
+                'Mueve y amplía la foto',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
               Text(
-                canDrag
-                    ? _dragInstruction(axis)
-                    : 'La foto ya coincide con la proporción elegida.',
+                'Arrastra para encuadrar y pellizca para hacer zoom. Doble toque para centrar.',
                 key: const Key('visual-framing-instruction'),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Expanded(
                 child: Center(
                   child: AspectRatio(
@@ -257,28 +280,62 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
                             return GestureDetector(
                               key: const Key('visual-framing-editor'),
                               behavior: HitTestBehavior.opaque,
-                              onPanUpdate: canDrag
-                                  ? (DragUpdateDetails details) {
-                                      final NormalizedPoint next = widget.mapper
-                                          .applyDrag(
-                                            sourceSize: sourceSize,
-                                            targetAspectRatio:
-                                                configuration.photoAspectRatio,
-                                            frameWidth: constraints.maxWidth,
-                                            frameHeight: constraints.maxHeight,
-                                            currentFocus: _focus,
-                                            dragDeltaX: details.delta.dx,
-                                            dragDeltaY: details.delta.dy,
-                                          );
-                                      if (next != _focus) {
-                                        setState(() => _focus = next);
-                                        widget.onFocusChanged(next);
-                                      }
-                                    }
-                                  : null,
-                              onDoubleTap: canDrag
-                                  ? () => _setFocus(NormalizedPoint.center)
-                                  : null,
+                              onScaleStart: (ScaleStartDetails details) {
+                                _gestureStartZoom = _zoom;
+                                _gestureLastFocalPoint =
+                                    details.localFocalPoint;
+                              },
+                              onScaleUpdate: (ScaleUpdateDetails details) {
+                                final double nextZoom =
+                                    (_gestureStartZoom * details.scale)
+                                        .clamp(
+                                          CropPlanner.minimumZoom,
+                                          CropPlanner.maximumZoom,
+                                        )
+                                        .toDouble();
+                                final Offset previous =
+                                    _gestureLastFocalPoint ??
+                                    details.localFocalPoint;
+                                final Offset delta =
+                                    details.localFocalPoint - previous;
+                                _gestureLastFocalPoint = details.localFocalPoint;
+
+                                NormalizedPoint nextFocus = _focus;
+                                if (delta.distanceSquared > 0.01) {
+                                  nextFocus = _focusAfterDrag(
+                                    sourceSize: sourceSize,
+                                    axis: axis,
+                                    targetAspectRatio:
+                                        configuration.photoAspectRatio,
+                                    frameWidth: constraints.maxWidth,
+                                    frameHeight: constraints.maxHeight,
+                                    currentFocus: _focus,
+                                    dragDelta: delta,
+                                    zoom: nextZoom,
+                                  );
+                                }
+
+                                final bool zoomChanged =
+                                    (nextZoom - _zoom).abs() > 0.0001;
+                                final bool focusChanged = nextFocus != _focus;
+                                if (!zoomChanged && !focusChanged) {
+                                  return;
+                                }
+                                setState(() {
+                                  _zoom = nextZoom;
+                                  _focus = nextFocus;
+                                });
+                                if (zoomChanged) {
+                                  widget.onZoomChanged(nextZoom);
+                                }
+                                if (focusChanged) {
+                                  widget.onFocusChanged(nextFocus);
+                                }
+                              },
+                              onScaleEnd: (_) =>
+                                  _gestureLastFocalPoint = null,
+                              onDoubleTap: () =>
+                                  _setFocus(NormalizedPoint.center),
                               child: _FramingSurface(
                                 configuration: configuration,
                                 cropToFill: true,
@@ -291,17 +348,44 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
+              Row(
+                children: <Widget>[
+                  Text(
+                    'Zoom',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${_zoom.toStringAsFixed(1)}×',
+                    key: const Key('framing-zoom-value'),
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                ],
+              ),
+              Slider(
+                key: const Key('framing-zoom-slider'),
+                min: CropPlanner.minimumZoom,
+                max: CropPlanner.maximumZoom,
+                divisions: 30,
+                value: _zoom,
+                onChanged: _setZoom,
+              ),
+              if (_zoom > 1.01) ...<Widget>[
+                _ZoomQualityNotice(advice: advice),
+                const SizedBox(height: 8),
+              ],
               Row(
                 children: <Widget>[
                   Expanded(
                     child: OutlinedButton.icon(
                       key: const Key('center-framing'),
-                      onPressed: _focus == NormalizedPoint.center
+                      onPressed:
+                          _focus == NormalizedPoint.center && _zoom == 1
                           ? null
-                          : () => _setFocus(NormalizedPoint.center),
+                          : _resetFraming,
                       icon: const Icon(Icons.center_focus_weak_rounded),
-                      label: const Text('Centrar'),
+                      label: const Text('Restablecer'),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -320,9 +404,107 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
     );
   }
 
+  NormalizedPoint _focusAfterDrag({
+    required SourceImageSize sourceSize,
+    required VisualFramingAxis axis,
+    required double targetAspectRatio,
+    required double frameWidth,
+    required double frameHeight,
+    required NormalizedPoint currentFocus,
+    required Offset dragDelta,
+    required double zoom,
+  }) {
+    if (zoom <= 1.0001) {
+      return widget.mapper.applyDrag(
+        sourceSize: sourceSize,
+        targetAspectRatio: targetAspectRatio,
+        frameWidth: frameWidth,
+        frameHeight: frameHeight,
+        currentFocus: currentFocus,
+        dragDeltaX: dragDelta.dx,
+        dragDeltaY: dragDelta.dy,
+      );
+    }
+
+    final double x = (currentFocus.x - dragDelta.dx / frameWidth)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final double y = (currentFocus.y - dragDelta.dy / frameHeight)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    return NormalizedPoint(x: x, y: y);
+  }
+
+  void _setZoom(double next) {
+    final double clamped = next
+        .clamp(CropPlanner.minimumZoom, CropPlanner.maximumZoom)
+        .toDouble();
+    if ((clamped - _zoom).abs() < 0.0001) {
+      return;
+    }
+    setState(() => _zoom = clamped);
+    widget.onZoomChanged(clamped);
+  }
+
   void _setFocus(NormalizedPoint next) {
+    if (next == _focus) {
+      return;
+    }
     setState(() => _focus = next);
     widget.onFocusChanged(next);
+  }
+
+  void _resetFraming() {
+    final bool focusChanged = _focus != NormalizedPoint.center;
+    final bool zoomChanged = (_zoom - 1).abs() > 0.0001;
+    setState(() {
+      _focus = NormalizedPoint.center;
+      _zoom = 1;
+    });
+    if (zoomChanged) {
+      widget.onZoomChanged(1);
+    }
+    if (focusChanged) {
+      widget.onFocusChanged(NormalizedPoint.center);
+    }
+  }
+}
+
+final class _ZoomQualityNotice extends StatelessWidget {
+  const _ZoomQualityNotice({required this.advice});
+
+  final ResolutionAdvice advice;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool warning = advice.shouldWarn;
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Container(
+      key: const Key('framing-zoom-quality'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: warning ? colors.errorContainer : colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            warning ? Icons.warning_amber_rounded : Icons.info_outline_rounded,
+            size: 19,
+            color: warning ? colors.onErrorContainer : colors.primary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              warning
+                  ? 'Este zoom deja aprox. ${advice.effectiveDpi.round()} ppp y puede perder calidad al imprimir.'
+                  : 'Al ampliar recortas más píxeles. Calidad estimada: ${advice.effectiveDpi.round()} ppp.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -358,6 +540,14 @@ final class _FramingSurface extends StatelessWidget {
         return const Center(child: Icon(Icons.broken_image_outlined, size: 42));
       },
     );
+
+    if (cropToFill && configuration.framingZoom > 1.0001) {
+      image = Transform.scale(
+        scale: configuration.framingZoom,
+        alignment: alignment,
+        child: image,
+      );
+    }
 
     if (configuration.colorMode == ImageColorMode.grayscale) {
       image = ColorFiltered(
@@ -396,7 +586,11 @@ final class _FramingSurface extends StatelessWidget {
                       vertical: 5,
                     ),
                     child: Text(
-                      cropToFill ? 'Rellenar' : 'Foto completa',
+                      cropToFill
+                          ? configuration.framingZoom > 1.01
+                                ? 'Rellenar · ${configuration.framingZoom.toStringAsFixed(1)}×'
+                                : 'Rellenar'
+                          : 'Foto completa',
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
@@ -408,15 +602,4 @@ final class _FramingSurface extends StatelessWidget {
       ),
     );
   }
-}
-
-String _dragInstruction(VisualFramingAxis axis) {
-  return switch (axis) {
-    VisualFramingAxis.horizontal =>
-      'Desliza la foto a izquierda o derecha. Aquí solo ajustas el encuadre.',
-    VisualFramingAxis.vertical =>
-      'Desliza la foto arriba o abajo. Aquí solo ajustas el encuadre.',
-    VisualFramingAxis.none =>
-      'La foto ya tiene esta proporción: no hace falta moverla.',
-  };
 }
