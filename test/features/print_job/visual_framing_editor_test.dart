@@ -24,9 +24,7 @@ void main() {
                     child: VisualFramingEditor(
                       configuration: _configuration(focus: focus),
                       onFocusChanged: (NormalizedPoint next) {
-                        setState(() {
-                          focus = next;
-                        });
+                        setState(() => focus = next);
                       },
                     ),
                   ),
@@ -63,48 +61,72 @@ void main() {
     },
   );
 
-  testWidgets('focused framing can close and reopen without losing its image', (
-    WidgetTester tester,
-  ) async {
-    NormalizedPoint focus = NormalizedPoint.center;
+  testWidgets(
+    'fill preview and focused editor keep independent image sessions',
+    (WidgetTester tester) async {
+      NormalizedPoint focus = NormalizedPoint.center;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Center(
-                child: SizedBox(
-                  width: 320,
-                  child: VisualFramingEditor(
-                    configuration: _configuration(focus: focus),
-                    onFocusChanged: (NormalizedPoint next) {
-                      setState(() => focus = next);
-                    },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Center(
+                  child: SizedBox(
+                    width: 320,
+                    child: VisualFramingEditor(
+                      configuration: _configuration(focus: focus),
+                      onFocusChanged: (NormalizedPoint next) {
+                        setState(() => focus = next);
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    for (int attempt = 0; attempt < 2; attempt += 1) {
-      await tester.tap(find.byKey(const Key('open-framing-focus')));
+      );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
-      expect(find.byType(Image), findsWidgets);
-      final Image image = tester.widget<Image>(find.byType(Image).first);
-      expect(image.image, isA<MemoryImage>());
+      MemoryImage previewProvider() {
+        final Finder previewImage = find.descendant(
+          of: find.byKey(const Key('visual-framing-preview')),
+          matching: find.byType(Image),
+        );
+        expect(previewImage, findsOneWidget);
+        return tester.widget<Image>(previewImage).image as MemoryImage;
+      }
 
-      await tester.tap(find.text('Guardar encuadre'));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('framing-focus-screen')), findsNothing);
-    }
-  });
+      MemoryImage currentPreview = previewProvider();
+      expect(currentPreview.bytes, isNotEmpty);
+
+      for (int attempt = 0; attempt < 2; attempt += 1) {
+        final MemoryImage inlineBefore = currentPreview;
+        await tester.tap(find.byKey(const Key('open-framing-focus')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
+        final Finder focusedImage = find.descendant(
+          of: find.byKey(const Key('visual-framing-editor')),
+          matching: find.byType(Image),
+        );
+        expect(focusedImage, findsOneWidget);
+        final MemoryImage focusedProvider =
+            tester.widget<Image>(focusedImage).image as MemoryImage;
+        expect(focusedProvider.bytes, isNotEmpty);
+        expect(identical(focusedProvider.bytes, inlineBefore.bytes), isFalse);
+
+        await tester.tap(find.text('Guardar encuadre'));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('framing-focus-screen')), findsNothing);
+
+        currentPreview = previewProvider();
+        expect(currentPreview.bytes, isNotEmpty);
+        expect(identical(currentPreview.bytes, inlineBefore.bytes), isFalse);
+      }
+    },
+  );
 
   testWidgets('fit-inside stays static and does not offer framing adjustment', (
     WidgetTester tester,
