@@ -23,6 +23,7 @@ final class PrintJobConfiguration {
     required this.focus,
     required this.cropRect,
     required this.sourceSize,
+    this.framingZoom = 1,
   });
 
   final ImageColorMode colorMode;
@@ -30,6 +31,7 @@ final class PrintJobConfiguration {
   final NormalizedCropRect cropRect;
   final ImageFitMode fitMode;
   final NormalizedPoint focus;
+  final double framingZoom;
   final PhysicalLength gap;
   final SelectedImage image;
   final PhysicalLength margin;
@@ -54,6 +56,7 @@ final class PrintJobConfiguration {
     ImageFitMode? fitMode,
     ImageColorMode? colorMode,
     NormalizedPoint? focus,
+    double? framingZoom,
     NormalizedCropRect? cropRect,
     Object? sourceSize = _keepSourceSize,
   }) {
@@ -69,6 +72,7 @@ final class PrintJobConfiguration {
       fitMode: fitMode ?? this.fitMode,
       colorMode: colorMode ?? this.colorMode,
       focus: focus ?? this.focus,
+      framingZoom: framingZoom ?? this.framingZoom,
       cropRect: cropRect ?? this.cropRect,
       sourceSize: identical(sourceSize, _keepSourceSize)
           ? this.sourceSize
