@@ -115,10 +115,7 @@ void main() {
         final MemoryImage focusedProvider =
             tester.widget<Image>(focusedImage).image as MemoryImage;
         expect(focusedProvider.bytes, isNotEmpty);
-        expect(
-          identical(focusedProvider.bytes, inlineBefore.bytes),
-          isFalse,
-        );
+        expect(identical(focusedProvider.bytes, inlineBefore.bytes), isFalse);
 
         await tester.tap(find.text('Guardar encuadre'));
         await tester.pumpAndSettle();
@@ -126,10 +123,7 @@ void main() {
 
         currentPreview = previewProvider();
         expect(currentPreview.bytes, isNotEmpty);
-        expect(
-          identical(currentPreview.bytes, inlineBefore.bytes),
-          isFalse,
-        );
+        expect(identical(currentPreview.bytes, inlineBefore.bytes), isFalse);
       }
     },
   );
