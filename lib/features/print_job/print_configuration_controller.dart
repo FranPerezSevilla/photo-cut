@@ -225,6 +225,17 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
+  void changeFramingZoom(double zoom) {
+    final double clamped = zoom
+        .clamp(CropPlanner.minimumZoom, CropPlanner.maximumZoom)
+        .toDouble();
+    _replaceWithPlanAndCrop(
+      _state.copyWith(
+        configuration: _state.configuration.copyWith(framingZoom: clamped),
+      ),
+    );
+  }
+
   void _replaceWithPlanAndCrop(PrintConfigurationState next) {
     PrintJobConfiguration configuration = next.configuration;
     final SourceImageSize? sourceSize = configuration.sourceSize;
@@ -236,6 +247,7 @@ final class PrintConfigurationController extends ChangeNotifier {
               sourceSize: sourceSize,
               targetAspectRatio: configuration.photoAspectRatio,
               focus: configuration.focus,
+              zoom: configuration.framingZoom,
             );
       configuration = configuration.copyWith(cropRect: cropRect);
     }
