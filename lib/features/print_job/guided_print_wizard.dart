@@ -162,7 +162,9 @@ final class _StepViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     final MediaQueryData media = MediaQuery.of(context);
     final bool needsFallbackScroll =
-        step == 3 || media.size.height < 700 || media.textScaler.scale(1) > 1.15;
+        step == 3 ||
+        media.size.height < 700 ||
+        media.textScaler.scale(1) > 1.15;
     const EdgeInsets padding = EdgeInsets.fromLTRB(16, 14, 16, 12);
 
     if (needsFallbackScroll) {
@@ -663,7 +665,10 @@ final class _ChoiceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(title, style: Theme.of(context).textTheme.labelLarge),
-                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
@@ -768,7 +773,11 @@ final class _CopyStepper extends StatelessWidget {
             ],
           ),
         ),
-        if (error != null) Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        if (error != null)
+          Text(
+            error!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
       ],
     );
   }
@@ -816,7 +825,10 @@ final class _SummaryCard extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     Expanded(child: Text(row.label)),
-                    Text(row.value, style: Theme.of(context).textTheme.labelLarge),
+                    Text(
+                      row.value,
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
                   ],
                 ),
               ),
@@ -967,8 +979,10 @@ void _openSheetSettings(
                           title: 'Color',
                           subtitle: 'Original',
                           selected:
-                              state.configuration.colorMode == ImageColorMode.color,
-                          onTap: () => controller.changeColorMode(ImageColorMode.color),
+                              state.configuration.colorMode ==
+                              ImageColorMode.color,
+                          onTap: () =>
+                              controller.changeColorMode(ImageColorMode.color),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -978,8 +992,11 @@ void _openSheetSettings(
                           title: 'B/N',
                           subtitle: 'Grises',
                           selected:
-                              state.configuration.colorMode == ImageColorMode.grayscale,
-                          onTap: () => controller.changeColorMode(ImageColorMode.grayscale),
+                              state.configuration.colorMode ==
+                              ImageColorMode.grayscale,
+                          onTap: () => controller.changeColorMode(
+                            ImageColorMode.grayscale,
+                          ),
                         ),
                       ),
                     ],
