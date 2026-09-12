@@ -63,16 +63,37 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Preparar foto')),
+      bottomNavigationBar: AnimatedBuilder(
+        animation: _controller,
+        builder: (BuildContext context, Widget? child) {
+          return _WizardNavigation(
+            step: _step,
+            stepCount: _stepTitles.length,
+            canContinue: _canContinue(_controller.state),
+            onBack: _step == 0 ? null : () => setState(() => _step -= 1),
+            onNext: () {
+              if (_step < _stepTitles.length - 1) {
+                setState(() => _step += 1);
+                return;
+              }
+              final PrintJobReviewCallback? callback = widget.onReview;
+              if (callback != null) {
+                callback(context, _controller.state.configuration);
+              }
+            },
+          );
+        },
+      ),
       body: SafeArea(
+        bottom: false,
         child: AnimatedBuilder(
           animation: _controller,
           builder: (BuildContext context, Widget? child) {
             final PrintConfigurationState state = _controller.state;
             final double previewHeight = math.min(
-              220,
-              MediaQuery.sizeOf(context).height * 0.27,
+              128,
+              MediaQuery.sizeOf(context).height * 0.16,
             );
-
             return Column(
               children: <Widget>[
                 _WizardProgress(
@@ -86,29 +107,14 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(28),
+                        top: Radius.circular(22),
                       ),
                     ),
-                    child: SingleChildScrollView(
-                      key: const Key('wizard-step-scroll'),
-                      physics: const ClampingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
+                    child: _StepViewport(
+                      step: _step,
                       child: _buildStep(context, state),
                     ),
                   ),
-                ),
-                _WizardNavigation(
-                  step: _step,
-                  stepCount: _stepTitles.length,
-                  canContinue: _canContinue(state),
-                  onBack: _step == 0 ? null : () => setState(() => _step -= 1),
-                  onNext: () {
-                    if (_step < _stepTitles.length - 1) {
-                      setState(() => _step += 1);
-                      return;
-                    }
-                    _review(context, state.configuration);
-                  },
                 ),
               ],
             );
@@ -144,12 +150,34 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
     }
     return state.imageError == null;
   }
+}
 
-  void _review(BuildContext context, PrintJobConfiguration configuration) {
-    final PrintJobReviewCallback? callback = widget.onReview;
-    if (callback != null) {
-      callback(context, configuration);
+final class _StepViewport extends StatelessWidget {
+  const _StepViewport({required this.step, required this.child});
+
+  final int step;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final MediaQueryData media = MediaQuery.of(context);
+    final bool needsFallbackScroll =
+        step == 3 || media.size.height < 700 || media.textScaler.scale(1) > 1.15;
+    const EdgeInsets padding = EdgeInsets.fromLTRB(16, 14, 16, 12);
+
+    if (needsFallbackScroll) {
+      return SingleChildScrollView(
+        key: const Key('wizard-step-scroll'),
+        physics: const ClampingScrollPhysics(),
+        padding: padding,
+        child: child,
+      );
     }
+    return Padding(
+      key: const Key('wizard-step-static'),
+      padding: padding,
+      child: Align(alignment: Alignment.topCenter, child: child),
+    );
   }
 }
 
@@ -167,9 +195,8 @@ final class _WizardProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 6, 20, 12),
+      padding: const EdgeInsets.fromLTRB(16, 3, 16, 7),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Row(
             children: <Widget>[
@@ -177,20 +204,20 @@ final class _WizardProgress extends StatelessWidget {
                 child: Text(
                   'Paso ${step + 1} de $stepCount · $title',
                   key: const Key('wizard-step-title'),
-                  style: Theme.of(context).textTheme.labelLarge,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
               Text(
                 '${step + 1}/$stepCount',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.labelSmall,
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 5),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
-              minHeight: 5,
+              minHeight: 4,
               value: (step + 1) / stepCount,
               backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
             ),
@@ -211,8 +238,7 @@ final class _PreviewPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: SizedBox(
         height: height,
         child: Align(
@@ -222,7 +248,7 @@ final class _PreviewPanel extends StatelessWidget {
             plan: state.previewPlan,
             configuration: state.configuration,
             errorMessage: state.layoutError,
-            maxPageHeight: height - 30,
+            maxPageHeight: height - 12,
           ),
         ),
       ),
@@ -239,58 +265,59 @@ final class _SizeStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
           '¿Qué tamaño quieres imprimir?',
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 3),
         Text(
-          'Elige un tamaño habitual o escribe el tuyo.',
-          style: Theme.of(context).textTheme.bodyMedium,
+          'Elige uno habitual o escribe el tuyo.',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 10),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 8,
+          runSpacing: 8,
           children: <Widget>[
             _SizePresetCard(
               key: const Key('size-preset-35x45'),
               label: '35 × 45 mm',
-              caption: 'Carné y documentos',
+              caption: 'Carné',
               selected: _matchesMillimetres(state, 35, 45),
               onTap: () => _applyMillimetrePreset(controller, 35, 45),
             ),
             _SizePresetCard(
               key: const Key('size-preset-10x15'),
               label: '10 × 15 cm',
-              caption: 'Foto clásica',
+              caption: 'Clásica',
               selected: _matchesMillimetres(state, 100, 150),
               onTap: () => _applyMillimetrePreset(controller, 100, 150),
             ),
             _SizePresetCard(
               key: const Key('size-preset-13x18'),
               label: '13 × 18 cm',
-              caption: 'Copia grande',
+              caption: 'Grande',
               selected: _matchesMillimetres(state, 130, 180),
               onTap: () => _applyMillimetrePreset(controller, 130, 180),
             ),
           ],
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 12),
         Row(
           children: <Widget>[
             Expanded(
               child: Text(
-                'Tamaño personalizado',
-                style: Theme.of(context).textTheme.titleMedium,
+                'Personalizado',
+                style: Theme.of(context).textTheme.labelLarge,
               ),
             ),
             _UnitSelector(state: state, controller: controller),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 7),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -306,7 +333,7 @@ final class _SizeStep extends StatelessWidget {
                 onChanged: controller.changeWidth,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: _LengthField(
                 key: ValueKey<String>(
@@ -321,7 +348,7 @@ final class _SizeStep extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 7),
         ResolutionGuidance(configuration: state.configuration),
       ],
     );
@@ -337,17 +364,17 @@ final class _FramingStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool fill = state.configuration.fitMode == ImageFitMode.cropToFill;
-
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text('Encuadre', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 6),
+        Text('Encuadre', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 3),
         Text(
-          'Decide si quieres llenar todo el marco o conservar la foto completa.',
-          style: Theme.of(context).textTheme.bodyMedium,
+          'Llena el marco o conserva la foto completa.',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 10),
         Row(
           key: const Key('wizard-fit-mode'),
           children: <Widget>[
@@ -355,41 +382,31 @@ final class _FramingStep extends StatelessWidget {
               child: _ChoiceCard(
                 icon: Icons.crop_rounded,
                 title: 'Rellenar',
-                subtitle: 'Sin bordes blancos',
+                subtitle: 'Sin bordes',
                 selected: fill,
                 onTap: () => controller.changeFitMode(ImageFitMode.cropToFill),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: _ChoiceCard(
                 icon: Icons.fit_screen_rounded,
                 title: 'Foto completa',
-                subtitle: 'No recorta nada',
+                subtitle: 'Sin recorte',
                 selected: !fill,
                 onTap: () => controller.changeFitMode(ImageFitMode.fitInside),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 18),
-        if (fill) ...<Widget>[
-          Row(
-            children: <Widget>[
-              const Icon(Icons.pan_tool_alt_rounded, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Arrastra la foto para encuadrar',
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
+        const SizedBox(height: 10),
+        if (fill)
           VisualFramingEditor(
             configuration: state.configuration,
             onFocusChanged: controller.changeFocus,
-          ),
-        ] else
+            maxHeight: 145,
+          )
+        else
           const _CompletePhotoNotice(),
       ],
     );
@@ -403,22 +420,18 @@ final class _CompletePhotoNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('fit-inside-static-notice'),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: const Row(
         children: <Widget>[
-          Icon(
-            Icons.check_circle_rounded,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
+          Icon(Icons.check_circle_rounded, size: 20),
+          SizedBox(width: 8),
+          Expanded(
             child: Text(
-              'Se conservará toda la foto centrada. Si la proporción no coincide, quedará espacio blanco alrededor; no hay nada que mover.',
+              'Se conserva toda la foto. Si la proporción no coincide, quedará espacio blanco.',
             ),
           ),
         ],
@@ -436,20 +449,19 @@ final class _SheetStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text('Hoja', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 6),
+        Text('Hoja', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 3),
         Text(
-          'Elige dónde imprimir y cuántas copias necesitas.',
-          style: Theme.of(context).textTheme.bodyMedium,
+          'Elige papel y número de copias.',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 18),
-        Text('Papel', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 10),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 8,
+          runSpacing: 8,
           children: PaperSize.presets
               .map(
                 (PaperSize paper) => _PaperCard(
@@ -461,16 +473,27 @@ final class _SheetStep extends StatelessWidget {
               )
               .toList(growable: false),
         ),
-        const SizedBox(height: 22),
-        Text('Copias', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 10),
-        _CopyStepper(
-          key: const Key('wizard-copy-count'),
-          value: state.configuration.copyCount,
-          error: state.copyCountError,
-          onChanged: (int value) => controller.changeCopyCount('$value'),
+        const SizedBox(height: 12),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                'Copias',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            SizedBox(
+              width: 190,
+              child: _CopyStepper(
+                key: const Key('wizard-copy-count'),
+                value: state.configuration.copyCount,
+                error: state.copyCountError,
+                onChanged: (int value) => controller.changeCopyCount('$value'),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 10),
         OutlinedButton.icon(
           key: const Key('wizard-advanced-options'),
           onPressed: () => _openSheetSettings(context, controller),
@@ -492,15 +515,11 @@ final class _ReviewStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final PrintJobConfiguration configuration = state.configuration;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text('Todo listo', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 6),
-        Text(
-          'Comprueba los datos antes de generar el PDF final.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 18),
+        Text('Todo listo', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
         _SummaryCard(
           rows: <_SummaryRow>[
             _SummaryRow(
@@ -519,17 +538,10 @@ final class _ReviewStep extends StatelessWidget {
               value: _paperLabel(configuration.paperSize),
             ),
             _SummaryRow(label: 'Copias', value: '${configuration.copyCount}'),
-            _SummaryRow(
-              label: 'Imagen',
-              value: configuration.colorMode == ImageColorMode.color
-                  ? 'Color'
-                  : 'Blanco y negro',
-            ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
         ResolutionGuidance(configuration: configuration),
-        const SizedBox(height: 12),
         TextButton.icon(
           onPressed: () => _openSheetSettings(context, controller),
           icon: const Icon(Icons.tune_rounded),
@@ -558,26 +570,23 @@ final class _SizePresetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 156,
+      width: 142,
       child: Material(
         color: selected ? colors.primaryContainer : colors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(
-            color: selected ? colors.primary : colors.outline,
-            width: selected ? 1.5 : 1,
-          ),
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: selected ? colors.primary : colors.outline),
         ),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(14),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(label, style: Theme.of(context).textTheme.labelLarge),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(caption, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
@@ -602,7 +611,7 @@ final class _UnitSelector extends StatelessWidget {
       children: LengthUnit.values
           .map(
             (LengthUnit unit) => Padding(
-              padding: const EdgeInsets.only(left: 4),
+              padding: const EdgeInsets.only(left: 3),
               child: ChoiceChip(
                 visualDensity: VisualDensity.compact,
                 label: Text(unit.shortLabel),
@@ -637,25 +646,27 @@ final class _ChoiceCard extends StatelessWidget {
     return Material(
       color: selected ? colors.primaryContainer : colors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(
-          color: selected ? colors.primary : colors.outline,
-          width: selected ? 1.5 : 1,
-        ),
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: selected ? colors.primary : colors.outline),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.all(11),
+          child: Row(
             children: <Widget>[
-              Icon(icon, color: selected ? colors.primary : colors.onSurface),
-              const SizedBox(height: 12),
-              Text(title, style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 3),
-              Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+              Icon(icon, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(title, style: Theme.of(context).textTheme.labelLarge),
+                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -680,32 +691,29 @@ final class _PaperCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 104,
+      width: 96,
       child: Material(
         color: selected ? colors.primaryContainer : colors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: selected ? colors.primary : colors.outline,
-            width: selected ? 1.5 : 1,
-          ),
+          borderRadius: BorderRadius.circular(13),
+          side: BorderSide(color: selected ? colors.primary : colors.outline),
         ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(13),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(
-                  Icons.description_outlined,
-                  color: selected ? colors.primary : colors.onSurface,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _paperLabel(paper),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelLarge,
+                const Icon(Icons.description_outlined, size: 18),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    _paperLabel(paper),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                 ),
               ],
             ),
@@ -731,13 +739,12 @@ final class _CopyStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
             children: <Widget>[
@@ -750,8 +757,7 @@ final class _CopyStepper extends StatelessWidget {
                 child: Text(
                   '$value',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w800),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               _StepperButton(
@@ -762,13 +768,7 @@ final class _CopyStepper extends StatelessWidget {
             ],
           ),
         ),
-        if (error != null) ...<Widget>[
-          const SizedBox(height: 6),
-          Text(
-            error!,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
-        ],
+        if (error != null) Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
       ],
     );
   }
@@ -788,8 +788,8 @@ final class _StepperButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton.filledTonal(
       onPressed: onPressed,
-      icon: Icon(icon),
-      style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+      icon: Icon(icon, size: 20),
+      visualDensity: VisualDensity.compact,
     );
   }
 }
@@ -803,29 +803,20 @@ final class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('wizard-summary'),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: rows
             .map(
               (_SummaryRow row) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 7),
                 child: Row(
                   children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        row.label,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                    Text(
-                      row.value,
-                      style: Theme.of(context).textTheme.labelLarge,
-                      textAlign: TextAlign.end,
-                    ),
+                    Expanded(child: Text(row.label)),
+                    Text(row.value, style: Theme.of(context).textTheme.labelLarge),
                   ],
                 ),
               ),
@@ -864,6 +855,7 @@ final class _LengthField extends StatelessWidget {
     return TextFormField(
       initialValue: value,
       decoration: InputDecoration(
+        isDense: true,
         labelText: label,
         suffixText: suffix,
         errorText: error,
@@ -896,29 +888,31 @@ final class _WizardNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      elevation: 0,
       child: SafeArea(
         top: false,
         child: Container(
+          key: const Key('wizard-fixed-navigation'),
           decoration: BoxDecoration(
             border: Border(
               top: BorderSide(color: Theme.of(context).colorScheme.outline),
             ),
           ),
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          padding: const EdgeInsets.fromLTRB(14, 7, 14, 8),
           child: Row(
             children: <Widget>[
-              if (onBack != null)
-                TextButton(
-                  key: const Key('wizard-back'),
-                  onPressed: onBack,
-                  child: const Text('Atrás'),
-                )
-              else
-                const SizedBox(width: 72),
+              SizedBox(
+                width: 78,
+                child: onBack == null
+                    ? const SizedBox.shrink()
+                    : TextButton(
+                        key: const Key('wizard-back'),
+                        onPressed: onBack,
+                        child: const Text('Atrás'),
+                      ),
+              ),
               const Spacer(),
               SizedBox(
-                width: 154,
+                width: 146,
                 child: FilledButton(
                   key: const Key('wizard-next'),
                   onPressed: canContinue ? onNext : null,
@@ -952,10 +946,10 @@ void _openSheetSettings(
             return SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(
-                20,
-                4,
-                20,
-                20 + MediaQuery.viewInsetsOf(context).bottom,
+                18,
+                8,
+                18,
+                18 + MediaQuery.viewInsetsOf(context).bottom,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -964,17 +958,7 @@ void _openSheetSettings(
                     'Ajustes de hoja e imagen',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Opciones que normalmente no necesitas tocar.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Imagen',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -983,36 +967,25 @@ void _openSheetSettings(
                           title: 'Color',
                           subtitle: 'Original',
                           selected:
-                              state.configuration.colorMode ==
-                              ImageColorMode.color,
-                          onTap: () =>
-                              controller.changeColorMode(ImageColorMode.color),
+                              state.configuration.colorMode == ImageColorMode.color,
+                          onTap: () => controller.changeColorMode(ImageColorMode.color),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: _ChoiceCard(
                           icon: Icons.monochrome_photos_outlined,
                           title: 'B/N',
-                          subtitle: 'Escala de grises',
+                          subtitle: 'Grises',
                           selected:
-                              state.configuration.colorMode ==
-                              ImageColorMode.grayscale,
-                          onTap: () => controller.changeColorMode(
-                            ImageColorMode.grayscale,
-                          ),
+                              state.configuration.colorMode == ImageColorMode.grayscale,
+                          onTap: () => controller.changeColorMode(ImageColorMode.grayscale),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Distribución',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Expanded(
                         child: _LengthField(
@@ -1026,7 +999,7 @@ void _openSheetSettings(
                           onChanged: controller.changeMargin,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: _LengthField(
                           key: ValueKey<String>(
@@ -1041,18 +1014,13 @@ void _openSheetSettings(
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
                   SwitchListTile.adaptive(
                     key: const Key('wizard-cut-marks'),
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Marcas de corte'),
-                    subtitle: const Text(
-                      'Añade guías para recortar después de imprimir.',
-                    ),
                     value: state.configuration.showCutMarks,
                     onChanged: controller.changeCutMarks,
                   ),
-                  const SizedBox(height: 12),
                   FilledButton(
                     onPressed: () => Navigator.of(sheetContext).pop(),
                     child: const Text('Listo'),
