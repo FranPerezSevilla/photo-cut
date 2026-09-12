@@ -137,23 +137,25 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
             onPressed: () {
               final Uint8List focusedBytes = Uint8List.fromList(_previewBytes);
               unawaited(
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext routeContext) {
-                      return _FramingFocusScreen(
-                        configuration: widget.configuration,
-                        mapper: widget.mapper,
-                        onFocusChanged: widget.onFocusChanged,
-                        imageBytes: focusedBytes,
-                      );
-                    },
-                  ),
-                ).then((_) {
-                  if (!mounted) {
-                    return;
-                  }
-                  setState(_resetPreviewSession);
-                }),
+                Navigator.of(context)
+                    .push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext routeContext) {
+                          return _FramingFocusScreen(
+                            configuration: widget.configuration,
+                            mapper: widget.mapper,
+                            onFocusChanged: widget.onFocusChanged,
+                            imageBytes: focusedBytes,
+                          );
+                        },
+                      ),
+                    )
+                    .then((_) {
+                      if (!mounted) {
+                        return;
+                      }
+                      setState(_resetPreviewSession);
+                    }),
               );
             },
             icon: const Icon(Icons.center_focus_strong_rounded),
