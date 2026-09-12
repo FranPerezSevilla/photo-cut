@@ -39,7 +39,7 @@ final class PrintSheetPreview extends StatelessWidget {
     this.maxPageHeight = 360,
   });
 
-  static const double _summaryReserve = 24;
+  static const double _summaryReserve = 13;
 
   final PrintJobConfiguration configuration;
   final String? errorMessage;
@@ -146,7 +146,8 @@ final class PrintSheetPreview extends StatelessWidget {
                                             '${configuration.fitMode.name}-'
                                             '${configuration.paperSize.id}-'
                                             '${configuration.photoWidth.inMillimetres}-'
-                                            '${configuration.photoHeight.inMillimetres}',
+                                            '${configuration.photoHeight.inMillimetres}-'
+                                            '${configuration.framingZoom}',
                                           ),
                                           bytes: bytes,
                                           copyIndex: placement.copyIndex,
@@ -164,14 +165,17 @@ final class PrintSheetPreview extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Text(
               currentPlan.pageCount == 1
                   ? '${currentPlan.placements.length} copias · 1 página'
                   : 'Página 1 de ${currentPlan.pageCount} · '
                         '${currentPlan.placements.length} copias',
               key: const Key('layout-page-summary'),
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontSize: 10.5,
+                height: 1,
+              ),
             ),
           ],
         );
@@ -200,25 +204,34 @@ final class _PreviewPhoto extends StatelessWidget {
       configuration.focus.x * 2 - 1,
       configuration.focus.y * 2 - 1,
     );
-    Widget photo = SizedBox.expand(
-      child: Image.memory(
-        bytes,
-        key: ValueKey<String>(
-          'preview-image-$copyIndex-${rotated ? 'rotated' : 'upright'}',
-        ),
-        width: double.infinity,
-        height: double.infinity,
-        fit: configuration.fitMode == ImageFitMode.cropToFill
-            ? BoxFit.cover
-            : BoxFit.contain,
-        alignment: alignment,
-        gaplessPlayback: false,
-        errorBuilder:
-            (BuildContext context, Object error, StackTrace? stackTrace) {
-              return const Center(child: Icon(Icons.broken_image_outlined));
-            },
+    Widget image = Image.memory(
+      bytes,
+      key: ValueKey<String>(
+        'preview-image-$copyIndex-${rotated ? 'rotated' : 'upright'}',
       ),
+      width: double.infinity,
+      height: double.infinity,
+      fit: configuration.fitMode == ImageFitMode.cropToFill
+          ? BoxFit.cover
+          : BoxFit.contain,
+      alignment: alignment,
+      gaplessPlayback: false,
+      errorBuilder:
+          (BuildContext context, Object error, StackTrace? stackTrace) {
+            return const Center(child: Icon(Icons.broken_image_outlined));
+          },
     );
+
+    if (configuration.fitMode == ImageFitMode.cropToFill &&
+        configuration.framingZoom > 1.0001) {
+      image = Transform.scale(
+        scale: configuration.framingZoom,
+        alignment: alignment,
+        child: image,
+      );
+    }
+
+    Widget photo = SizedBox.expand(child: image);
 
     if (configuration.colorMode == ImageColorMode.grayscale) {
       photo = ColorFiltered(
