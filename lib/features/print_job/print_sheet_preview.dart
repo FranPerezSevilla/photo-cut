@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/layout/layout.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
+import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 
 const List<double> _grayscaleMatrix = <double>[
   0.2126,
@@ -49,6 +50,7 @@ final class PrintSheetPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     final SheetPlan? currentPlan = plan;
     if (currentPlan == null) {
       return ConstrainedBox(
@@ -64,7 +66,7 @@ final class PrintSheetPreview extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  errorMessage ?? 'No se puede crear la vista previa.',
+                  errorMessage ?? l10n.text('cannotCreatePreview'),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -174,10 +176,10 @@ final class PrintSheetPreview extends StatelessWidget {
             if (!compactPreview) ...<Widget>[
               const SizedBox(height: 2),
               Text(
-                currentPlan.pageCount == 1
-                    ? '${currentPlan.placements.length} copias · 1 página'
-                    : 'Página 1 de ${currentPlan.pageCount} · '
-                          '${currentPlan.placements.length} copias',
+                l10n.pageSummary(
+                  currentPlan.placements.length,
+                  currentPlan.pageCount,
+                ),
                 key: const Key('layout-page-summary'),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontSize: 10.5,
