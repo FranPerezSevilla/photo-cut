@@ -27,7 +27,36 @@ void main() {
 
     await _settleSplash(tester);
     expect(find.byKey(const Key('photo-cut-splash')), findsNothing);
+    expect(find.text('Print photos at the exact size'), findsOneWidget);
+  });
+
+  testWidgets('uses system locale by default and allows a manual override', (
+    WidgetTester tester,
+  ) async {
+    tester.platformDispatcher.localeTestValue = const Locale('fr');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+    await tester.pumpWidget(
+      PhotoCutApp(
+        imagePickerGateway: _FakeImagePickerGateway(),
+        imageProcessor: _FakeImageProcessor(),
+      ),
+    );
+    await _settleSplash(tester);
+
+    expect(find.text('Imprimez vos photos à la taille exacte'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('more-actions')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Español'));
+    await tester.pumpAndSettle();
     expect(find.text('Imprime fotos al tamaño exacto'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('more-actions')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sistema'));
+    await tester.pumpAndSettle();
+    expect(find.text('Imprimez vos photos à la taille exacte'), findsOneWidget);
   });
 
   testWidgets('renders the product promise and primary action', (tester) async {
@@ -41,10 +70,10 @@ void main() {
 
     expect(find.byKey(const Key('photo-cut-wordmark')), findsNWidgets(2));
     expect(find.byKey(const Key('photo-cut-brand-icon')), findsNWidgets(2));
-    expect(find.text('Imprime fotos al tamaño exacto'), findsOneWidget);
-    expect(find.text('Elegir foto'), findsOneWidget);
+    expect(find.text('Print photos at the exact size'), findsOneWidget);
+    expect(find.text('Choose photo'), findsOneWidget);
     expect(find.byIcon(Icons.add_photo_alternate_outlined), findsOneWidget);
-    expect(find.text('Probar PDF de ejemplo'), findsOneWidget);
+    expect(find.text('Open sample PDF'), findsOneWidget);
   });
 
   testWidgets('primary action selects and previews one local image', (
@@ -70,8 +99,8 @@ void main() {
     expect(find.byKey(const Key('selected-image-preview')), findsOneWidget);
     expect(find.text('portrait.png'), findsOneWidget);
     expect(find.text('400 × 200 px'), findsOneWidget);
-    expect(find.text('Elegir tamaño y configurar'), findsOneWidget);
-    expect(find.text('Elegir otra foto'), findsOneWidget);
+    expect(find.text('Choose size and configure'), findsOneWidget);
+    expect(find.text('Choose another photo'), findsOneWidget);
   });
 
   testWidgets('selected image opens the polished four-step wizard', (
@@ -88,26 +117,21 @@ void main() {
     );
     await _settleSplash(tester);
 
-    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
-    await tester.ensureVisible(choosePhoto);
-    await tester.tap(choosePhoto);
+    await tester.tap(find.byKey(const Key('choose-photo')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('configure-photo')));
     await tester.pumpAndSettle();
 
-    final Finder configure = find.byKey(const Key('configure-photo'));
-    await tester.ensureVisible(configure);
-    await tester.tap(configure);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Preparar foto'), findsOneWidget);
-    expect(find.textContaining('Paso 1 de 4 · Tamaño'), findsOneWidget);
+    expect(find.text('Prepare photo'), findsOneWidget);
+    expect(find.textContaining('Step 1 of 4 · Size'), findsOneWidget);
     expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
-    expect(find.text('¿Qué tamaño quieres imprimir?'), findsOneWidget);
+    expect(find.text('What size do you want to print?'), findsOneWidget);
     expect(find.byKey(const Key('size-preset-35x45')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Paso 2 de 4 · Encuadre'), findsOneWidget);
+    expect(find.textContaining('Step 2 of 4 · Framing'), findsOneWidget);
     expect(find.byKey(const Key('wizard-fit-mode')), findsOneWidget);
     expect(find.byKey(const Key('visual-framing-editor')), findsNothing);
     expect(find.byKey(const Key('open-framing-focus')), findsOneWidget);
@@ -144,9 +168,7 @@ void main() {
     );
     await _settleSplash(tester);
 
-    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
-    await tester.ensureVisible(choosePhoto);
-    await tester.tap(choosePhoto);
+    await tester.tap(find.byKey(const Key('choose-photo')));
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.error_outline), findsNothing);
@@ -161,6 +183,8 @@ void main() {
         home: HomeScreen(
           imagePickerGateway: _FakeImagePickerGateway(),
           imageProcessor: _FakeImageProcessor(),
+          localeOverride: null,
+          onLocaleChanged: (_) {},
           pdfSpikeBuilder: (BuildContext context) {
             return const Scaffold(body: Center(child: Text('PDF spike open')));
           },
@@ -169,7 +193,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final Finder spikeButton = find.text('Probar PDF de ejemplo');
+    final Finder spikeButton = find.text('Open sample PDF');
     await tester.ensureVisible(spikeButton);
     await tester.tap(spikeButton);
     await tester.pumpAndSettle();
