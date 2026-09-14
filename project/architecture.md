@@ -10,7 +10,8 @@ ceremony.
 
 ```text
 lib/
-├── app/                    App root, navigation and theme wiring
+├── app/                    App root, navigation, locale and theme wiring
+├── l10n/                   App-owned translations and locale resolution
 ├── core/
 │   ├── units/              PhysicalLength and point conversion
 │   ├── layout/             Pure sheet-placement engine
@@ -41,8 +42,8 @@ It owns:
 
 Crop state uses source-normalized coordinates in the closed range 0–1. A
 `CropPlanner` derives the crop rectangle from orientation-aware source dimensions,
-the exact physical target aspect and a normalized focus point. Fit-inside retains
-the complete source rectangle.
+the exact physical target aspect, a normalized focus point and deliberate framing
+zoom. Fit-inside retains the complete source rectangle.
 
 ### Platform adapters
 
@@ -64,11 +65,18 @@ bytes off the UI isolate, physically bakes EXIF orientation, applies the normali
 crop when required, performs app-owned grayscale conversion and returns encoded
 bytes without uploading them.
 
-### UI and state
+### UI, locale and state
 
 The app has one short-lived print-job session. Use immutable state objects and
 small `ChangeNotifier` controllers. Do not add a state-management framework
 without evidence and an ADR.
+
+`PhotoCutApp` owns locale resolution. With no override it follows the system
+language when one of `es`, `en`, `fr`, `pt` or `de` is available and otherwise
+falls back to English. The Home language selector may set an in-app override or
+return to System. Product-visible production copy comes from the single
+`PhotoCutLocalizations` catalog under `lib/l10n/`; geometry and print-job domain
+objects do not depend on locale.
 
 The product flow is intentionally split:
 
@@ -79,7 +87,9 @@ The product flow is intentionally split:
 
 The native print screen is a printer handoff, not a second document editor.
 
-Pure `core/quality` logic calculates effective-resolution guidance from orientation-aware source pixels, normalized crop state and exact physical output size. UI warnings consume that advice but never modify geometry.
+Pure `core/quality` logic calculates effective-resolution guidance from
+orientation-aware source pixels, normalized crop state and exact physical output
+size. UI warnings consume that advice but never modify geometry.
 
 ## Physical geometry
 
@@ -125,6 +135,7 @@ state where required.
 
 Current runtime dependencies have narrow boundaries:
 
+- Flutter SDK `flutter_localizations` for Material/Cupertino platform strings;
 - `pdf` for document generation;
 - `printing` for preview/share/native print;
 - `image_picker` for source-image selection;
