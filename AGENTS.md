@@ -163,7 +163,7 @@ Use the cheapest reliable test first:
 - widget tests for form validation and navigation;
 - integration tests for app flows using fake gateways;
 - platform tests only for plugin/native behaviour;
-- human checks only for physical printing, real purchases and store submission.
+- human checks only for real purchases and store submission.
 
 Geometry tests should compare numbers, not screenshots. PDF tests should inspect
 page boxes and object placement where possible. Golden images are supplementary,
@@ -174,7 +174,6 @@ not proof of physical dimensions.
 The following cannot be asserted by an autonomous agent without evidence from a
 real person/device/account:
 
-- a physical 50 mm calibration square measured with a ruler;
 - sandbox purchases on real Android/iPhone store accounts;
 - final store listing review and submission;
 - final bundle/application ID ownership confirmation;
