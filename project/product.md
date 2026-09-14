@@ -31,10 +31,12 @@ scaling, margins, duplication and “fit to page” behaviour.
 4. Ask for the exact final width and height first, in mm, cm or inches.
 5. Keep a live sheet preview visible while the user advances through the wizard.
 6. Choose crop-to-fill or fit-inside and adjust the visual framing when needed.
-7. Choose paper and copy count and see the layout update immediately.
-8. Choose colour/grayscale and optionally open advanced margin, spacing and
+7. Crop-to-fill framing may be zoomed deliberately; zoom reduces the pixels used
+   for the final result, so the app must communicate that quality trade-off.
+8. Choose paper and copy count and see the layout update immediately.
+9. Choose colour/grayscale and optionally open advanced margin, spacing and
    cut-mark controls.
-9. Review a compact summary before producing the final PDF.
+10. Review a compact summary before producing the final PDF.
 
 The wizard presents one decision group at a time. It must not expose the whole
 configuration form at once or make the user switch between a settings screen and
@@ -42,12 +44,27 @@ a separate preview screen for ordinary configuration.
 
 ### Review and print
 
-10. Review the immutable final PDF and a compact settings summary.
-11. Go back to edit, share the PDF or explicitly open native printing.
-12. Use the matching paper at 100% / actual size in the operating-system dialog.
+11. Review the immutable final PDF and a compact settings summary.
+12. Go back to edit, share the PDF or explicitly open native printing.
+13. Use the matching paper at 100% / actual size in the operating-system dialog.
 
 The native print dialog controls the destination printer and printer-specific
 options. It is not a second editor for Photo Cut geometry.
+
+## Languages
+
+Photo Cut ships the core product flow in:
+
+- Spanish;
+- English;
+- French;
+- Portuguese;
+- German.
+
+The app follows the operating-system language by default when it is supported,
+and falls back to English otherwise. A user can override the language from the
+app and can return to “System” behaviour at any time. The product name `Photo Cut`
+remains language-neutral.
 
 ## MVP requirements
 
@@ -57,23 +74,24 @@ options. It is not a second editor for Photo Cut geometry.
 - Automatic portrait/landscape page orientation when it fits more copies.
 - Repeated copies, page overflow and deterministic ordering.
 - Crop-to-fill and fit-inside modes.
+- Visual framing with deliberate zoom for crop-to-fill.
 - App-owned colour or grayscale output.
 - Optional cut marks.
 - Resolution warning based on effective DPI.
 - PDF preview, share and native print hand-off.
 - One free export, then a lifetime unlock.
-- Spanish and English before public release.
+- Spanish, English, French, Portuguese and German before public release.
 - Offline use and local-only image processing.
 
 ## Quality bar
 
 The PDF page box and placed image boxes must be geometrically correct. The app
 must not claim that a printer driver will honour those dimensions; it must tell
-the user to print at 100% / actual size and offer a calibration sheet.
+the user to print at 100% / actual size. Printer hardware, driver scaling and
+paper handling remain outside Photo Cut’s control and are not a separate product
+calibration flow.
 
-Target domain tolerance for generated PDF geometry: **±0.1 mm**. The separate
-physical-print acceptance target is initially **±1 mm over 50 mm**, because
-printer hardware, drivers and paper handling are outside the app's control.
+Target domain tolerance for generated PDF geometry: **±0.1 mm**.
 
 ### Effective-resolution guidance
 
@@ -110,5 +128,6 @@ Prices and product IDs remain provisional until the store milestone.
 - Background removal or AI enhancement.
 - Passport/visa/legal compliance guarantees.
 - Printer-brand integrations.
+- Calibration sheets or printer-specific calibration workflows.
 - Cloud storage, account creation or multi-device sync.
 - Web or desktop release in the MVP.
