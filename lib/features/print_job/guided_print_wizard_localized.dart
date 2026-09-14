@@ -148,6 +148,7 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
 
 final class _StepViewport extends StatelessWidget {
   const _StepViewport({required this.step, required this.child});
+
   final int step;
   final Widget child;
 
@@ -181,6 +182,7 @@ final class _WizardProgress extends StatelessWidget {
     required this.stepCount,
     required this.title,
   });
+
   final int step;
   final int stepCount;
   final String title;
@@ -201,8 +203,10 @@ final class _WizardProgress extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
-              Text('$stepCount'.isEmpty ? '' : '${step + 1}/$stepCount',
-                  style: Theme.of(context).textTheme.labelSmall),
+              Text(
+                '${step + 1}/$stepCount',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
             ],
           ),
           const SizedBox(height: 5),
@@ -222,6 +226,7 @@ final class _WizardProgress extends StatelessWidget {
 
 final class _PreviewPanel extends StatelessWidget {
   const _PreviewPanel({required this.height, required this.state});
+
   final double height;
   final PrintConfigurationState state;
 
@@ -249,6 +254,7 @@ final class _PreviewPanel extends StatelessWidget {
 
 final class _SizeStep extends StatelessWidget {
   const _SizeStep({required this.state, required this.controller});
+
   final PrintConfigurationState state;
   final PrintConfigurationController controller;
 
@@ -259,9 +265,15 @@ final class _SizeStep extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.text('whatSize'), style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.text('whatSize'),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 3),
-        Text(l10n.text('choosePresetOrCustom'), style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          l10n.text('choosePresetOrCustom'),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -293,7 +305,12 @@ final class _SizeStep extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: <Widget>[
-            Expanded(child: Text(l10n.text('custom'), style: Theme.of(context).textTheme.labelLarge)),
+            Expanded(
+              child: Text(
+                l10n.text('custom'),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
             _UnitSelector(state: state, controller: controller),
           ],
         ),
@@ -303,7 +320,9 @@ final class _SizeStep extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _LengthField(
-                key: ValueKey<String>('wizard-width-${state.unit.name}-${state.widthInput}'),
+                key: ValueKey<String>(
+                  'wizard-width-${state.unit.name}-${state.widthInput}',
+                ),
                 label: l10n.text('width'),
                 suffix: state.unit.shortLabel,
                 value: state.widthInput,
@@ -314,7 +333,9 @@ final class _SizeStep extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _LengthField(
-                key: ValueKey<String>('wizard-height-${state.unit.name}-${state.heightInput}'),
+                key: ValueKey<String>(
+                  'wizard-height-${state.unit.name}-${state.heightInput}',
+                ),
                 label: l10n.text('height'),
                 suffix: state.unit.shortLabel,
                 value: state.heightInput,
@@ -333,6 +354,7 @@ final class _SizeStep extends StatelessWidget {
 
 final class _FramingStep extends StatelessWidget {
   const _FramingStep({required this.state, required this.controller});
+
   final PrintConfigurationState state;
   final PrintConfigurationController controller;
 
@@ -344,9 +366,15 @@ final class _FramingStep extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Text(l10n.text('framingTitle'), style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.text('framingTitle'),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 3),
-        Text(l10n.text('framingSubtitle'), style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          l10n.text('framingSubtitle'),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 10),
         Row(
           key: const Key('wizard-fit-mode'),
@@ -389,6 +417,7 @@ final class _FramingStep extends StatelessWidget {
 
 final class _CompletePhotoNotice extends StatelessWidget {
   const _CompletePhotoNotice();
+
   @override
   Widget build(BuildContext context) {
     final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
@@ -412,6 +441,7 @@ final class _CompletePhotoNotice extends StatelessWidget {
 
 final class _SheetStep extends StatelessWidget {
   const _SheetStep({required this.state, required this.controller});
+
   final PrintConfigurationState state;
   final PrintConfigurationController controller;
 
@@ -424,24 +454,34 @@ final class _SheetStep extends StatelessWidget {
       children: <Widget>[
         Text(l10n.text('sheet'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 3),
-        Text(l10n.text('paperAndCopies'), style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          l10n.text('paperAndCopies'),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: PaperSize.presets
-              .map((PaperSize paper) => _PaperCard(
-                    key: ValueKey<String>('wizard-paper-${paper.id}'),
-                    paper: paper,
-                    selected: paper == state.configuration.paperSize,
-                    onTap: () => controller.changePaperSize(paper),
-                  ))
+              .map(
+                (PaperSize paper) => _PaperCard(
+                  key: ValueKey<String>('wizard-paper-${paper.id}'),
+                  paper: paper,
+                  selected: paper == state.configuration.paperSize,
+                  onTap: () => controller.changePaperSize(paper),
+                ),
+              )
               .toList(growable: false),
         ),
         const SizedBox(height: 12),
         Row(
           children: <Widget>[
-            Expanded(child: Text(l10n.text('copies'), style: Theme.of(context).textTheme.labelLarge)),
+            Expanded(
+              child: Text(
+                l10n.text('copies'),
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
             SizedBox(
               width: 190,
               child: _CopyStepper(
@@ -467,6 +507,7 @@ final class _SheetStep extends StatelessWidget {
 
 final class _ReviewStep extends StatelessWidget {
   const _ReviewStep({required this.state, required this.controller});
+
   final PrintConfigurationState state;
   final PrintConfigurationController controller;
 
@@ -476,8 +517,8 @@ final class _ReviewStep extends StatelessWidget {
     final PrintJobConfiguration configuration = state.configuration;
     final String framing = configuration.fitMode == ImageFitMode.cropToFill
         ? configuration.framingZoom > 1.01
-            ? '${l10n.text('fill')} · ${configuration.framingZoom.toStringAsFixed(1)}×'
-            : l10n.text('fill')
+              ? '${l10n.text('fill')} · ${configuration.framingZoom.toStringAsFixed(1)}×'
+              : l10n.text('fill')
         : l10n.text('wholePhoto');
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -489,11 +530,18 @@ final class _ReviewStep extends StatelessWidget {
           rows: <_SummaryRow>[
             _SummaryRow(
               label: l10n.text('photo'),
-              value: '${_formatMillimetres(configuration.photoWidth)} × ${_formatMillimetres(configuration.photoHeight)} mm',
+              value:
+                  '${_formatMillimetres(configuration.photoWidth)} × ${_formatMillimetres(configuration.photoHeight)} mm',
             ),
             _SummaryRow(label: l10n.text('framing'), value: framing),
-            _SummaryRow(label: l10n.text('paper'), value: _paperLabel(context, configuration.paperSize)),
-            _SummaryRow(label: l10n.text('copies'), value: '${configuration.copyCount}'),
+            _SummaryRow(
+              label: l10n.text('paper'),
+              value: _paperLabel(context, configuration.paperSize),
+            ),
+            _SummaryRow(
+              label: l10n.text('copies'),
+              value: '${configuration.copyCount}',
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -516,6 +564,7 @@ final class _SizePresetCard extends StatelessWidget {
     required this.selected,
     required this.onTap,
   });
+
   final String label;
   final String caption;
   final bool selected;
@@ -542,7 +591,12 @@ final class _SizePresetCard extends StatelessWidget {
               children: <Widget>[
                 Text(label, style: Theme.of(context).textTheme.labelLarge),
                 const SizedBox(height: 2),
-                Text(caption, style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  caption,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
           ),
@@ -554,24 +608,30 @@ final class _SizePresetCard extends StatelessWidget {
 
 final class _UnitSelector extends StatelessWidget {
   const _UnitSelector({required this.state, required this.controller});
+
   final PrintConfigurationState state;
   final PrintConfigurationController controller;
+
   @override
-  Widget build(BuildContext context) => Row(
-        key: const Key('wizard-length-unit'),
-        mainAxisSize: MainAxisSize.min,
-        children: LengthUnit.values
-            .map((LengthUnit unit) => Padding(
-                  padding: const EdgeInsets.only(left: 3),
-                  child: ChoiceChip(
-                    visualDensity: VisualDensity.compact,
-                    label: Text(unit.shortLabel),
-                    selected: unit == state.unit,
-                    onSelected: (_) => controller.changeUnit(unit),
-                  ),
-                ))
-            .toList(growable: false),
-      );
+  Widget build(BuildContext context) {
+    return Row(
+      key: const Key('wizard-length-unit'),
+      mainAxisSize: MainAxisSize.min,
+      children: LengthUnit.values
+          .map(
+            (LengthUnit unit) => Padding(
+              padding: const EdgeInsets.only(left: 3),
+              child: ChoiceChip(
+                visualDensity: VisualDensity.compact,
+                label: Text(unit.shortLabel),
+                selected: unit == state.unit,
+                onSelected: (_) => controller.changeUnit(unit),
+              ),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
 }
 
 final class _ChoiceCard extends StatelessWidget {
@@ -582,6 +642,7 @@ final class _ChoiceCard extends StatelessWidget {
     required this.selected,
     required this.onTap,
   });
+
   final IconData icon;
   final String title;
   final String subtitle;
@@ -610,8 +671,18 @@ final class _ChoiceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(title, style: Theme.of(context).textTheme.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.labelLarge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
@@ -624,7 +695,13 @@ final class _ChoiceCard extends StatelessWidget {
 }
 
 final class _PaperCard extends StatelessWidget {
-  const _PaperCard({super.key, required this.paper, required this.selected, required this.onTap});
+  const _PaperCard({
+    super.key,
+    required this.paper,
+    required this.selected,
+    required this.onTap,
+  });
+
   final PaperSize paper;
   final bool selected;
   final VoidCallback onTap;
@@ -650,7 +727,13 @@ final class _PaperCard extends StatelessWidget {
               children: <Widget>[
                 const Icon(Icons.description_outlined, size: 18),
                 const SizedBox(width: 5),
-                Flexible(child: Text(_paperLabel(context, paper), textAlign: TextAlign.center, style: Theme.of(context).textTheme.labelMedium)),
+                Flexible(
+                  child: Text(
+                    _paperLabel(context, paper),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
               ],
             ),
           ),
@@ -661,95 +744,169 @@ final class _PaperCard extends StatelessWidget {
 }
 
 final class _CopyStepper extends StatelessWidget {
-  const _CopyStepper({super.key, required this.value, required this.error, required this.onChanged});
+  const _CopyStepper({
+    super.key,
+    required this.value,
+    required this.error,
+    required this.onChanged,
+  });
+
   final int value;
   final String? error;
   final ValueChanged<int> onChanged;
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              children: <Widget>[
-                _StepperButton(key: const Key('copies-minus'), icon: Icons.remove_rounded, onPressed: value > 1 ? () => onChanged(value - 1) : null),
-                Expanded(child: Text('$value', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium)),
-                _StepperButton(key: const Key('copies-plus'), icon: Icons.add_rounded, onPressed: value < 999 ? () => onChanged(value + 1) : null),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(14),
           ),
-          if (error != null) Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-        ],
-      );
+          child: Row(
+            children: <Widget>[
+              _StepperButton(
+                key: const Key('copies-minus'),
+                icon: Icons.remove_rounded,
+                onPressed: value > 1 ? () => onChanged(value - 1) : null,
+              ),
+              Expanded(
+                child: Text(
+                  '$value',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              _StepperButton(
+                key: const Key('copies-plus'),
+                icon: Icons.add_rounded,
+                onPressed: value < 999 ? () => onChanged(value + 1) : null,
+              ),
+            ],
+          ),
+        ),
+        if (error != null)
+          Text(
+            error!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+      ],
+    );
+  }
 }
 
 final class _StepperButton extends StatelessWidget {
-  const _StepperButton({super.key, required this.icon, required this.onPressed});
+  const _StepperButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+  });
+
   final IconData icon;
   final VoidCallback? onPressed;
+
   @override
-  Widget build(BuildContext context) => IconButton.filledTonal(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        visualDensity: VisualDensity.compact,
-      );
+  Widget build(BuildContext context) {
+    return IconButton.filledTonal(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      visualDensity: VisualDensity.compact,
+    );
+  }
 }
 
 final class _SummaryCard extends StatelessWidget {
   const _SummaryCard({required this.rows});
+
   final List<_SummaryRow> rows;
+
   @override
-  Widget build(BuildContext context) => Container(
-        key: const Key('wizard-summary'),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          children: rows
-              .map((_SummaryRow row) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 7),
-                    child: Row(children: <Widget>[
-                      Expanded(child: Text(row.label)),
-                      Flexible(child: Text(row.value, textAlign: TextAlign.end, style: Theme.of(context).textTheme.labelLarge)),
-                    ]),
-                  ))
-              .toList(growable: false),
-        ),
-      );
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('wizard-summary'),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        children: rows
+            .map(
+              (_SummaryRow row) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 7),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(child: Text(row.label)),
+                    Flexible(
+                      child: Text(
+                        row.value,
+                        textAlign: TextAlign.end,
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList(growable: false),
+      ),
+    );
+  }
 }
 
 final class _SummaryRow {
   const _SummaryRow({required this.label, required this.value});
+
   final String label;
   final String value;
 }
 
 final class _LengthField extends StatelessWidget {
-  const _LengthField({super.key, required this.label, required this.suffix, required this.value, required this.error, required this.onChanged});
+  const _LengthField({
+    super.key,
+    required this.label,
+    required this.suffix,
+    required this.value,
+    required this.error,
+    required this.onChanged,
+  });
+
   final String label;
   final String suffix;
   final String value;
   final String? error;
   final ValueChanged<String> onChanged;
+
   @override
-  Widget build(BuildContext context) => TextFormField(
-        initialValue: value,
-        decoration: InputDecoration(isDense: true, labelText: label, suffixText: suffix, errorText: error),
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
-        onChanged: onChanged,
-      );
+  Widget build(BuildContext context) {
+    return TextFormField(
+      initialValue: value,
+      decoration: InputDecoration(
+        isDense: true,
+        labelText: label,
+        suffixText: suffix,
+        errorText: error,
+      ),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+      ],
+      onChanged: onChanged,
+    );
+  }
 }
 
 final class _WizardNavigation extends StatelessWidget {
-  const _WizardNavigation({required this.step, required this.stepCount, required this.canContinue, required this.onBack, required this.onNext});
+  const _WizardNavigation({
+    required this.step,
+    required this.stepCount,
+    required this.canContinue,
+    required this.onBack,
+    required this.onNext,
+  });
+
   final int step;
   final int stepCount;
   final bool canContinue;
@@ -765,7 +922,11 @@ final class _WizardNavigation extends StatelessWidget {
         top: false,
         child: Container(
           key: const Key('wizard-fixed-navigation'),
-          decoration: BoxDecoration(border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outline))),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Theme.of(context).colorScheme.outline),
+            ),
+          ),
           padding: const EdgeInsets.fromLTRB(14, 7, 14, 8),
           child: Row(
             children: <Widget>[
@@ -773,7 +934,11 @@ final class _WizardNavigation extends StatelessWidget {
                 width: 86,
                 child: onBack == null
                     ? const SizedBox.shrink()
-                    : TextButton(key: const Key('wizard-back'), onPressed: onBack, child: Text(l10n.text('back'))),
+                    : TextButton(
+                        key: const Key('wizard-back'),
+                        onPressed: onBack,
+                        child: Text(l10n.text('back')),
+                      ),
               ),
               const Spacer(),
               SizedBox(
@@ -781,7 +946,14 @@ final class _WizardNavigation extends StatelessWidget {
                 child: FilledButton(
                   key: const Key('wizard-next'),
                   onPressed: canContinue ? onNext : null,
-                  child: FittedBox(fit: BoxFit.scaleDown, child: Text(step == stepCount - 1 ? l10n.text('reviewPdf') : l10n.text('next'))),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      step == stepCount - 1
+                          ? l10n.text('reviewPdf')
+                          : l10n.text('next'),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -792,110 +964,200 @@ final class _WizardNavigation extends StatelessWidget {
   }
 }
 
-void _openSheetSettings(BuildContext context, PrintConfigurationController controller) {
-  unawaited(showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (BuildContext sheetContext) {
-      return AnimatedBuilder(
-        animation: controller,
-        builder: (BuildContext context, Widget? child) {
-          final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
-          final PrintConfigurationState state = controller.state;
-          return SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(18, 8, 18, 18 + MediaQuery.viewInsetsOf(context).bottom),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(l10n.text('sheetSettings'), style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 12),
-                Row(children: <Widget>[
-                  Expanded(child: _ChoiceCard(
-                    icon: Icons.palette_outlined,
-                    title: l10n.text('color'),
-                    subtitle: l10n.text('original'),
-                    selected: state.configuration.colorMode == ImageColorMode.color,
-                    onTap: () => controller.changeColorMode(ImageColorMode.color),
-                  )),
-                  const SizedBox(width: 8),
-                  Expanded(child: _ChoiceCard(
-                    icon: Icons.monochrome_photos_outlined,
-                    title: l10n.text('grayscale'),
-                    subtitle: l10n.text('grays'),
-                    selected: state.configuration.colorMode == ImageColorMode.grayscale,
-                    onTap: () => controller.changeColorMode(ImageColorMode.grayscale),
-                  )),
-                ]),
-                const SizedBox(height: 12),
-                Row(children: <Widget>[
-                  Expanded(child: _LengthField(
-                    key: ValueKey<String>('wizard-margin-${state.unit.name}-${state.marginInput}'),
-                    label: l10n.text('margin'),
-                    suffix: state.unit.shortLabel,
-                    value: state.marginInput,
-                    error: _localizedValidation(context, state.marginError),
-                    onChanged: controller.changeMargin,
-                  )),
-                  const SizedBox(width: 8),
-                  Expanded(child: _LengthField(
-                    key: ValueKey<String>('wizard-gap-${state.unit.name}-${state.gapInput}'),
-                    label: l10n.text('spacing'),
-                    suffix: state.unit.shortLabel,
-                    value: state.gapInput,
-                    error: _localizedValidation(context, state.gapError),
-                    onChanged: controller.changeGap,
-                  )),
-                ]),
-                SwitchListTile.adaptive(
-                  key: const Key('wizard-cut-marks'),
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.text('cutMarks')),
-                  value: state.configuration.showCutMarks,
-                  onChanged: controller.changeCutMarks,
-                ),
-                FilledButton(onPressed: () => Navigator.of(sheetContext).pop(), child: Text(l10n.text('done'))),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  ));
+void _openSheetSettings(
+  BuildContext context,
+  PrintConfigurationController controller,
+) {
+  unawaited(
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (BuildContext sheetContext) {
+        return AnimatedBuilder(
+          animation: controller,
+          builder: (BuildContext context, Widget? child) {
+            final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+            final PrintConfigurationState state = controller.state;
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(
+                18,
+                8,
+                18,
+                18 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Text(
+                    l10n.text('sheetSettings'),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: _ChoiceCard(
+                          icon: Icons.palette_outlined,
+                          title: l10n.text('color'),
+                          subtitle: l10n.text('original'),
+                          selected:
+                              state.configuration.colorMode ==
+                              ImageColorMode.color,
+                          onTap: () =>
+                              controller.changeColorMode(ImageColorMode.color),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _ChoiceCard(
+                          icon: Icons.monochrome_photos_outlined,
+                          title: l10n.text('grayscale'),
+                          subtitle: l10n.text('grays'),
+                          selected:
+                              state.configuration.colorMode ==
+                              ImageColorMode.grayscale,
+                          onTap: () => controller.changeColorMode(
+                            ImageColorMode.grayscale,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: _LengthField(
+                          key: ValueKey<String>(
+                            'wizard-margin-${state.unit.name}-${state.marginInput}',
+                          ),
+                          label: l10n.text('margin'),
+                          suffix: state.unit.shortLabel,
+                          value: state.marginInput,
+                          error: _localizedValidation(context, state.marginError),
+                          onChanged: controller.changeMargin,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _LengthField(
+                          key: ValueKey<String>(
+                            'wizard-gap-${state.unit.name}-${state.gapInput}',
+                          ),
+                          label: l10n.text('spacing'),
+                          suffix: state.unit.shortLabel,
+                          value: state.gapInput,
+                          error: _localizedValidation(context, state.gapError),
+                          onChanged: controller.changeGap,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SwitchListTile.adaptive(
+                    key: const Key('wizard-cut-marks'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.text('cutMarks')),
+                    value: state.configuration.showCutMarks,
+                    onChanged: controller.changeCutMarks,
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    child: Text(l10n.text('done')),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ),
+  );
 }
 
 String? _localizedValidation(BuildContext context, String? error) {
-  if (error == null) return null;
-  final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
-  if (error.contains('1 y 999')) return l10n.text('invalidCopies');
-  if (error.contains('mayor que 0')) return l10n.text('invalidLength');
-  if (error.contains('no cabe en el papel')) return l10n.text('layoutError');
-  return error;
+  if (error == null) {
+    return null;
+  }
+  final String languageCode = Localizations.localeOf(context).languageCode;
+  final bool invalidCopies = error.contains('1 y 999');
+  final bool invalidLength = error.contains('mayor que 0');
+  final bool layoutError = error.contains('no cabe en el papel');
+  if (!invalidCopies && !invalidLength && !layoutError) {
+    return error;
+  }
+  return switch (languageCode) {
+    'es' => invalidCopies
+        ? 'Introduce un número entre 1 y 999.'
+        : invalidLength
+              ? 'Introduce una medida mayor que 0.'
+              : 'La foto no cabe en el papel con estas medidas y márgenes.',
+    'fr' => invalidCopies
+        ? 'Saisissez un nombre entre 1 et 999.'
+        : invalidLength
+              ? 'Saisissez une mesure supérieure à 0.'
+              : 'La photo ne tient pas sur le papier avec ces dimensions et marges.',
+    'pt' => invalidCopies
+        ? 'Introduza um número entre 1 e 999.'
+        : invalidLength
+              ? 'Introduza uma medida superior a 0.'
+              : 'A foto não cabe no papel com estas dimensões e margens.',
+    'de' => invalidCopies
+        ? 'Gib eine Zahl zwischen 1 und 999 ein.'
+        : invalidLength
+              ? 'Gib ein Maß größer als 0 ein.'
+              : 'Das Foto passt mit diesen Maßen und Rändern nicht auf das Papier.',
+    _ => invalidCopies
+        ? 'Enter a number between 1 and 999.'
+        : invalidLength
+              ? 'Enter a measurement greater than 0.'
+              : 'The photo does not fit on the paper with these dimensions and margins.',
+  };
 }
 
-void _applyMillimetrePreset(PrintConfigurationController controller, double width, double height) {
+void _applyMillimetrePreset(
+  PrintConfigurationController controller,
+  double width,
+  double height,
+) {
   controller.changeUnit(LengthUnit.millimetres);
   controller.changeWidth(_compactNumber(width));
   controller.changeHeight(_compactNumber(height));
 }
 
-bool _matchesMillimetres(PrintConfigurationState state, double width, double height) {
+bool _matchesMillimetres(
+  PrintConfigurationState state,
+  double width,
+  double height,
+) {
   final PrintJobConfiguration configuration = state.configuration;
   return (configuration.photoWidth.inMillimetres - width).abs() < 0.001 &&
       (configuration.photoHeight.inMillimetres - height).abs() < 0.001;
 }
 
-String _compactNumber(double value) => value == value.roundToDouble() ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+String _compactNumber(double value) {
+  return value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(2);
+}
 
 String _paperLabel(BuildContext context, PaperSize paper) {
-  if (paper == PaperSize.a4) return 'A4';
-  if (paper == PaperSize.usLetter) return PhotoCutLocalizations.of(context).text('letter');
-  if (paper == PaperSize.photo10x15) return '10 × 15';
+  if (paper == PaperSize.a4) {
+    return 'A4';
+  }
+  if (paper == PaperSize.usLetter) {
+    return PhotoCutLocalizations.of(context).text('letter');
+  }
+  if (paper == PaperSize.photo10x15) {
+    return '10 × 15';
+  }
   return paper.id;
 }
 
 String _formatMillimetres(PhysicalLength length) {
   final double value = length.inMillimetres;
-  return value == value.roundToDouble() ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+  return value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1);
 }
