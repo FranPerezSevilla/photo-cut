@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/quality/resolution_advisor.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
+import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 
 const List<double> _grayscaleMatrix = <double>[
   0.2126,
@@ -84,21 +85,22 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     final SourceImageSize? sourceSize = widget.configuration.sourceSize;
     if (sourceSize == null) {
-      return const Card(
-        key: Key('visual-framing-loading'),
+      return Card(
+        key: const Key('visual-framing-loading'),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              SizedBox.square(
+              const SizedBox.square(
                 dimension: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              SizedBox(width: 10),
-              Flexible(child: Text('Preparando el encuadre…')),
+              const SizedBox(width: 10),
+              Flexible(child: Text(l10n.text('preparingFraming'))),
             ],
           ),
         ),
@@ -160,13 +162,13 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
             icon: const Icon(Icons.center_focus_strong_rounded),
             label: Text(
               widget.configuration.framingZoom > 1.01
-                  ? 'Ajustar encuadre · ${widget.configuration.framingZoom.toStringAsFixed(1)}×'
-                  : 'Ajustar encuadre',
+                  ? '${l10n.text('adjustFraming')} · ${widget.configuration.framingZoom.toStringAsFixed(1)}×'
+                  : l10n.text('adjustFraming'),
             ),
           )
         else
           Text(
-            'La foto completa queda dentro del marco.',
+            l10n.text('wholePhotoInside'),
             key: const Key('visual-framing-instruction'),
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
@@ -218,6 +220,7 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     final SourceImageSize sourceSize = widget.configuration.sourceSize!;
     final NormalizedCropRect cropRect = _cropPlanner.plan(
       sourceSize: sourceSize,
@@ -245,11 +248,11 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
     return Scaffold(
       key: const Key('framing-focus-screen'),
       appBar: AppBar(
-        title: const Text('Ajustar encuadre'),
+        title: Text(l10n.text('adjustFramingTitle')),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Listo'),
+            child: Text(l10n.text('done')),
           ),
         ],
       ),
@@ -260,12 +263,12 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Mueve y amplía la foto',
+                l10n.text('moveAndZoom'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
               Text(
-                'Arrastra para encuadrar y pellizca para hacer zoom. Doble toque para centrar.',
+                l10n.text('moveAndZoomHelp'),
                 key: const Key('visual-framing-instruction'),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -352,7 +355,7 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
               Row(
                 children: <Widget>[
                   Text(
-                    'Zoom',
+                    l10n.text('zoom'),
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   const Spacer(),
@@ -385,14 +388,14 @@ final class _FramingFocusScreenState extends State<_FramingFocusScreen> {
                           ? null
                           : _resetFraming,
                       icon: const Icon(Icons.center_focus_weak_rounded),
-                      label: const Text('Restablecer'),
+                      label: Text(l10n.text('reset')),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: FilledButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Guardar encuadre'),
+                      child: Text(l10n.text('saveFraming')),
                     ),
                   ),
                 ],
@@ -477,6 +480,7 @@ final class _ZoomQualityNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     final bool warning = advice.shouldWarn;
     final ColorScheme colors = Theme.of(context).colorScheme;
     return Container(
@@ -496,7 +500,7 @@ final class _ZoomQualityNotice extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'El zoom reduce la calidad del resultado final. Calidad estimada: ${advice.effectiveDpi.round()} ppp.',
+              '${l10n.text('zoomQualityWarning')} ${l10n.zoomDpi(advice.effectiveDpi.round())}.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -522,6 +526,7 @@ final class _FramingSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     final Alignment alignment = Alignment(
       configuration.focus.x * 2 - 1,
       configuration.focus.y * 2 - 1,
@@ -586,9 +591,9 @@ final class _FramingSurface extends StatelessWidget {
                     child: Text(
                       cropToFill
                           ? configuration.framingZoom > 1.01
-                                ? 'Rellenar · ${configuration.framingZoom.toStringAsFixed(1)}×'
-                                : 'Rellenar'
-                          : 'Foto completa',
+                                ? '${l10n.text('fill')} · ${configuration.framingZoom.toStringAsFixed(1)}×'
+                                : l10n.text('fill')
+                          : l10n.text('wholePhoto'),
                       style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
