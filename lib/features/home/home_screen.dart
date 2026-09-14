@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_cut/core/theme/photo_cut_brand.dart';
-import 'package:photo_cut/features/calibration/calibration.dart';
 import 'package:photo_cut/features/home/selected_photo_info.dart';
 import 'package:photo_cut/features/pdf_spike/pdf_spike.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
+import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
@@ -14,23 +14,23 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.imagePickerGateway,
+    required this.localeOverride,
+    required this.onLocaleChanged,
     this.imageProcessor,
     this.pdfSpikeBuilder,
-    this.calibrationBuilder,
   });
 
   final ImagePickerGateway imagePickerGateway;
   final ImageProcessor? imageProcessor;
   final WidgetBuilder? pdfSpikeBuilder;
-  final WidgetBuilder? calibrationBuilder;
+  final Locale? localeOverride;
+  final ValueChanged<Locale?> onLocaleChanged;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 final class _HomeScreenState extends State<HomeScreen> {
-  static const String _printScaleTestAction = 'print-scale-test';
-
   late final PhotoSelectionController _controller;
 
   @override
@@ -48,26 +48,35 @@ final class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const PhotoCutBrand(compact: true),
         actions: <Widget>[
           PopupMenuButton<String>(
             key: const Key('more-actions'),
-            tooltip: 'Más opciones',
-            onSelected: (String action) {
-              if (action == _printScaleTestAction) {
-                _openCalibration(context);
-              }
+            tooltip: l10n.text('language'),
+            icon: const Icon(Icons.language_rounded),
+            initialValue: widget.localeOverride?.languageCode ?? 'system',
+            onSelected: (String languageCode) {
+              widget.onLocaleChanged(
+                languageCode == 'system' ? null : Locale(languageCode),
+              );
             },
-            itemBuilder: (BuildContext context) =>
-                const <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    key: Key('open-calibration'),
-                    value: _printScaleTestAction,
-                    child: Text('Prueba de escala de impresión'),
-                  ),
-                ],
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'system',
+                child: _LanguageOption(
+                  label: l10n.text('system'),
+                  selected: widget.localeOverride == null,
+                ),
+              ),
+              _languageItem('es', 'Español'),
+              _languageItem('en', 'English'),
+              _languageItem('fr', 'Français'),
+              _languageItem('pt', 'Português'),
+              _languageItem('de', 'Deutsch'),
+            ],
           ),
         ],
       ),
@@ -89,15 +98,15 @@ final class _HomeScreenState extends State<HomeScreen> {
                       _PhotoHero(image: state.image),
                       const SizedBox(height: 32),
                       Text(
-                        'Imprime fotos al tamaño exacto',
+                        l10n.text('printExactTitle'),
                         style: Theme.of(context).textTheme.headlineMedium,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
                       Text(
                         state.image == null
-                            ? 'Elige una foto y Photo Cut te guiará paso a paso hasta el PDF listo para imprimir.'
-                            : 'Foto seleccionada. Antes de elegir el tamaño final, mira qué resolución tiene.',
+                            ? l10n.text('homeEmptyBody')
+                            : l10n.text('homeSelectedBody'),
                         style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -139,7 +148,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 )
                               : const Icon(Icons.add_photo_alternate_outlined),
-                          label: const Text('Elegir foto'),
+                          label: Text(l10n.text('choosePhoto')),
                         )
                       else ...<Widget>[
                         FilledButton.icon(
@@ -147,7 +156,7 @@ final class _HomeScreenState extends State<HomeScreen> {
                           onPressed: () =>
                               _openConfiguration(state.image!, imageProcessor),
                           icon: const Icon(Icons.arrow_forward),
-                          label: const Text('Elegir tamaño y configurar'),
+                          label: Text(l10n.text('configurePhoto')),
                         ),
                         const SizedBox(height: 10),
                         OutlinedButton.icon(
@@ -156,12 +165,12 @@ final class _HomeScreenState extends State<HomeScreen> {
                               ? null
                               : _controller.selectFromGallery,
                           icon: const Icon(Icons.add_photo_alternate_outlined),
-                          label: const Text('Elegir otra foto'),
+                          label: Text(l10n.text('chooseAnotherPhoto')),
                         ),
                       ],
                       const SizedBox(height: 12),
                       Text(
-                        'La foto se procesa en este dispositivo y no se sube.',
+                        l10n.text('privacyLocal'),
                         style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.center,
                       ),
@@ -178,6 +187,16 @@ final class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _languageItem(String code, String label) {
+    return PopupMenuItem<String>(
+      value: code,
+      child: _LanguageOption(
+        label: label,
+        selected: widget.localeOverride?.languageCode == code,
       ),
     );
   }
@@ -215,16 +234,6 @@ final class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _openCalibration(BuildContext context) {
-    final WidgetBuilder builder =
-        widget.calibrationBuilder ??
-        (BuildContext routeContext) => CalibrationScreen.production();
-    unawaited(
-      Navigator.of(context)
-          .push<void>(MaterialPageRoute<void>(builder: builder)),
-    );
-  }
-
   void _openPdfSpike(BuildContext context) {
     final WidgetBuilder builder =
         widget.pdfSpikeBuilder ??
@@ -236,6 +245,32 @@ final class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+final class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({required this.label, required this.selected});
+
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        SizedBox(
+          width: 28,
+          child: selected
+              ? Icon(
+                  Icons.check_rounded,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : const SizedBox.shrink(),
+        ),
+        Text(label),
+      ],
+    );
+  }
+}
+
 final class _PhotoHero extends StatelessWidget {
   const _PhotoHero({required this.image});
 
@@ -243,13 +278,14 @@ final class _PhotoHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final SelectedImage? selected = image;
 
     return Semantics(
       label: selected == null
-          ? 'Identidad visual de Photo Cut'
-          : 'Vista previa de la fotografía seleccionada',
+          ? l10n.text('photoBrandSemantics')
+          : l10n.text('photoPreviewSemantics'),
       child: AspectRatio(
         aspectRatio: 4 / 3,
         child: DecoratedBox(
@@ -285,9 +321,11 @@ final class _PhotoHero extends StatelessWidget {
                           Object error,
                           StackTrace? stack,
                         ) {
-                          return const Center(
+                          return Center(
                             child: Text(
-                              'No se pudo mostrar la foto.',
+                              PhotoCutLocalizations.of(
+                                errorContext,
+                              ).text('cannotShowPhoto'),
                               textAlign: TextAlign.center,
                             ),
                           );
@@ -308,6 +346,7 @@ final class _SelectionError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
@@ -318,7 +357,7 @@ final class _SelectionError extends StatelessWidget {
             Expanded(child: Text(message)),
             IconButton(
               onPressed: onDismiss,
-              tooltip: 'Cerrar aviso',
+              tooltip: l10n.text('closeNotice'),
               icon: const Icon(Icons.close),
             ),
           ],
@@ -342,7 +381,7 @@ final class _DevelopmentNotice extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Build de desarrollo · M1 Vista previa PDF',
+              'Development build · PDF preview',
               style: Theme.of(context).textTheme.labelLarge,
               textAlign: TextAlign.center,
             ),
@@ -350,7 +389,7 @@ final class _DevelopmentNotice extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onOpenPdfSpike,
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text('Probar PDF de ejemplo'),
+              label: const Text('Open sample PDF'),
             ),
           ],
         ),
