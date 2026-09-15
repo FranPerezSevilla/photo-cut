@@ -73,7 +73,7 @@ void main() {
     expect(find.text('Print photos at the exact size'), findsOneWidget);
     expect(find.text('Choose photo'), findsOneWidget);
     expect(find.byIcon(Icons.add_photo_alternate_outlined), findsOneWidget);
-    expect(find.text('Try sample PDF'), findsOneWidget);
+    expect(find.text('Open sample PDF'), findsOneWidget);
   });
 
   testWidgets('primary action selects and previews one local image', (
@@ -200,7 +200,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final Finder spikeButton = find.text('Probar PDF de ejemplo');
+    final Finder spikeButton = find.text('Open sample PDF');
     await tester.ensureVisible(spikeButton);
     await tester.tap(spikeButton);
     await tester.pumpAndSettle();
