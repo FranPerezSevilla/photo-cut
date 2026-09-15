@@ -193,6 +193,8 @@ void main() {
           pdfSpikeBuilder: (BuildContext context) {
             return const Scaffold(body: Center(child: Text('PDF spike open')));
           },
+          localeOverride: null,
+          onLocaleChanged: (_) {},
         ),
       ),
     );
