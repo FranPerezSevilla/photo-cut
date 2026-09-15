@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:photo_cut/core/theme/app_theme.dart';
 import 'package:photo_cut/core/theme/photo_cut_brand.dart';
 import 'package:photo_cut/features/home/home_screen.dart';
+import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
-class PhotoCutApp extends StatelessWidget {
+class PhotoCutApp extends StatefulWidget {
   PhotoCutApp({
     super.key,
     ImagePickerGateway? imagePickerGateway,
@@ -20,17 +22,45 @@ class PhotoCutApp extends StatelessWidget {
   final WidgetBuilder? pdfSpikeBuilder;
 
   @override
+  State<PhotoCutApp> createState() => _PhotoCutAppState();
+}
+
+final class _PhotoCutAppState extends State<PhotoCutApp> {
+  Locale? _localeOverride;
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Photo Cut',
       theme: AppTheme.light(),
       scrollBehavior: const PhotoCutScrollBehavior(),
+      locale: _localeOverride,
+      supportedLocales: PhotoCutLocalizations.supportedLocales,
+      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+        PhotoCutLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      localeResolutionCallback: (Locale? locale, Iterable<Locale> supported) {
+        final Locale systemLocale = locale ?? const Locale('en');
+        for (final Locale candidate in supported) {
+          if (candidate.languageCode == systemLocale.languageCode) {
+            return candidate;
+          }
+        }
+        return const Locale('en');
+      },
       home: _SplashGate(
         child: HomeScreen(
-          imagePickerGateway: imagePickerGateway,
-          imageProcessor: imageProcessor,
-          pdfSpikeBuilder: pdfSpikeBuilder,
+          imagePickerGateway: widget.imagePickerGateway,
+          imageProcessor: widget.imageProcessor,
+          pdfSpikeBuilder: widget.pdfSpikeBuilder,
+          localeOverride: _localeOverride,
+          onLocaleChanged: (Locale? locale) {
+            setState(() => _localeOverride = locale);
+          },
         ),
       ),
     );

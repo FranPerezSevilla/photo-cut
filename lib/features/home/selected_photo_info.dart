@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 
@@ -36,12 +37,13 @@ final class _SelectedPhotoInfoState extends State<SelectedPhotoInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
     return FutureBuilder<SourceImageSize>(
       future: _inspection,
       builder: (BuildContext context, AsyncSnapshot<SourceImageSize> snapshot) {
         if (snapshot.hasError) {
           return Text(
-            'No se pudo leer la resolución de la foto.',
+            l10n.text('cannotReadResolution'),
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           );
@@ -88,7 +90,7 @@ final class _SelectedPhotoInfoState extends State<SelectedPhotoInfo> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Hasta aprox. ${_physicalSizeLabel(size, 300)} con calidad fotográfica.',
+                      l10n.selectedPhysicalSize(_physicalSizeLabel(size, 300)),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],

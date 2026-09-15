@@ -36,10 +36,7 @@ void main() {
     expect(previewed, same(document));
     expect(find.text('Paso 2 de 2 · Revisa el PDF final'), findsOneWidget);
     expect(find.text('35 × 45 mm · 8 copias · A4'), findsOneWidget);
-    expect(
-      find.text('Rellenar · Blanco y negro · Con marcas de corte'),
-      findsOneWidget,
-    );
+    expect(find.text('Rellenar · B/N · Con marcas de corte'), findsOneWidget);
     expect(find.text('Abrir impresión de Android'), findsOneWidget);
     expect(find.textContaining(document.filename), findsOneWidget);
 
