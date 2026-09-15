@@ -33,8 +33,8 @@ void main() {
   testWidgets('uses system locale by default and allows a manual override', (
     WidgetTester tester,
   ) async {
-    tester.platformDispatcher.localeTestValue = const Locale('fr');
-    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+    tester.platformDispatcher.localesTestValue = const <Locale>[Locale('fr')];
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
 
     await tester.pumpWidget(
       PhotoCutApp(
@@ -73,7 +73,7 @@ void main() {
     expect(find.text('Print photos at the exact size'), findsOneWidget);
     expect(find.text('Choose photo'), findsOneWidget);
     expect(find.byIcon(Icons.add_photo_alternate_outlined), findsOneWidget);
-    expect(find.text('Open sample PDF'), findsOneWidget);
+    expect(find.text('Try sample PDF'), findsOneWidget);
   });
 
   testWidgets('primary action selects and previews one local image', (
@@ -117,9 +117,14 @@ void main() {
     );
     await _settleSplash(tester);
 
-    await tester.tap(find.byKey(const Key('choose-photo')));
+    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
+    await tester.ensureVisible(choosePhoto);
+    await tester.tap(choosePhoto);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('configure-photo')));
+
+    final Finder configure = find.byKey(const Key('configure-photo'));
+    await tester.ensureVisible(configure);
+    await tester.tap(configure);
     await tester.pumpAndSettle();
 
     expect(find.text('Prepare photo'), findsOneWidget);
@@ -168,7 +173,9 @@ void main() {
     );
     await _settleSplash(tester);
 
-    await tester.tap(find.byKey(const Key('choose-photo')));
+    final Finder choosePhoto = find.byKey(const Key('choose-photo'));
+    await tester.ensureVisible(choosePhoto);
+    await tester.tap(choosePhoto);
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.error_outline), findsNothing);
@@ -183,8 +190,6 @@ void main() {
         home: HomeScreen(
           imagePickerGateway: _FakeImagePickerGateway(),
           imageProcessor: _FakeImageProcessor(),
-          localeOverride: null,
-          onLocaleChanged: (_) {},
           pdfSpikeBuilder: (BuildContext context) {
             return const Scaffold(body: Center(child: Text('PDF spike open')));
           },
@@ -193,7 +198,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final Finder spikeButton = find.text('Open sample PDF');
+    final Finder spikeButton = find.text('Probar PDF de ejemplo');
     await tester.ensureVisible(spikeButton);
     await tester.tap(spikeButton);
     await tester.pumpAndSettle();
