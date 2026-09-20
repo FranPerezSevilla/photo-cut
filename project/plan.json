@@ -671,17 +671,18 @@
     {
       "id": "M4-T01",
       "milestone": "M4",
-      "title": "Implement export allowance and entitlement model",
+      "title": "Implement final-PDF allowance and entitlement model",
       "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M3-T01"
       ],
-      "objective": "Allow one complete free export and represent a lifetime entitlement independently of store APIs.",
+      "objective": "Allow one complete final PDF generation for free and represent a lifetime entitlement independently of store APIs.",
       "acceptance": [
-        "Preview and calibration never consume the free export.",
-        "A successful normal export consumes it exactly once.",
-        "Failed or cancelled exports do not consume it.",
+        "Step 1 preview generation never consumes the free use.",
+        "A successfully generated final review PDF consumes the free use exactly once.",
+        "Backing out before final generation or a failed final-PDF build does not consume it.",
+        "Sharing or printing an already-generated final PDF never consumes another use.",
         "Lifetime entitlement bypasses the allowance.",
         "State-transition tests cover reinstall/restore assumptions explicitly."
       ],
@@ -693,7 +694,9 @@
       ],
       "evidence": [
         "lib/core/entitlement/",
-        "test/core/entitlement/"
+        "lib/features/export/",
+        "test/core/entitlement/",
+        "test/features/export/"
       ]
     },
     {
