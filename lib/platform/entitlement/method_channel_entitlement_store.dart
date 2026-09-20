@@ -8,17 +8,17 @@ import 'package:photo_cut/core/entitlement/entitlement.dart';
 /// marker. Lifetime purchase restoration remains the store's responsibility.
 final class MethodChannelEntitlementStore implements EntitlementStore {
   const MethodChannelEntitlementStore({
-    MethodChannel channel = const MethodChannel(_channelName),
-  }) : _channel = channel;
+    this.channel = const MethodChannel(_channelName),
+  });
 
   static const String _channelName = 'com.frainzzel.photocut/entitlement';
 
-  final MethodChannel _channel;
+  final MethodChannel channel;
 
   @override
   Future<EntitlementState> read() async {
     final Map<Object?, Object?>? raw =
-        await _channel.invokeMapMethod<Object?, Object?>('read');
+        await channel.invokeMapMethod<Object?, Object?>('read');
 
     return EntitlementState(
       freeFinalPdfConsumed:
@@ -29,7 +29,7 @@ final class MethodChannelEntitlementStore implements EntitlementStore {
 
   @override
   Future<void> write(EntitlementState state) {
-    return _channel.invokeMethod<void>('write', <String, bool>{
+    return channel.invokeMethod<void>('write', <String, bool>{
       'freeFinalPdfConsumed': state.freeFinalPdfConsumed,
       'lifetimeUnlocked': state.lifetimeUnlocked,
     });
