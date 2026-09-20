@@ -4,7 +4,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/core/entitlement/entitlement.dart';
 import 'package:photo_cut/core/layout/layout.dart';
+import 'package:photo_cut/features/export/export.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
@@ -18,6 +20,9 @@ void main() {
     final _FakeImageProcessor imageProcessor = _FakeImageProcessor();
     final _FakeSheetPdfRenderer pdfRenderer = _FakeSheetPdfRenderer();
     final _FakePrintGateway printGateway = _FakePrintGateway();
+    final _FakeEntitlementStore entitlementStore = _FakeEntitlementStore();
+    final FinalPdfGenerationController finalPdfGenerationController =
+        FinalPdfGenerationController(store: entitlementStore);
     final PrintJobDocumentFactory documentFactory = PrintJobDocumentFactory(
       imageProcessor: imageProcessor,
       pdfRenderer: pdfRenderer,
@@ -41,6 +46,8 @@ void main() {
                           documentLoader: () =>
                               documentFactory.build(configuration),
                           printGateway: printGateway,
+                          finalPdfGenerationController:
+                              finalPdfGenerationController,
                           previewBuilder:
                               (
                                 BuildContext previewContext,
@@ -88,6 +95,9 @@ void main() {
     );
     expect(imageProcessor.request?.colorMode, ImageColorMode.grayscale);
     expect(pdfRenderer.showCutMarks, isTrue);
+    expect(pdfRenderer.renderCalls, 1);
+    expect(entitlementStore.state.freeFinalPdfConsumed, isTrue);
+    expect(entitlementStore.writeCount, 1);
 
     await tester.tap(find.byKey(const Key('share-final-pdf')));
     await tester.pumpAndSettle();
@@ -96,6 +106,7 @@ void main() {
 
     expect(printGateway.shared, same(reviewedDocument));
     expect(printGateway.printed, same(reviewedDocument));
+    expect(entitlementStore.writeCount, 1);
 
     await tester.tap(find.byKey(const Key('edit-print-job')));
     await tester.pumpAndSettle();
@@ -112,6 +123,17 @@ void main() {
       ),
     );
     expect(editable.controller.text, '40');
+
+    await _scrollTo(tester, reviewButton);
+    await tester.tap(reviewButton);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('final-pdf-purchase-required')),
+      findsOneWidget,
+    );
+    expect(pdfRenderer.renderCalls, 1);
+    expect(entitlementStore.writeCount, 1);
   });
 }
 
@@ -157,6 +179,7 @@ final class _FakeImageProcessor implements ImageProcessor {
 
 final class _FakeSheetPdfRenderer implements SheetPdfRenderer {
   bool? showCutMarks;
+  int renderCalls = 0;
 
   @override
   Future<PdfRenderResult> render({
@@ -164,6 +187,7 @@ final class _FakeSheetPdfRenderer implements SheetPdfRenderer {
     required Uint8List imageBytes,
     bool showCutMarks = false,
   }) async {
+    renderCalls += 1;
     this.showCutMarks = showCutMarks;
     return PdfRenderResult(
       bytes: Uint8List.fromList(<int>[37, 80, 68, 70]),
@@ -186,5 +210,20 @@ final class _FakePrintGateway implements PrintGateway {
   Future<bool> sharePdf(PrintDocument document) async {
     shared = document;
     return true;
+  }
+}
+
+
+final class _FakeEntitlementStore implements EntitlementStore {
+  EntitlementState state = const EntitlementState();
+  int writeCount = 0;
+
+  @override
+  Future<EntitlementState> read() async => state;
+
+  @override
+  Future<void> write(EntitlementState state) async {
+    this.state = state;
+    writeCount += 1;
   }
 }
