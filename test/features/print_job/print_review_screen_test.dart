@@ -3,7 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/core/entitlement/entitlement.dart';
 import 'package:photo_cut/core/units/units.dart';
+import 'package:photo_cut/features/export/export.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/print/print.dart';
@@ -14,6 +16,7 @@ void main() {
   ) async {
     final PrintDocument document = _document();
     final _FakePrintGateway gateway = _FakePrintGateway();
+    final _FakeEntitlementStore entitlementStore = _FakeEntitlementStore();
     PrintDocument? previewed;
 
     await tester.pumpWidget(
@@ -23,6 +26,9 @@ void main() {
           configuration: _configuration(),
           documentLoader: () async => document,
           printGateway: gateway,
+          finalPdfGenerationController: FinalPdfGenerationController(
+            store: entitlementStore,
+          ),
           previewBuilder:
               (BuildContext context, PrintDocument previewDocument) {
                 previewed = previewDocument;
@@ -34,6 +40,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(previewed, same(document));
+    expect(entitlementStore.state.freeFinalPdfConsumed, isTrue);
+    expect(entitlementStore.writeCount, 1);
     expect(find.text('Paso 2 de 2 · Revisa el PDF final'), findsOneWidget);
     expect(find.text('35 × 45 mm · 8 copias · A4'), findsOneWidget);
     expect(find.text('Rellenar · B/N · Con marcas de corte'), findsOneWidget);
@@ -43,11 +51,13 @@ void main() {
     await tester.tap(find.byKey(const Key('share-final-pdf')));
     await tester.pumpAndSettle();
     expect(gateway.shared, same(document));
+    expect(entitlementStore.writeCount, 1);
     expect(find.text('PDF preparado para compartir.'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('open-native-print')));
     await tester.pumpAndSettle();
     expect(gateway.printed, same(document));
+    expect(entitlementStore.writeCount, 1);
     expect(
       find.text('Has vuelto de la impresión del sistema.'),
       findsOneWidget,
@@ -68,6 +78,9 @@ void main() {
           configuration: _configuration(),
           documentLoader: () async => _document(),
           printGateway: gateway,
+          finalPdfGenerationController: FinalPdfGenerationController(
+            store: _FakeEntitlementStore(),
+          ),
           previewBuilder: (BuildContext context, PrintDocument document) {
             return const SizedBox();
           },
@@ -103,6 +116,9 @@ void main() {
             return _document();
           },
           printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: FinalPdfGenerationController(
+            store: _FakeEntitlementStore(),
+          ),
           previewBuilder: (BuildContext context, PrintDocument document) {
             return const Center(child: Text('Recovered final preview'));
           },
@@ -119,6 +135,44 @@ void main() {
     expect(find.text('Recovered final preview'), findsOneWidget);
     expect(find.text('35 × 45 mm · 8 copias · A4'), findsOneWidget);
   });
+
+  testWidgets('exhausted free use blocks before final PDF generation', (
+    WidgetTester tester,
+  ) async {
+    int generationCalls = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrintReviewScreen(
+          configuration: _configuration(),
+          documentLoader: () async {
+            generationCalls += 1;
+            return _document();
+          },
+          printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: FinalPdfGenerationController(
+            store: _FakeEntitlementStore(
+              const EntitlementState(freeFinalPdfConsumed: true),
+            ),
+          ),
+          previewBuilder: (BuildContext context, PrintDocument document) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(generationCalls, 0);
+    expect(
+      find.byKey(const Key('final-pdf-purchase-required')),
+      findsOneWidget,
+    );
+    expect(find.text('Ya has usado tu PDF gratuito'), findsOneWidget);
+    expect(find.byKey(const Key('share-final-pdf')), findsNothing);
+    expect(find.byKey(const Key('open-native-print')), findsNothing);
+  });
+
 }
 
 PrintDocument _document() {
@@ -169,5 +223,22 @@ final class _FakePrintGateway implements PrintGateway {
   Future<bool> sharePdf(PrintDocument document) async {
     shared = document;
     return shareResult;
+  }
+}
+
+
+final class _FakeEntitlementStore implements EntitlementStore {
+  _FakeEntitlementStore([this.state = const EntitlementState()]);
+
+  EntitlementState state;
+  int writeCount = 0;
+
+  @override
+  Future<EntitlementState> read() async => state;
+
+  @override
+  Future<void> write(EntitlementState state) async {
+    this.state = state;
+    writeCount += 1;
   }
 }
