@@ -706,9 +706,7 @@
       "completedAt": "2026-09-20",
       "verification": [
         "GitHub Actions CI run 35490318772: Quality and Android — success",
-        "GitHub Actions CI run 35490318772: iOS simulator build — success",
-        "flutter test --coverage — success",
-        "Android debug and release APK builds — success"
+        "GitHub Actions CI run 35490318772: iOS simulator build — success"
       ]
     },
     {
