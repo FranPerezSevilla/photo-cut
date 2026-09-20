@@ -36,7 +36,7 @@ class ProjectCliTest(unittest.TestCase):
         result = self.run_cli('status')
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('M4 — Lifetime purchase', result.stdout)
-        self.assertIn('M3-T01', result.stdout)
+        self.assertIn('M4-T01', result.stdout)
 
     def test_unknown_task_fails_cleanly(self) -> None:
         result = self.run_cli('show', 'M99-T99')
