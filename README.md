@@ -12,10 +12,11 @@ single lifetime purchase.
 
 ## Current state
 
-Photo Cut now completes the usable MVP preparation flow with contextual help,
-visual framing and a persistent one-tap PDF preview with zoom, pan and
-fit-page reset. The repository is now in **M3 — Physical validation**; the
-next task adds the calibration sheet and actual-size print guidance.
+Photo Cut now completes the usable MVP flow with contextual help, visual framing,
+a persistent one-tap PDF preview and a five-language production UI. Calibration
+was deliberately removed after real-device use. The repository is now in
+**M4 — Lifetime purchase**; the next task implements the one-free-export
+allowance and lifetime entitlement model.
 
 The canonical status is always [`project/plan.json`](project/plan.json), not a
 chat transcript, issue board or agent memory.
