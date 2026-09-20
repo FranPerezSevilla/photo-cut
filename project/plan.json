@@ -688,15 +688,20 @@
       ],
       "checks": [
         {
-          "command": "flutter test test/core/entitlement test/features/export",
+          "command": "flutter test test/core/entitlement test/features/export test/platform/entitlement test/features/print_job/print_review_screen_test.dart test/integration/print_job_flow_test.dart",
           "runner": "any"
         }
       ],
       "evidence": [
         "lib/core/entitlement/",
         "lib/features/export/",
+        "lib/platform/entitlement/",
         "test/core/entitlement/",
-        "test/features/export/"
+        "test/features/export/",
+        "test/platform/entitlement/",
+        "test/features/print_job/print_review_screen_test.dart",
+        "test/integration/print_job_flow_test.dart",
+        "project/decisions/ADR-012-final-pdf-entitlement-boundary.md"
       ]
     },
     {
