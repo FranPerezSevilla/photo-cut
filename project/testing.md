@@ -37,3 +37,15 @@ a human sandbox gate for Android and iPhone that records:
 Normal print guidance still tells users to choose 100% / actual size. Printer
 hardware and driver scaling remain outside Photo Cut's control and are not a
 separate calibration workflow.
+
+## Final-PDF allowance
+
+The free-use rule is tested below the store APIs:
+
+- Step 1 preview generation is outside the allowance controller.
+- A successful final PDF build consumes the free use once.
+- A failed final PDF build leaves the free use untouched.
+- Share and native print of an existing final PDF do not consume another use.
+- An exhausted allowance prevents the final PDF renderer from running.
+- A fresh local store models the reinstall case; lifetime restoration is
+  separately validated against real store sandboxes in M4-H01.
