@@ -29,20 +29,19 @@ final class FinalPdfGenerationResult<T> {
 /// also stay outside it: once a final PDF exists, the user may review, share and
 /// print that already-generated document without spending another use.
 final class FinalPdfGenerationController {
-  FinalPdfGenerationController({required EntitlementStore store})
-    : _store = store;
+  FinalPdfGenerationController({required this.store});
 
-  final EntitlementStore _store;
+  final EntitlementStore store;
   EntitlementState? _state;
 
-  Future<EntitlementState> get state async => _state ??= await _store.read();
+  Future<EntitlementState> get state async => _state ??= await store.read();
 
   Future<FinalPdfGenerationResult<T>> generate<T>(
     Future<T> Function() buildFinalPdf,
   ) async {
     final EntitlementState current = await state;
     if (!current.canGenerateFinalPdf) {
-      return const FinalPdfGenerationResult<T>.requiresPurchase();
+      return FinalPdfGenerationResult<T>.requiresPurchase();
     }
 
     final T document;
@@ -57,7 +56,7 @@ final class FinalPdfGenerationController {
           current.consumeSuccessfulFinalPdf();
       _state = consumed;
       try {
-        await _store.write(consumed);
+        await store.write(consumed);
       } on Object {
         // The final PDF already exists successfully. Keep the in-memory state
         // consumed rather than misreporting generation as failed.
@@ -72,6 +71,6 @@ final class FinalPdfGenerationController {
     final EntitlementState updated =
         (await state).withLifetimeUnlocked(unlocked);
     _state = updated;
-    await _store.write(updated);
+    await store.write(updated);
   }
 }
