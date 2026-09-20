@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/features/export/export.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
 import 'package:photo_cut/features/print_job/print_job_document_factory.dart';
 import 'package:photo_cut/l10n/photo_cut_localizations.dart';
+import 'package:photo_cut/platform/entitlement/entitlement.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 import 'package:photo_cut/platform/print/print.dart';
 
@@ -18,6 +20,7 @@ final class PrintReviewScreen extends StatefulWidget {
     required this.configuration,
     required this.documentLoader,
     required this.printGateway,
+    required this.finalPdfGenerationController,
     this.previewBuilder,
   });
 
@@ -34,6 +37,9 @@ final class PrintReviewScreen extends StatefulWidget {
       configuration: configuration,
       documentLoader: () => factory.build(configuration),
       printGateway: const PrintingPrintGateway(),
+      finalPdfGenerationController: FinalPdfGenerationController(
+        store: const MethodChannelEntitlementStore(),
+      ),
     );
   }
 
@@ -41,13 +47,14 @@ final class PrintReviewScreen extends StatefulWidget {
   final PrintReviewDocumentLoader documentLoader;
   final PrintReviewPreviewBuilder? previewBuilder;
   final PrintGateway printGateway;
+  final FinalPdfGenerationController finalPdfGenerationController;
 
   @override
   State<PrintReviewScreen> createState() => _PrintReviewScreenState();
 }
 
 final class _PrintReviewScreenState extends State<PrintReviewScreen> {
-  late Future<PrintDocument> _documentFuture;
+  late Future<FinalPdfGenerationResult<PrintDocument>> _documentFuture;
   bool _actionInProgress = false;
   String? _statusMessage;
 
@@ -63,16 +70,27 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.text('reviewAndPrint'))),
       body: SafeArea(
-        child: FutureBuilder<PrintDocument>(
+        child: FutureBuilder<FinalPdfGenerationResult<PrintDocument>>(
           future: _documentFuture,
-          builder: (BuildContext context, AsyncSnapshot<PrintDocument> snapshot) {
+          builder: (
+            BuildContext context,
+            AsyncSnapshot<FinalPdfGenerationResult<PrintDocument>> snapshot,
+          ) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const _PreparingDocument();
             }
-            final PrintDocument? document = snapshot.data;
-            if (snapshot.hasError || document == null) {
+            final FinalPdfGenerationResult<PrintDocument>? result = snapshot.data;
+            if (snapshot.hasError || result == null) {
               return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
             }
+            if (result.status == FinalPdfGenerationStatus.requiresPurchase) {
+              return _PurchaseRequired(onBack: _goBack);
+            }
+            if (result.status == FinalPdfGenerationStatus.failed ||
+                result.value == null) {
+              return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
+            }
+            final PrintDocument document = result.value!;
             final PrintReviewPreviewBuilder? previewBuilder = widget.previewBuilder;
             final Widget preview = previewBuilder == null
                 ? PdfDocumentPreview(document: document)
@@ -97,7 +115,11 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     );
   }
 
-  Future<PrintDocument> _loadDocument() => Future<PrintDocument>.sync(widget.documentLoader);
+  Future<FinalPdfGenerationResult<PrintDocument>> _loadDocument() {
+    return widget.finalPdfGenerationController.generate<PrintDocument>(
+      widget.documentLoader,
+    );
+  }
 
   void _retryDocument() {
     setState(() {
@@ -283,6 +305,53 @@ final class _ReviewActions extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+
+final class _PurchaseRequired extends StatelessWidget {
+  const _PurchaseRequired({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Icon(
+                Icons.workspace_premium_outlined,
+                key: Key('final-pdf-purchase-required'),
+                size: 52,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.text('freeFinalPdfUsedTitle'),
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.text('freeFinalPdfUsedBody'),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                key: const Key('purchase-required-back'),
+                onPressed: onBack,
+                child: Text(l10n.text('edit')),
+              ),
+            ],
+          ),
         ),
       ),
     );
