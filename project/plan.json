@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "project": "photo-cut",
-  "currentMilestone": "M3",
-  "updatedAt": "2026-09-07",
+  "currentMilestone": "M4",
+  "updatedAt": "2026-09-20",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -28,8 +28,8 @@
     },
     {
       "id": "M3",
-      "title": "Physical validation",
-      "goal": "Guide 100% printing and validate a real calibration sheet."
+      "title": "Product polish",
+      "goal": "Remove unnecessary calibration complexity and ship the core product flow in five languages."
     },
     {
       "id": "M4",
@@ -636,59 +636,46 @@
     {
       "id": "M3-T01",
       "milestone": "M3",
-      "title": "Generate calibration and print guidance",
-      "status": "ready",
+      "title": "Replace calibration with five-language product UI",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M2-T08"
       ],
-      "objective": "Provide a 50 mm reference square and precise instructions for actual-size printing.",
+      "objective": "Remove the calibration product flow and ship the core Photo Cut experience in Spanish, English, French, Portuguese and German.",
       "acceptance": [
-        "Calibration PDF geometry is automatically verified.",
-        "Guidance explains 100% / actual size and warns against fit-to-page.",
-        "The feature is available before purchase.",
-        "The app does not claim control over printer-driver scaling."
+        "Calibration entry points and calibration-specific product code are removed.",
+        "The core production flow is available in Spanish, English, French, Portuguese and German.",
+        "The app follows a supported operating-system locale by default and falls back to English.",
+        "A user can override the language in-app and return to System behaviour.",
+        "Normal print guidance still explains 100% / actual size without claiming control over printer-driver scaling."
       ],
       "checks": [
         {
-          "command": "flutter test test/features/calibration test/platform/pdf",
+          "command": "flutter test",
           "runner": "any"
         }
       ],
       "evidence": [
-        "lib/features/calibration/",
-        "test/features/calibration/"
-      ]
-    },
-    {
-      "id": "M3-H01",
-      "milestone": "M3",
-      "title": "Measure a physical calibration print",
-      "status": "backlog",
-      "executor": "human",
-      "dependsOn": [
-        "M3-T01"
+        "lib/l10n/",
+        "lib/app/photo_cut_app.dart",
+        "lib/features/home/home_screen.dart",
+        "project/decisions/ADR-011-localization-and-remove-calibration.md"
       ],
-      "objective": "Print and measure the generated 50 mm square on real hardware.",
-      "acceptance": [
-        "A human records device, OS, printer, print route and scaling setting.",
-        "Both square dimensions are measured and recorded.",
-        "The result is linked to an exact commit.",
-        "Any deviation greater than 1 mm is investigated before release."
-      ],
-      "checks": [],
-      "evidence": [
-        "project/evidence/calibration/<date>-<printer>.md"
+      "completedAt": "2026-09-15",
+      "verification": [
+        "PR #29 merged as d9593e2a18bb3a058628c77eae4392b2725d8399",
+        "GitHub Actions CI run 34947138191 — success"
       ]
     },
     {
       "id": "M4-T01",
       "milestone": "M4",
       "title": "Implement export allowance and entitlement model",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
-        "M3-H01"
+        "M3-T01"
       ],
       "objective": "Allow one complete free export and represent a lifetime entitlement independently of store APIs.",
       "acceptance": [
@@ -760,40 +747,13 @@
       ]
     },
     {
-      "id": "M5-T01",
-      "milestone": "M5",
-      "title": "Localise the app in Spanish and English",
-      "status": "backlog",
-      "executor": "agent",
-      "dependsOn": [
-        "M4-H01"
-      ],
-      "objective": "Move all user-visible copy into Flutter localisation resources and cover both launch languages.",
-      "acceptance": [
-        "No production user-visible string is hard-coded in a widget.",
-        "Spanish and English flows fit supported phone sizes.",
-        "Units and decimal formatting follow locale expectations.",
-        "Widget tests run in both locales."
-      ],
-      "checks": [
-        {
-          "command": "flutter test test/localization test/features",
-          "runner": "any"
-        }
-      ],
-      "evidence": [
-        "lib/l10n/",
-        "test/localization/"
-      ]
-    },
-    {
       "id": "M5-H01",
       "milestone": "M5",
       "title": "Confirm app identity and store ownership",
       "status": "backlog",
       "executor": "human",
       "dependsOn": [
-        "M5-T01"
+        "M4-H01"
       ],
       "objective": "Confirm final display name, bundle IDs and store accounts before signing configuration is locked.",
       "acceptance": [

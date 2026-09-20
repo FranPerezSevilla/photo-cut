@@ -23,15 +23,17 @@ A visual preview is not proof of exact size. Tests should assert:
 - deterministic layout for the same specification;
 - copy count across page boundaries.
 
-## Physical print gate
+## Store purchase gate
 
-CI cannot prove printer output. M3 includes a 50 mm calibration square and a human
-record containing:
+CI can verify entitlement state transitions and purchase-adapter behaviour with
+fakes, but it cannot prove real store checkout or restoration. M4 therefore keeps
+a human sandbox gate for Android and iPhone that records:
 
-- device and OS;
-- printer model and print route;
-- “actual size / 100%” setting used;
-- measured width/height;
-- date and app commit.
+- app version and exact commit;
+- device and operating system;
+- purchase, cancellation and restoration outcomes;
+- store product name and one-time pricing shown to the tester.
 
-Never use OCR or a photographed ruler as the sole measurement evidence.
+Normal print guidance still tells users to choose 100% / actual size. Printer
+hardware and driver scaling remain outside Photo Cut's control and are not a
+separate calibration workflow.
