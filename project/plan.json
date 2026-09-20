@@ -672,7 +672,7 @@
       "id": "M4-T01",
       "milestone": "M4",
       "title": "Implement final-PDF allowance and entitlement model",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M3-T01"
@@ -702,13 +702,20 @@
         "test/features/print_job/print_review_screen_test.dart",
         "test/integration/print_job_flow_test.dart",
         "project/decisions/ADR-012-final-pdf-entitlement-boundary.md"
+      ],
+      "completedAt": "2026-09-20",
+      "verification": [
+        "GitHub Actions CI run 35490318772: Quality and Android — success",
+        "GitHub Actions CI run 35490318772: iOS simulator build — success",
+        "flutter test --coverage — success",
+        "Android debug and release APK builds — success"
       ]
     },
     {
       "id": "M4-T02",
       "milestone": "M4",
       "title": "Integrate the lifetime store purchase",
-      "status": "backlog",
+      "status": "ready",
       "executor": "agent",
       "dependsOn": [
         "M4-T01"
