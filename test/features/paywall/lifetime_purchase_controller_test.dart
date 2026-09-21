@@ -21,6 +21,33 @@ void main() {
     controller.dispose();
   });
 
+
+  test('pending purchase keeps the paywall busy without unlocking', () async {
+    int unlockCalls = 0;
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway();
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      setLifetimeUnlocked: (_) async {
+        unlockCalls += 1;
+      },
+    );
+    await controller.initialize();
+
+    gateway.emit(
+      const PurchaseUpdate(
+        productId: 'photo_cut_lifetime',
+        status: PurchaseUpdateStatus.pending,
+        needsCompletion: false,
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.state.phase, LifetimePurchasePhase.purchasing);
+    expect(controller.state.isBusy, isTrue);
+    expect(unlockCalls, 0);
+    controller.dispose();
+  });
+
   test('purchase unlocks before completing the store transaction', () async {
     final List<String> order = <String>[];
     final _FakePurchaseGateway gateway = _FakePurchaseGateway(
