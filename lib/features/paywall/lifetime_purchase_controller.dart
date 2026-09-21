@@ -189,6 +189,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
             clearError: true,
           ),
         );
+        return;
       case PurchaseUpdateStatus.cancelled:
         _setState(
           _state.copyWith(
@@ -196,6 +197,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
             clearError: true,
           ),
         );
+        return;
       case PurchaseUpdateStatus.failed:
         _setState(
           _state.copyWith(
@@ -203,6 +205,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
             errorCode: update.errorMessage ?? 'purchase_failed',
           ),
         );
+        return;
       case PurchaseUpdateStatus.purchased:
       case PurchaseUpdateStatus.restored:
         try {
@@ -222,6 +225,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
             ),
           );
         }
+        return;
     }
   }
 
