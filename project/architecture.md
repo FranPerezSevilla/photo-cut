@@ -23,7 +23,8 @@ lib/
 │   ├── image_processing/   EXIF, crop and colour transformations
 │   ├── pdf/                Exact-size document generation
 │   ├── print/              Preview/share/native print
-│   └── entitlement/        Native local entitlement persistence
+│   ├── entitlement/        Native local entitlement persistence
+│   └── purchase/           Store product/purchase boundary
 └── features/
     └── print_job/          State/controller and user-facing pages
 ```
@@ -153,11 +154,11 @@ Current runtime dependencies have narrow boundaries:
 - `pdf` for document generation;
 - `printing` for preview/share/native print;
 - `image_picker` for source-image selection;
-- `image` for orientation-aware crop and colour processing.
+- `image` for orientation-aware crop and colour processing;
+- `in_app_purchase` 3.3.1 for one non-consumable lifetime unlock, isolated behind `PurchaseGateway` (BSD-3-Clause).
 
 `crop_your_image` was evaluated for M2-T03 and not retained because the narrow
 MVP only needs normalized focus within a fixed output aspect. Reconsidering a
 freeform crop editor requires a new task and evidence.
 
-`in_app_purchase` remains planned for the lifetime product. Package additions and
-upgrades must include a reason, licence check, test impact and updated lockfile.
+`in_app_purchase` is used only by `lib/platform/purchase/`. Product-visible code never imports store plugin types. Package additions and upgrades must include a reason, licence check, test impact and updated lockfile.
