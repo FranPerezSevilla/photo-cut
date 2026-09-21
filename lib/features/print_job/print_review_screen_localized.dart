@@ -42,7 +42,7 @@ final class PrintReviewScreen extends StatefulWidget {
     final LifetimePurchaseController purchaseController =
         LifetimePurchaseController(
           gateway: InAppPurchaseGateway(),
-          setLifetimeUnlocked: generationController.setLifetimeUnlocked,
+          entitlementWriter: generationController.setLifetimeUnlocked,
         );
     return PrintReviewScreen(
       key: key,
