@@ -1,15 +1,65 @@
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:photo_cut/platform/purchase/purchase_gateway.dart';
 
-final class InAppPurchaseGateway implements PurchaseGateway {
-  InAppPurchaseGateway({InAppPurchase? inAppPurchase})
+abstract interface class InAppPurchaseClient {
+  Stream<List<PurchaseDetails>> get purchaseStream;
+
+  Future<bool> isAvailable();
+
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> identifiers);
+
+  Future<bool> buyNonConsumable({required PurchaseParam purchaseParam});
+
+  Future<void> restorePurchases();
+
+  Future<void> completePurchase(PurchaseDetails purchase);
+}
+
+final class PluginInAppPurchaseClient implements InAppPurchaseClient {
+  PluginInAppPurchaseClient({InAppPurchase? inAppPurchase})
     : _inAppPurchase = inAppPurchase ?? InAppPurchase.instance;
 
   final InAppPurchase _inAppPurchase;
 
   @override
+  Stream<List<PurchaseDetails>> get purchaseStream =>
+      _inAppPurchase.purchaseStream;
+
+  @override
+  Future<bool> isAvailable() => _inAppPurchase.isAvailable();
+
+  @override
+  Future<ProductDetailsResponse> queryProductDetails(
+    Set<String> identifiers,
+  ) {
+    return _inAppPurchase.queryProductDetails(identifiers);
+  }
+
+  @override
+  Future<bool> buyNonConsumable({
+    required PurchaseParam purchaseParam,
+  }) {
+    return _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+  }
+
+  @override
+  Future<void> restorePurchases() => _inAppPurchase.restorePurchases();
+
+  @override
+  Future<void> completePurchase(PurchaseDetails purchase) {
+    return _inAppPurchase.completePurchase(purchase);
+  }
+}
+
+final class InAppPurchaseGateway implements PurchaseGateway {
+  InAppPurchaseGateway({InAppPurchaseClient? client})
+    : _client = client ?? PluginInAppPurchaseClient();
+
+  final InAppPurchaseClient _client;
+
+  @override
   Stream<PurchaseUpdate> get updates {
-    return _inAppPurchase.purchaseStream.expand<PurchaseUpdate>(
+    return _client.purchaseStream.expand<PurchaseUpdate>(
       (List<PurchaseDetails> purchases) => purchases.map(_mapPurchase),
     );
   }
@@ -17,7 +67,7 @@ final class InAppPurchaseGateway implements PurchaseGateway {
   @override
   Future<PurchaseProductResult> loadProduct(String productId) async {
     try {
-      final bool available = await _inAppPurchase.isAvailable();
+      final bool available = await _client.isAvailable();
       if (!available) {
         return const PurchaseProductResult(
           storeAvailable: false,
@@ -25,7 +75,7 @@ final class InAppPurchaseGateway implements PurchaseGateway {
         );
       }
 
-      final ProductDetailsResponse response = await _inAppPurchase
+      final ProductDetailsResponse response = await _client
           .queryProductDetails(<String>{productId});
 
       if (response.error != null) {
@@ -35,9 +85,13 @@ final class InAppPurchaseGateway implements PurchaseGateway {
         );
       }
 
-      final ProductDetails? details = response.productDetails
-          .where((ProductDetails item) => item.id == productId)
-          .firstOrNull;
+      ProductDetails? details;
+      for (final ProductDetails candidate in response.productDetails) {
+        if (candidate.id == productId) {
+          details = candidate;
+          break;
+        }
+      }
 
       if (details == null) {
         return PurchaseProductResult(
@@ -73,13 +127,13 @@ final class InAppPurchaseGateway implements PurchaseGateway {
       throw StateError('Purchase product was not created by this gateway.');
     }
 
-    await _inAppPurchase.buyNonConsumable(
+    await _client.buyNonConsumable(
       purchaseParam: PurchaseParam(productDetails: payload),
     );
   }
 
   @override
-  Future<void> restorePurchases() => _inAppPurchase.restorePurchases();
+  Future<void> restorePurchases() => _client.restorePurchases();
 
   @override
   Future<void> completePurchase(PurchaseUpdate update) async {
@@ -91,7 +145,7 @@ final class InAppPurchaseGateway implements PurchaseGateway {
     if (payload is! PurchaseDetails) {
       throw StateError('Purchase update was not created by this gateway.');
     }
-    await _inAppPurchase.completePurchase(payload);
+    await _client.completePurchase(payload);
   }
 
   PurchaseUpdate _mapPurchase(PurchaseDetails details) {
