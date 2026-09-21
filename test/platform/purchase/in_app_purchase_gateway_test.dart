@@ -5,6 +5,21 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:photo_cut/platform/purchase/purchase.dart';
 
 void main() {
+  test('reports an unavailable store without querying products', () async {
+    final _FakeInAppPurchaseClient client = _FakeInAppPurchaseClient(
+      available: false,
+    );
+    final InAppPurchaseGateway gateway = InAppPurchaseGateway(client: client);
+
+    final PurchaseProductResult result = await gateway.loadProduct(
+      'photo_cut_lifetime',
+    );
+
+    expect(result.storeAvailable, isFalse);
+    expect(result.product, isNull);
+    expect(client.queriedIds, isNull);
+  });
+
   test('loads the lifetime product with the store-localized price', () async {
     final _FakeInAppPurchaseClient client = _FakeInAppPurchaseClient(
       productResponse: ProductDetailsResponse(
