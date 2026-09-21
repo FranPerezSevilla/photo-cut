@@ -10,6 +10,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
+    addTearDown(gateway.dispose);
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
       entitlementWriter: (_) async {},
@@ -80,6 +81,8 @@ final class _FakePurchaseGateway implements PurchaseGateway {
 
   int buyCalls = 0;
   int restoreCalls = 0;
+
+  Future<void> dispose() => _updates.close();
 
   @override
   Stream<PurchaseUpdate> get updates => _updates.stream;
