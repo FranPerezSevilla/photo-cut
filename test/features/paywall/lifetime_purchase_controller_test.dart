@@ -9,7 +9,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (_) async {},
+      entitlementWriter: (_) async {},
     );
 
     await controller.initialize();
@@ -27,7 +27,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (_) async {
+      entitlementWriter: (_) async {
         unlockCalls += 1;
       },
     );
@@ -55,7 +55,7 @@ void main() {
     );
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (bool unlocked) async {
+      entitlementWriter: (bool unlocked) async {
         expect(unlocked, isTrue);
         order.add('unlock');
       },
@@ -91,7 +91,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (bool unlocked) async {
+      entitlementWriter: (bool unlocked) async {
         lifetimeUnlocked = unlocked;
       },
     );
@@ -130,7 +130,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (_) async {
+      entitlementWriter: (_) async {
         unlockCalls += 1;
       },
     );
@@ -155,7 +155,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (_) async {
+      entitlementWriter: (_) async {
         unlockCalls += 1;
       },
     );
