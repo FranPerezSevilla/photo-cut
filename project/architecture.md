@@ -16,12 +16,14 @@ lib/
 │   ├── units/              PhysicalLength and point conversion
 │   ├── layout/             Pure sheet-placement engine
 │   ├── crop/               Normalized crop/fit geometry
-│   └── quality/            DPI and resolution advice
+│   ├── quality/            DPI and resolution advice
+│   └── entitlement/        Store-independent free-use/lifetime state
 ├── platform/
 │   ├── image_picker/       Gallery boundary
 │   ├── image_processing/   EXIF, crop and colour transformations
 │   ├── pdf/                Exact-size document generation
-│   └── print/              Preview/share/native print
+│   ├── print/              Preview/share/native print
+│   └── entitlement/        Native local entitlement persistence
 └── features/
     └── print_job/          State/controller and user-facing pages
 ```
@@ -90,6 +92,18 @@ The native print screen is a printer handoff, not a second document editor.
 Pure `core/quality` logic calculates effective-resolution guidance from
 orientation-aware source pixels, normalized crop state and exact physical output
 size. UI warnings consume that advice but never modify geometry.
+
+`core/entitlement` owns store-independent commercial state. The Step 1 preview
+does not participate in entitlement checks. The final review route gates the
+single `PrintJobDocumentFactory.build(...)` that creates the final PDF: a
+successful build consumes the one free use, while a failed build does not.
+Share and native print operate only on an already-generated immutable document
+and therefore never consume another use.
+
+The free-use marker and cached lifetime flag are persisted locally through a
+small method channel backed by Android SharedPreferences and iOS UserDefaults.
+Uninstalling may clear local state; the store purchase receipt remains the
+authority for restoring lifetime access in M4-T02.
 
 ## Physical geometry
 

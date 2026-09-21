@@ -79,7 +79,7 @@ remains language-neutral.
 - Optional cut marks.
 - Resolution warning based on effective DPI.
 - PDF preview, share and native print hand-off.
-- One free export, then a lifetime unlock.
+- One successfully generated final review PDF free, then a lifetime unlock.
 - Spanish, English, French, Portuguese and German before public release.
 - Offline use and local-only image processing.
 
@@ -114,7 +114,9 @@ affect the final result.
 
 Planned model:
 
-- one complete export free;
+- one successfully generated final review PDF free;
+- Step 1 previews do not consume the free use;
+- sharing and printing an already-generated final PDF do not consume another use;
 - lifetime unlock as a non-consumable in-app purchase;
 - no subscription, advertising or consumable credits.
 
