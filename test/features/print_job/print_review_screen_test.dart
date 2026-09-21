@@ -6,9 +6,11 @@ import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/core/entitlement/entitlement.dart';
 import 'package:photo_cut/core/units/units.dart';
 import 'package:photo_cut/features/export/export.dart';
+import 'package:photo_cut/features/paywall/paywall.dart';
 import 'package:photo_cut/features/print_job/print_job.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/print/print.dart';
+import 'package:photo_cut/platform/purchase/purchase.dart';
 
 void main() {
   testWidgets('reviews one immutable document and routes both final actions', (
@@ -173,6 +175,60 @@ void main() {
     expect(find.byKey(const Key('open-native-print')), findsNothing);
   });
 
+
+  testWidgets('lifetime purchase unlocks and retries final PDF generation', (
+    WidgetTester tester,
+  ) async {
+    int generationCalls = 0;
+    final _FakeEntitlementStore entitlementStore = _FakeEntitlementStore(
+      const EntitlementState(freeFinalPdfConsumed: true),
+    );
+    final FinalPdfGenerationController generationController =
+        FinalPdfGenerationController(store: entitlementStore);
+    final _FakePurchaseGateway purchaseGateway = _FakePurchaseGateway(
+      autoPurchase: true,
+    );
+    final LifetimePurchaseController purchaseController =
+        LifetimePurchaseController(
+          gateway: purchaseGateway,
+          setLifetimeUnlocked: generationController.setLifetimeUnlocked,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrintReviewScreen(
+          configuration: _configuration(),
+          documentLoader: () async {
+            generationCalls += 1;
+            return _document();
+          },
+          printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: generationController,
+          lifetimePurchaseController: purchaseController,
+          previewBuilder: (BuildContext context, PrintDocument document) {
+            return const Center(child: Text('Unlocked final PDF'));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(generationCalls, 0);
+    expect(find.byKey(const Key('lifetime-paywall')), findsOneWidget);
+    expect(find.text('Pago único · Sin suscripción'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('buy-lifetime')));
+    await tester.pumpAndSettle();
+
+    expect(purchaseGateway.buyCalls, 1);
+    expect(purchaseGateway.completeCalls, 1);
+    expect(entitlementStore.state.lifetimeUnlocked, isTrue);
+    expect(generationCalls, 1);
+    expect(find.text('Unlocked final PDF'), findsOneWidget);
+    expect(find.byKey(const Key('share-final-pdf')), findsOneWidget);
+    expect(find.byKey(const Key('open-native-print')), findsOneWidget);
+  });
+
 }
 
 PrintDocument _document() {
@@ -240,5 +296,57 @@ final class _FakeEntitlementStore implements EntitlementStore {
   Future<void> write(EntitlementState state) async {
     this.state = state;
     writeCount += 1;
+  }
+}
+
+
+final class _FakePurchaseGateway implements PurchaseGateway {
+  _FakePurchaseGateway({this.autoPurchase = false});
+
+  final bool autoPurchase;
+  final StreamController<PurchaseUpdate> _updates =
+      StreamController<PurchaseUpdate>.broadcast();
+
+  int buyCalls = 0;
+  int completeCalls = 0;
+
+  @override
+  Stream<PurchaseUpdate> get updates => _updates.stream;
+
+  @override
+  Future<PurchaseProductResult> loadProduct(String productId) async {
+    return PurchaseProductResult(
+      storeAvailable: true,
+      product: PurchaseProduct(
+        id: productId,
+        title: 'Photo Cut Lifetime',
+        description: 'One-time unlock',
+        price: '3,99 €',
+        platformPayload: Object(),
+      ),
+    );
+  }
+
+  @override
+  Future<void> buyNonConsumable(PurchaseProduct product) async {
+    buyCalls += 1;
+    if (autoPurchase) {
+      _updates.add(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.purchased,
+          needsCompletion: true,
+          platformPayload: 'opaque',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> restorePurchases() async {}
+
+  @override
+  Future<void> completePurchase(PurchaseUpdate update) async {
+    completeCalls += 1;
   }
 }
