@@ -48,18 +48,17 @@ final class LifetimePurchaseState {
 
 final class LifetimePurchaseController extends ChangeNotifier {
   LifetimePurchaseController({
-    required PurchaseGateway gateway,
-    required Future<void> Function(bool unlocked) setLifetimeUnlocked,
+    required this.gateway,
+    required this.entitlementWriter,
     this.productId = 'photo_cut_lifetime',
-  }) : _gateway = gateway,
-       _setLifetimeUnlocked = setLifetimeUnlocked;
+  });
 
-  final PurchaseGateway _gateway;
-  final Future<void> Function(bool unlocked) _setLifetimeUnlocked;
+  final PurchaseGateway gateway;
+  final Future<void> Function(bool unlocked) entitlementWriter;
   final String productId;
 
   LifetimePurchaseState _state = const LifetimePurchaseState();
-  StreamSubscription<PurchaseUpdate>? _subscription;
+  late final StreamSubscription<PurchaseUpdate> _subscription;
   bool _initialized = false;
   bool _disposed = false;
 
@@ -71,7 +70,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
     }
     _initialized = true;
 
-    _subscription = _gateway.updates.listen(
+    _subscription = gateway.updates.listen(
       _handleUpdate,
       onError: (_) {
         _setState(
@@ -84,7 +83,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
     );
 
     _setState(_state.copyWith(phase: LifetimePurchasePhase.loading));
-    final PurchaseProductResult result = await _gateway.loadProduct(productId);
+    final PurchaseProductResult result = await gateway.loadProduct(productId);
     if (_disposed) {
       return;
     }
@@ -131,7 +130,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
     );
 
     try {
-      await _gateway.buyNonConsumable(product);
+      await gateway.buyNonConsumable(product);
     } on Object {
       _setState(
         _state.copyWith(
@@ -155,7 +154,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
     );
 
     try {
-      await _gateway.restorePurchases();
+      await gateway.restorePurchases();
       if (_state.phase == LifetimePurchasePhase.restoring) {
         _setState(
           _state.copyWith(
@@ -209,11 +208,11 @@ final class LifetimePurchaseController extends ChangeNotifier {
       case PurchaseUpdateStatus.purchased:
       case PurchaseUpdateStatus.restored:
         try {
-          await _setLifetimeUnlocked(true);
+          await entitlementWriter(true);
           try {
-            await _gateway.completePurchase(update);
+            await gateway.completePurchase(update);
           } on Object {
-            await _setLifetimeUnlocked(false);
+            await entitlementWriter(false);
             rethrow;
           }
           _setState(
@@ -245,9 +244,8 @@ final class LifetimePurchaseController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    final StreamSubscription<PurchaseUpdate>? subscription = _subscription;
-    if (subscription != null) {
-      unawaited(subscription.cancel());
+    if (_initialized) {
+      unawaited(_subscription.cancel());
     }
     super.dispose();
   }
