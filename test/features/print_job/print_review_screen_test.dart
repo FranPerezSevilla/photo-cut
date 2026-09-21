@@ -192,7 +192,7 @@ void main() {
     final LifetimePurchaseController purchaseController =
         LifetimePurchaseController(
           gateway: purchaseGateway,
-          setLifetimeUnlocked: generationController.setLifetimeUnlocked,
+          entitlementWriter: generationController.setLifetimeUnlocked,
         );
 
     await tester.pumpWidget(
