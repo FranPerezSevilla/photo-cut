@@ -127,9 +127,12 @@ final class InAppPurchaseGateway implements PurchaseGateway {
       throw StateError('Purchase product was not created by this gateway.');
     }
 
-    await _client.buyNonConsumable(
+    final bool started = await _client.buyNonConsumable(
       purchaseParam: PurchaseParam(productDetails: payload),
     );
+    if (!started) {
+      throw StateError('The store did not start the purchase flow.');
+    }
   }
 
   @override
