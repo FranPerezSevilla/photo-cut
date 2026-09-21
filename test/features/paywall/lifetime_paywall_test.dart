@@ -12,7 +12,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (_) async {},
+      entitlementWriter: (_) async {},
     );
 
     await tester.pumpWidget(
@@ -49,7 +49,7 @@ void main() {
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();
     final LifetimePurchaseController controller = LifetimePurchaseController(
       gateway: gateway,
-      setLifetimeUnlocked: (_) async {},
+      entitlementWriter: (_) async {},
     );
 
     await tester.pumpWidget(
