@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-09-20",
+  "updatedAt": "2026-09-21",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -728,13 +728,19 @@
       ],
       "checks": [
         {
-          "command": "flutter test test/platform/purchase test/features/paywall",
+          "command": "flutter test test/platform/purchase test/features/paywall test/features/print_job/print_review_screen_test.dart",
           "runner": "any"
         }
       ],
       "evidence": [
-        "lib/platform/purchase_gateway.dart",
-        "test/platform/purchase_gateway_test.dart"
+        "lib/platform/purchase/",
+        "lib/features/paywall/",
+        "test/platform/purchase/",
+        "test/features/paywall/",
+        "test/features/print_job/print_review_screen_test.dart",
+        "project/decisions/ADR-013-lifetime-store-purchase.md",
+        "pubspec.yaml",
+        "pubspec.lock"
       ]
     },
     {
