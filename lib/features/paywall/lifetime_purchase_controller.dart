@@ -210,7 +210,12 @@ final class LifetimePurchaseController extends ChangeNotifier {
       case PurchaseUpdateStatus.restored:
         try {
           await _setLifetimeUnlocked(true);
-          await _gateway.completePurchase(update);
+          try {
+            await _gateway.completePurchase(update);
+          } on Object {
+            await _setLifetimeUnlocked(false);
+            rethrow;
+          }
           _setState(
             _state.copyWith(
               phase: LifetimePurchasePhase.unlocked,
@@ -240,7 +245,10 @@ final class LifetimePurchaseController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    unawaited(_subscription?.cancel());
+    final StreamSubscription<PurchaseUpdate>? subscription = _subscription;
+    if (subscription != null) {
+      unawaited(subscription.cancel());
+    }
     super.dispose();
   }
 }
