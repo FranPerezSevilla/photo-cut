@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-09-21",
+  "updatedAt": "2026-09-22",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -713,7 +713,7 @@
       "id": "M4-T02",
       "milestone": "M4",
       "title": "Integrate the lifetime store purchase",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T01"
@@ -741,13 +741,18 @@
         "project/decisions/ADR-013-lifetime-store-purchase.md",
         "pubspec.yaml",
         "pubspec.lock"
+      ],
+      "completedAt": "2026-09-22",
+      "verification": [
+        "GitHub Actions CI run 35591824321: Quality and Android — success",
+        "GitHub Actions CI run 35591824321: iOS simulator build — success"
       ]
     },
     {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
-      "status": "backlog",
+      "status": "awaiting_human",
       "executor": "human",
       "dependsOn": [
         "M4-T02"
@@ -763,7 +768,8 @@
       "evidence": [
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
-      ]
+      ],
+      "statusReason": "Requires real Google Play / App Store sandbox accounts and devices to validate purchase, cancellation and restoration."
     },
     {
       "id": "M5-H01",
