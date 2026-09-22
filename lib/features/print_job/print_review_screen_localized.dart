@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/features/export/export.dart';
+import 'package:photo_cut/features/paywall/paywall.dart';
 import 'package:photo_cut/features/print_job/print_job_configuration.dart';
 import 'package:photo_cut/features/print_job/print_job_document_factory.dart';
 import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 import 'package:photo_cut/platform/entitlement/entitlement.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
 import 'package:photo_cut/platform/print/print.dart';
+import 'package:photo_cut/platform/purchase/purchase.dart';
 
 typedef PrintReviewDocumentLoader = Future<PrintDocument> Function();
 typedef PrintReviewPreviewBuilder = Widget Function(
@@ -21,6 +23,7 @@ final class PrintReviewScreen extends StatefulWidget {
     required this.documentLoader,
     required this.printGateway,
     required this.finalPdfGenerationController,
+    this.lifetimePurchaseController,
     this.previewBuilder,
   });
 
@@ -32,14 +35,22 @@ final class PrintReviewScreen extends StatefulWidget {
     final PrintJobDocumentFactory factory = PrintJobDocumentFactory(
       imageProcessor: imageProcessor,
     );
+    final FinalPdfGenerationController generationController =
+        FinalPdfGenerationController(
+          store: const MethodChannelEntitlementStore(),
+        );
+    final LifetimePurchaseController purchaseController =
+        LifetimePurchaseController(
+          gateway: InAppPurchaseGateway(),
+          entitlementWriter: generationController.setLifetimeUnlocked,
+        );
     return PrintReviewScreen(
       key: key,
       configuration: configuration,
       documentLoader: () => factory.build(configuration),
       printGateway: const PrintingPrintGateway(),
-      finalPdfGenerationController: FinalPdfGenerationController(
-        store: const MethodChannelEntitlementStore(),
-      ),
+      finalPdfGenerationController: generationController,
+      lifetimePurchaseController: purchaseController,
     );
   }
 
@@ -48,6 +59,7 @@ final class PrintReviewScreen extends StatefulWidget {
   final PrintReviewPreviewBuilder? previewBuilder;
   final PrintGateway printGateway;
   final FinalPdfGenerationController finalPdfGenerationController;
+  final LifetimePurchaseController? lifetimePurchaseController;
 
   @override
   State<PrintReviewScreen> createState() => _PrintReviewScreenState();
@@ -84,7 +96,16 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
               return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
             }
             if (result.status == FinalPdfGenerationStatus.requiresPurchase) {
-              return _PurchaseRequired(onBack: _goBack);
+              final LifetimePurchaseController? purchaseController =
+                  widget.lifetimePurchaseController;
+              if (purchaseController == null) {
+                return _PurchaseRequired(onBack: _goBack);
+              }
+              return LifetimePaywall(
+                controller: purchaseController,
+                onUnlocked: _retryDocument,
+                onBack: _goBack,
+              );
             }
             if (result.status == FinalPdfGenerationStatus.failed ||
                 result.value == null) {
@@ -113,6 +134,12 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    widget.lifetimePurchaseController?.dispose();
+    super.dispose();
   }
 
   Future<FinalPdfGenerationResult<PrintDocument>> _loadDocument() {
