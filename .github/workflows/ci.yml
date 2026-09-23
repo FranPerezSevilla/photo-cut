@@ -82,6 +82,9 @@ jobs:
       - name: Build installable Android test APK
         run: flutter build apk --release
 
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
       - name: Stage generated project scaffold
         run: |
           mkdir -p build/bootstrap-project
@@ -102,6 +105,7 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/app-debug.apk
             build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/*.aab
             build/evidence/sample-35x45-a4.pdf
             build/evidence/sample-35x45-a4.geometry.json
             coverage/lcov.info
