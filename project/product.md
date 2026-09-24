@@ -115,6 +115,7 @@ affect the final result.
 Planned model:
 
 - one successfully generated final review PDF free;
+- before that first free final PDF is generated, the app clearly explains that it is the one free generation, asks the user to review the job settings, and requires explicit confirmation;
 - Step 1 previews do not consume the free use;
 - sharing and printing an already-generated final PDF do not consume another use;
 - lifetime unlock as a non-consumable in-app purchase;
