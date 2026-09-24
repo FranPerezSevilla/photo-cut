@@ -66,14 +66,16 @@ final class PrintReviewScreen extends StatefulWidget {
 }
 
 final class _PrintReviewScreenState extends State<PrintReviewScreen> {
-  late Future<FinalPdfGenerationResult<PrintDocument>> _documentFuture;
+  Future<FinalPdfGenerationResult<PrintDocument>>? _documentFuture;
+  bool _checkingEntitlement = true;
+  bool _awaitingFreePdfConfirmation = false;
   bool _actionInProgress = false;
   String? _statusMessage;
 
   @override
   void initState() {
     super.initState();
-    _documentFuture = _loadDocument();
+    _prepareInitialDocument();
   }
 
   @override
@@ -82,56 +84,14 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.text('reviewAndPrint'))),
       body: SafeArea(
-        child: FutureBuilder<FinalPdfGenerationResult<PrintDocument>>(
-          future: _documentFuture,
-          builder: (
-            BuildContext context,
-            AsyncSnapshot<FinalPdfGenerationResult<PrintDocument>> snapshot,
-          ) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const _PreparingDocument();
-            }
-            final FinalPdfGenerationResult<PrintDocument>? result = snapshot.data;
-            if (snapshot.hasError || result == null) {
-              return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
-            }
-            if (result.status == FinalPdfGenerationStatus.requiresPurchase) {
-              final LifetimePurchaseController? purchaseController =
-                  widget.lifetimePurchaseController;
-              if (purchaseController == null) {
-                return _PurchaseRequired(onBack: _goBack);
-              }
-              return LifetimePaywall(
-                controller: purchaseController,
-                onUnlocked: _retryDocument,
+        child: _checkingEntitlement
+            ? const _CheckingEntitlement()
+            : _awaitingFreePdfConfirmation
+            ? _FreeFinalPdfConfirmation(
                 onBack: _goBack,
-              );
-            }
-            if (result.status == FinalPdfGenerationStatus.failed ||
-                result.value == null) {
-              return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
-            }
-            final PrintDocument document = result.value!;
-            final PrintReviewPreviewBuilder? previewBuilder = widget.previewBuilder;
-            final Widget preview = previewBuilder == null
-                ? PdfDocumentPreview(document: document)
-                : previewBuilder(context, document);
-            return Column(
-              children: <Widget>[
-                _ReviewSummary(configuration: widget.configuration, document: document),
-                Expanded(child: preview),
-                _ReviewActions(
-                  actionInProgress: _actionInProgress,
-                  nativePrintLabel: _nativePrintLabel(context),
-                  onBack: _goBack,
-                  onPrint: () => _print(document),
-                  onShare: () => _share(document),
-                  statusMessage: _statusMessage,
-                ),
-              ],
-            );
-          },
-        ),
+                onConfirm: _confirmFreePdfGeneration,
+              )
+            : _buildDocumentBody(),
       ),
     );
   }
@@ -142,6 +102,99 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     super.dispose();
   }
 
+  Future<void> _prepareInitialDocument() async {
+    try {
+      final entitlement = await widget.finalPdfGenerationController.state;
+      if (!mounted) return;
+      if (!entitlement.lifetimeUnlocked &&
+          !entitlement.freeFinalPdfConsumed) {
+        setState(() {
+          _checkingEntitlement = false;
+          _awaitingFreePdfConfirmation = true;
+          _documentFuture = null;
+        });
+        return;
+      }
+    } on Object {
+      if (!mounted) return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _checkingEntitlement = false;
+      _awaitingFreePdfConfirmation = false;
+      _documentFuture = _loadDocument();
+    });
+  }
+
+  Widget _buildDocumentBody() {
+    final Future<FinalPdfGenerationResult<PrintDocument>>? documentFuture =
+        _documentFuture;
+    if (documentFuture == null) {
+      return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
+    }
+    return FutureBuilder<FinalPdfGenerationResult<PrintDocument>>(
+      future: documentFuture,
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<FinalPdfGenerationResult<PrintDocument>> snapshot,
+      ) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const _PreparingDocument();
+        }
+        final FinalPdfGenerationResult<PrintDocument>? result = snapshot.data;
+        if (snapshot.hasError || result == null) {
+          return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
+        }
+        if (result.status == FinalPdfGenerationStatus.requiresPurchase) {
+          final LifetimePurchaseController? purchaseController =
+              widget.lifetimePurchaseController;
+          if (purchaseController == null) {
+            return _PurchaseRequired(onBack: _goBack);
+          }
+          return LifetimePaywall(
+            controller: purchaseController,
+            onUnlocked: _retryDocument,
+            onBack: _goBack,
+          );
+        }
+        if (result.status == FinalPdfGenerationStatus.failed ||
+            result.value == null) {
+          return _DocumentError(onBack: _goBack, onRetry: _retryDocument);
+        }
+        final PrintDocument document = result.value!;
+        final PrintReviewPreviewBuilder? previewBuilder = widget.previewBuilder;
+        final Widget preview = previewBuilder == null
+            ? PdfDocumentPreview(document: document)
+            : previewBuilder(context, document);
+        return Column(
+          children: <Widget>[
+            _ReviewSummary(
+              configuration: widget.configuration,
+              document: document,
+            ),
+            Expanded(child: preview),
+            _ReviewActions(
+              actionInProgress: _actionInProgress,
+              nativePrintLabel: _nativePrintLabel(context),
+              onBack: _goBack,
+              onPrint: () => _print(document),
+              onShare: () => _share(document),
+              statusMessage: _statusMessage,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmFreePdfGeneration() {
+    setState(() {
+      _awaitingFreePdfConfirmation = false;
+      _documentFuture = _loadDocument();
+    });
+  }
+
   Future<FinalPdfGenerationResult<PrintDocument>> _loadDocument() {
     return widget.finalPdfGenerationController.generate<PrintDocument>(
       widget.documentLoader,
@@ -150,6 +203,8 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
 
   void _retryDocument() {
     setState(() {
+      _checkingEntitlement = false;
+      _awaitingFreePdfConfirmation = false;
       _statusMessage = null;
       _documentFuture = _loadDocument();
     });
@@ -338,6 +393,77 @@ final class _ReviewActions extends StatelessWidget {
   }
 }
 
+
+final class _CheckingEntitlement extends StatelessWidget {
+  const _CheckingEntitlement();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(
+        key: Key('checking-final-pdf-entitlement'),
+      ),
+    );
+  }
+}
+
+final class _FreeFinalPdfConfirmation extends StatelessWidget {
+  const _FreeFinalPdfConfirmation({
+    required this.onBack,
+    required this.onConfirm,
+  });
+
+  final VoidCallback onBack;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.picture_as_pdf_outlined,
+                color: Theme.of(context).colorScheme.primary,
+                size: 54,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.text('freeFinalPdfConfirmTitle'),
+                key: const Key('free-final-pdf-confirmation'),
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.text('freeFinalPdfConfirmBody'),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                key: const Key('confirm-free-final-pdf'),
+                onPressed: onConfirm,
+                icon: const Icon(Icons.check_rounded),
+                label: Text(l10n.text('generateFreeFinalPdf')),
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                key: const Key('free-final-pdf-back'),
+                onPressed: onBack,
+                child: Text(l10n.text('edit')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 final class _PurchaseRequired extends StatelessWidget {
   const _PurchaseRequired({required this.onBack});
