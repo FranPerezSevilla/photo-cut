@@ -42,6 +42,19 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(previewed, isNull);
+    expect(entitlementStore.state.freeFinalPdfConsumed, isFalse);
+    expect(entitlementStore.writeCount, 0);
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsOneWidget,
+    );
+    expect(find.text('Tu primer PDF final es gratis'), findsOneWidget);
+    expect(find.textContaining('tamaño, el encuadre, el papel'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('confirm-free-final-pdf')));
+    await tester.pumpAndSettle();
+
     expect(previewed, same(document));
     expect(entitlementStore.state.freeFinalPdfConsumed, isTrue);
     expect(entitlementStore.writeCount, 1);
@@ -92,6 +105,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byKey(const Key('confirm-free-final-pdf')));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const Key('share-final-pdf')));
     await tester.pumpAndSettle();
     expect(find.text('Compartir cancelado.'), findsOneWidget);
@@ -130,6 +146,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(attempts, 0);
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('confirm-free-final-pdf')));
+    await tester.pumpAndSettle();
+
+    expect(attempts, 1);
     expect(find.text('No se pudo preparar el PDF final.'), findsOneWidget);
     await tester.tap(find.text('Reintentar'));
     await tester.pumpAndSettle();
@@ -137,6 +163,90 @@ void main() {
     expect(attempts, 2);
     expect(find.text('Recovered final preview'), findsOneWidget);
     expect(find.text('35 × 45 mm · 8 copias · A4'), findsOneWidget);
+  });
+
+  testWidgets('backing out of the free confirmation preserves the free use', (
+    WidgetTester tester,
+  ) async {
+    int generationCalls = 0;
+    final _FakeEntitlementStore store = _FakeEntitlementStore();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Center(
+                child: FilledButton(
+                  key: const Key('open-review'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => PrintReviewScreen(
+                          configuration: _configuration(),
+                          documentLoader: () async {
+                            generationCalls += 1;
+                            return _document();
+                          },
+                          printGateway: _FakePrintGateway(),
+                          finalPdfGenerationController:
+                              FinalPdfGenerationController(store: store),
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Open'),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('open-review')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('free-final-pdf-confirmation')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('free-final-pdf-back')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('open-review')), findsOneWidget);
+    expect(generationCalls, 0);
+    expect(store.state.freeFinalPdfConsumed, isFalse);
+    expect(store.writeCount, 0);
+  });
+
+  testWidgets('lifetime unlock bypasses the free PDF confirmation', (
+    WidgetTester tester,
+  ) async {
+    int generationCalls = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrintReviewScreen(
+          configuration: _configuration(),
+          documentLoader: () async {
+            generationCalls += 1;
+            return _document();
+          },
+          printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: FinalPdfGenerationController(
+            store: _FakeEntitlementStore(
+              const EntitlementState(lifetimeUnlocked: true),
+            ),
+          ),
+          previewBuilder: (BuildContext context, PrintDocument document) {
+            return const Center(child: Text('Lifetime preview'));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(generationCalls, 1);
+    expect(find.byKey(const Key('free-final-pdf-confirmation')), findsNothing);
+    expect(find.text('Lifetime preview'), findsOneWidget);
   });
 
   testWidgets('exhausted free use blocks before final PDF generation', (
