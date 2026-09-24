@@ -540,7 +540,7 @@ final class _FramingSurface extends StatelessWidget {
       key: imageKey,
       fit: cropToFill ? BoxFit.cover : BoxFit.contain,
       alignment: alignment,
-      gaplessPlayback: false,
+      gaplessPlayback: true,
       filterQuality: FilterQuality.medium,
       errorBuilder: (BuildContext context, Object error, StackTrace? stack) {
         return const Center(child: Icon(Icons.broken_image_outlined, size: 42));
