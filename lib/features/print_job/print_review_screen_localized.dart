@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:photo_cut/core/crop/crop.dart';
 import 'package:photo_cut/features/export/export.dart';
@@ -75,7 +77,7 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
   @override
   void initState() {
     super.initState();
-    _prepareInitialDocument();
+    unawaited(_prepareInitialDocument());
   }
 
   @override
