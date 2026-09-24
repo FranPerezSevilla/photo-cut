@@ -752,7 +752,7 @@
       "id": "M4-T03",
       "milestone": "M4",
       "title": "Polish first-free-PDF confirmation and framing return preview",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T02"
@@ -783,14 +783,21 @@
         "lib/l10n/photo_cut_localizations_impl.dart",
         "test/features/print_job/print_review_screen_test.dart",
         "test/features/print_job/visual_framing_editor_test.dart",
-        "test/features/print_job/guided_print_wizard_test.dart"
+        "test/features/print_job/guided_print_wizard_test.dart",
+        "project/evidence/purchases/android.md"
+      ],
+      "completedAt": "2026-09-24",
+      "verification": [
+        "GitHub Actions CI run 35953246451: Quality and Android — success",
+        "GitHub Actions CI run 35953246451: iOS simulator build — success",
+        "Full flutter analyze and flutter test completed successfully before Android/iOS builds"
       ]
     },
     {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
-      "status": "blocked",
+      "status": "awaiting_human",
       "executor": "human",
       "dependsOn": [
         "M4-T02",
@@ -808,7 +815,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "Real-device purchase validation uncovered M4-T03 UX/preview regressions. Resume the Android/iPhone human gate after M4-T03 lands."
+      "statusReason": "Android internal-track purchase succeeded on 2026-09-24, but M4-T03 must be re-tested and Android cancellation/restore plus the full iPhone sandbox validation are still required."
     },
     {
       "id": "M5-H01",
