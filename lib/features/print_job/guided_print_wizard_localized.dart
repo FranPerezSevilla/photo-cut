@@ -35,11 +35,13 @@ final class GuidedPrintWizard extends StatefulWidget {
 
 final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
   late final PrintConfigurationController _controller;
+  late Uint8List _livePreviewBytes;
   int _step = 0;
 
   @override
   void initState() {
     super.initState();
+    _livePreviewBytes = Uint8List.fromList(widget.image.bytes);
     _controller = PrintConfigurationController(
       image: widget.image,
       imageProcessor: widget.imageProcessor ?? const DartImageProcessor(),
@@ -99,7 +101,11 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                   stepCount: stepTitles.length,
                   title: stepTitles[_step],
                 ),
-                _PreviewPanel(height: previewHeight, state: state),
+                _PreviewPanel(
+                  height: previewHeight,
+                  state: state,
+                  imageBytes: _livePreviewBytes,
+                ),
                 Expanded(
                   child: DecoratedBox(
                     decoration: const BoxDecoration(
@@ -112,7 +118,11 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                       step: _step,
                       child: switch (_step) {
                         0 => _SizeStep(state: state, controller: _controller),
-                        1 => _FramingStep(state: state, controller: _controller),
+                        1 => _FramingStep(
+                          state: state,
+                          controller: _controller,
+                          onEditingFinished: _refreshLivePreview,
+                        ),
                         2 => _SheetStep(state: state, controller: _controller),
                         _ => _ReviewStep(state: state, controller: _controller),
                       },
@@ -125,6 +135,13 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
         ),
       ),
     );
+  }
+
+  void _refreshLivePreview() {
+    if (!mounted) return;
+    setState(() {
+      _livePreviewBytes = Uint8List.fromList(widget.image.bytes);
+    });
   }
 
   bool _canContinue(PrintConfigurationState state, int stepCount) {
@@ -225,10 +242,15 @@ final class _WizardProgress extends StatelessWidget {
 }
 
 final class _PreviewPanel extends StatelessWidget {
-  const _PreviewPanel({required this.height, required this.state});
+  const _PreviewPanel({
+    required this.height,
+    required this.state,
+    required this.imageBytes,
+  });
 
   final double height;
   final PrintConfigurationState state;
+  final Uint8List imageBytes;
 
   @override
   Widget build(BuildContext context) {
@@ -243,6 +265,7 @@ final class _PreviewPanel extends StatelessWidget {
             key: const Key('wizard-live-preview'),
             plan: state.previewPlan,
             configuration: state.configuration,
+            previewImageBytes: imageBytes,
             errorMessage: _localizedValidation(context, state.layoutError),
             maxPageHeight: height - 12,
           ),
@@ -353,10 +376,15 @@ final class _SizeStep extends StatelessWidget {
 }
 
 final class _FramingStep extends StatelessWidget {
-  const _FramingStep({required this.state, required this.controller});
+  const _FramingStep({
+    required this.state,
+    required this.controller,
+    required this.onEditingFinished,
+  });
 
   final PrintConfigurationState state;
   final PrintConfigurationController controller;
+  final VoidCallback onEditingFinished;
 
   @override
   Widget build(BuildContext context) {
@@ -406,6 +434,7 @@ final class _FramingStep extends StatelessWidget {
             configuration: state.configuration,
             onFocusChanged: controller.changeFocus,
             onZoomChanged: controller.changeFramingZoom,
+            onEditingFinished: onEditingFinished,
             maxHeight: 145,
           )
         else

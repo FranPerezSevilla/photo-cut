@@ -39,6 +39,7 @@ final class VisualFramingEditor extends StatefulWidget {
     required this.configuration,
     required this.onFocusChanged,
     required this.onZoomChanged,
+    this.onEditingFinished,
     this.mapper = const VisualFramingMapper(),
     this.maxHeight = 150,
   });
@@ -47,6 +48,7 @@ final class VisualFramingEditor extends StatefulWidget {
   final VisualFramingMapper mapper;
   final ValueChanged<NormalizedPoint> onFocusChanged;
   final ValueChanged<double> onZoomChanged;
+  final VoidCallback? onEditingFinished;
   final double maxHeight;
 
   @override
@@ -156,6 +158,7 @@ final class _VisualFramingEditorState extends State<VisualFramingEditor> {
                         return;
                       }
                       setState(_resetPreviewSession);
+                      widget.onEditingFinished?.call();
                     }),
               );
             },

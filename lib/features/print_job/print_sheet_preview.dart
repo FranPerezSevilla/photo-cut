@@ -37,6 +37,7 @@ final class PrintSheetPreview extends StatelessWidget {
     required this.plan,
     required this.configuration,
     required this.errorMessage,
+    this.previewImageBytes,
     this.maxPageHeight = 360,
   });
 
@@ -45,6 +46,7 @@ final class PrintSheetPreview extends StatelessWidget {
 
   final PrintJobConfiguration configuration;
   final String? errorMessage;
+  final Uint8List? previewImageBytes;
   final double maxPageHeight;
   final SheetPlan? plan;
 
@@ -76,7 +78,7 @@ final class PrintSheetPreview extends StatelessWidget {
       );
     }
 
-    final Uint8List bytes = configuration.image.bytes;
+    final Uint8List bytes = previewImageBytes ?? configuration.image.bytes;
     final double pageWidth = currentPlan.pageWidth.inMillimetres;
     final double pageHeight = currentPlan.pageHeight.inMillimetres;
     final List<PlacedPhoto> firstPage = currentPlan
@@ -225,7 +227,7 @@ final class _PreviewPhoto extends StatelessWidget {
           ? BoxFit.cover
           : BoxFit.contain,
       alignment: alignment,
-      gaplessPlayback: false,
+      gaplessPlayback: true,
       errorBuilder:
           (BuildContext context, Object error, StackTrace? stackTrace) {
             return const Center(child: Icon(Icons.broken_image_outlined));

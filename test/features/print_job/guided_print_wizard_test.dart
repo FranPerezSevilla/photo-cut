@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -57,6 +58,68 @@ void main() {
     expect(find.byKey(const Key('copies-plus')), findsOneWidget);
     expect(find.byKey(const Key('wizard-advanced-options')), findsOneWidget);
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
+  });
+
+  testWidgets('refreshes the live preview after returning from framing', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final SelectedImage image = SelectedImage(
+      bytes: base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAACMAAAAtCAIAAACrsUV+AAAARElEQVR42u3V'
+        'sREAEBREwc+oQyXKEQkUqAwVaUFCtK+Bnbnk0m4tvpTjVyQSiUR6VRm9Wo9E'
+        'IpFIl68Ra1qPRCKRSHcdIZ4DvGdT4rYAAAAASUVORK5CYII=',
+      ),
+      displayName: 'synthetic.png',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: image,
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    MemoryImage livePreviewProvider() {
+      final Finder previewImage = find.descendant(
+        of: find.byKey(const Key('wizard-live-preview')),
+        matching: find.byType(Image),
+      );
+      expect(previewImage, findsWidgets);
+      return tester.widget<Image>(previewImage.first).image as MemoryImage;
+    }
+
+    final MemoryImage before = livePreviewProvider();
+    expect(before.bytes, isNotEmpty);
+
+    await tester.tap(find.byKey(const Key('open-framing-focus')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
+
+    final Slider slider = tester.widget<Slider>(
+      find.byKey(const Key('framing-zoom-slider')),
+    );
+    slider.onChanged!(1.5);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Guardar encuadre'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('framing-focus-screen')), findsNothing);
+    final MemoryImage after = livePreviewProvider();
+    expect(after.bytes, isNotEmpty);
+    expect(identical(after.bytes, before.bytes), isFalse);
+    expect(find.textContaining('1.5×'), findsWidgets);
   });
 
   testWidgets('small screens retain scroll as an accessibility fallback', (

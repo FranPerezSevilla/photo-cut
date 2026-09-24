@@ -86,6 +86,16 @@ void main() {
     await tester.tap(reviewButton);
     await tester.pumpAndSettle();
 
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsOneWidget,
+    );
+    expect(pdfRenderer.renderCalls, 0);
+    expect(entitlementStore.state.freeFinalPdfConsumed, isFalse);
+
+    await tester.tap(find.byKey(const Key('confirm-free-final-pdf')));
+    await tester.pumpAndSettle();
+
     expect(find.text('Paso 2 de 2 · Revisa el PDF final'), findsOneWidget);
     expect(find.text('40 × 45 mm · 8 copias · A4'), findsOneWidget);
     expect(find.text('Final PDF preview'), findsOneWidget);
