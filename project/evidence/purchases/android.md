@@ -24,6 +24,10 @@ The same real-device session exposed two product issues:
 Both findings are addressed by M4-T03 and must be rechecked on the internal-track
 build produced after that task lands.
 
+Implementation verification: GitHub Actions CI run `35956748398` passed both
+Quality/Android and iOS simulator jobs for the M4-T03 product changes. A fresh
+final-head PR check is still required before merge.
+
 ## Still required for M4-H01
 
 - re-test the M4-T03 build on Android;
