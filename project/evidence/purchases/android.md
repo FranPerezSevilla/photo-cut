@@ -35,6 +35,9 @@ M4-T04 changes the paywall startup to silently restore an existing lifetime
 purchase before enabling Buy, and adds a restore fallback if launching a new
 purchase fails. This finding must be re-tested on a new internal-track build.
 
+Implementation verification: GitHub Actions CI run `36599000630` passed the full
+Flutter test suite, Quality/Android build and iOS simulator build for M4-T04.
+
 ## Still required for M4-H01
 
 - re-test the M4-T03 build on Android;
