@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-09-24",
+  "updatedAt": "2026-09-29",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -794,14 +794,51 @@
       ]
     },
     {
-      "id": "M4-H01",
+      "id": "M4-T04",
       "milestone": "M4",
-      "title": "Validate sandbox purchases on Android and iPhone",
-      "status": "awaiting_human",
-      "executor": "human",
+      "title": "Recover an already-owned lifetime purchase",
+      "status": "ready",
+      "executor": "agent",
       "dependsOn": [
         "M4-T02",
         "M4-T03"
+      ],
+      "objective": "Prevent the Google Play already-owned path from leaving the paywall busy and automatically recover the existing lifetime entitlement.",
+      "acceptance": [
+        "Opening the paywall silently checks the store for an existing photo_cut_lifetime purchase before enabling a new purchase.",
+        "An existing restored purchase grants lifetime access without asking the user to buy again.",
+        "If launching a purchase fails, Photo Cut attempts one ownership restore before showing a recoverable error.",
+        "A failed ownership check with no existing purchase leaves the paywall ready rather than stuck busy.",
+        "Explicit Restore purchase remains available and reports when nothing is found.",
+        "Tests cover preflight restore, already-owned recovery, no-purchase recovery and non-stuck error state."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/paywall test/platform/purchase test/features/print_job/print_review_screen_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/features/paywall/lifetime_purchase_controller.dart",
+        "test/features/paywall/lifetime_purchase_controller_test.dart",
+        "test/features/paywall/lifetime_paywall_test.dart",
+        "project/evidence/purchases/android.md"
+      ]
+    },
+    {
+      "id": "M4-H01",
+      "milestone": "M4",
+      "title": "Validate sandbox purchases on Android and iPhone",
+      "status": "blocked",
+      "executor": "human",
+      "dependsOn": [
+        "M4-T02",
+        "M4-T03",
+        "M4-T04"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -815,7 +852,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "Android internal-track purchase succeeded on 2026-09-24, but M4-T03 must be re-tested and Android cancellation/restore plus the full iPhone sandbox validation are still required."
+      "statusReason": "Android internal testing exposed an already-owned lifetime purchase path that can leave the paywall busy. Re-test purchases after M4-T04 lands."
     },
     {
       "id": "M5-H01",
