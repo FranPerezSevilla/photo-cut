@@ -59,6 +59,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
 
   LifetimePurchaseState _state = const LifetimePurchaseState();
   late final StreamSubscription<PurchaseUpdate> _subscription;
+  Completer<bool>? _restoreObservation;
   bool _initialized = false;
   bool _disposed = false;
 
@@ -110,10 +111,28 @@ final class LifetimePurchaseController extends ChangeNotifier {
 
     _setState(
       LifetimePurchaseState(
-        phase: LifetimePurchasePhase.ready,
+        phase: LifetimePurchasePhase.loading,
         product: result.product,
       ),
     );
+
+    final bool restored = await _restoreOwnedPurchase(
+      busyPhase: LifetimePurchasePhase.loading,
+      reportNothing: false,
+      reportFailure: false,
+    );
+    if (_disposed || restored || _state.phase == LifetimePurchasePhase.unlocked) {
+      return;
+    }
+
+    if (_state.phase == LifetimePurchasePhase.loading) {
+      _setState(
+        _state.copyWith(
+          phase: LifetimePurchasePhase.ready,
+          clearError: true,
+        ),
+      );
+    }
   }
 
   Future<void> buy() async {
@@ -132,6 +151,14 @@ final class LifetimePurchaseController extends ChangeNotifier {
     try {
       await gateway.buyNonConsumable(product);
     } on Object {
+      final bool restored = await _restoreOwnedPurchase(
+        busyPhase: LifetimePurchasePhase.restoring,
+        reportNothing: false,
+        reportFailure: false,
+      );
+      if (_disposed || restored || _state.phase == LifetimePurchasePhase.unlocked) {
+        return;
+      }
       _setState(
         _state.copyWith(
           phase: LifetimePurchasePhase.error,
@@ -146,38 +173,102 @@ final class LifetimePurchaseController extends ChangeNotifier {
       return;
     }
 
+    await _restoreOwnedPurchase(
+      busyPhase: LifetimePurchasePhase.restoring,
+      reportNothing: true,
+      reportFailure: true,
+    );
+  }
+
+  Future<bool> _restoreOwnedPurchase({
+    required LifetimePurchasePhase busyPhase,
+    required bool reportNothing,
+    required bool reportFailure,
+  }) async {
+    final Completer<bool> observation = Completer<bool>();
+    _restoreObservation = observation;
     _setState(
       _state.copyWith(
-        phase: LifetimePurchasePhase.restoring,
+        phase: busyPhase,
         clearError: true,
       ),
     );
 
     try {
       await gateway.restorePurchases();
-      if (_state.phase == LifetimePurchasePhase.restoring) {
-        _setState(
-          _state.copyWith(
-            phase: _state.product == null
-                ? LifetimePurchasePhase.unavailable
-                : LifetimePurchasePhase.ready,
-            errorCode: 'nothing_to_restore',
-          ),
-        );
+      if (!observation.isCompleted) {
+        await Future<void>.delayed(Duration.zero);
       }
+
+      final bool purchaseObserved =
+          observation.isCompleted ? await observation.future : false;
+      if (_disposed ||
+          purchaseObserved ||
+          _state.phase == LifetimePurchasePhase.unlocked) {
+        return true;
+      }
+
+      if (_state.phase == busyPhase) {
+        if (reportNothing) {
+          _setState(
+            _state.copyWith(
+              phase: _state.product == null
+                  ? LifetimePurchasePhase.unavailable
+                  : LifetimePurchasePhase.ready,
+              errorCode: 'nothing_to_restore',
+            ),
+          );
+        } else {
+          _setState(
+            _state.copyWith(
+              phase: _state.product == null
+                  ? LifetimePurchasePhase.unavailable
+                  : LifetimePurchasePhase.ready,
+              clearError: true,
+            ),
+          );
+        }
+      }
+      return false;
     } on Object {
-      _setState(
-        _state.copyWith(
-          phase: LifetimePurchasePhase.error,
-          errorCode: 'restore_failed',
-        ),
-      );
+      if (!_disposed && _state.phase != LifetimePurchasePhase.unlocked) {
+        if (reportFailure) {
+          _setState(
+            _state.copyWith(
+              phase: LifetimePurchasePhase.error,
+              errorCode: 'restore_failed',
+            ),
+          );
+        } else if (_state.phase == busyPhase) {
+          _setState(
+            _state.copyWith(
+              phase: _state.product == null
+                  ? LifetimePurchasePhase.unavailable
+                  : LifetimePurchasePhase.ready,
+              clearError: true,
+            ),
+          );
+        }
+      }
+      return false;
+    } finally {
+      if (identical(_restoreObservation, observation)) {
+        _restoreObservation = null;
+      }
     }
   }
 
   Future<void> _handleUpdate(PurchaseUpdate update) async {
     if (update.productId != productId || _disposed) {
       return;
+    }
+
+    if (update.status == PurchaseUpdateStatus.purchased ||
+        update.status == PurchaseUpdateStatus.restored) {
+      final Completer<bool>? observation = _restoreObservation;
+      if (observation != null && !observation.isCompleted) {
+        observation.complete(true);
+      }
     }
 
     switch (update.status) {
