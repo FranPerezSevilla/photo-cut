@@ -44,6 +44,39 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('already-owned purchase unlocks automatically without a new buy', (
+    WidgetTester tester,
+  ) async {
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway(
+      restoreOwnedPurchase: true,
+    );
+    addTearDown(gateway.dispose);
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      entitlementWriter: (_) async {},
+    );
+    bool unlocked = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: LifetimePaywall(
+            controller: controller,
+            onUnlocked: () => unlocked = true,
+            onBack: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(unlocked, isTrue);
+    expect(gateway.restoreCalls, 1);
+    expect(gateway.buyCalls, 0);
+    expect(controller.state.phase, LifetimePurchasePhase.unlocked);
+    controller.dispose();
+  });
+
   testWidgets('restore purchase remains accessible', (
     WidgetTester tester,
   ) async {
@@ -69,13 +102,16 @@ void main() {
     await tester.tap(find.byKey(const Key('restore-purchase')));
     await tester.pumpAndSettle();
 
-    expect(gateway.restoreCalls, 1);
+    expect(gateway.restoreCalls, 2);
     expect(find.text('No se encontró ninguna compra anterior de Photo Cut.'), findsOneWidget);
     controller.dispose();
   });
 }
 
 final class _FakePurchaseGateway implements PurchaseGateway {
+  _FakePurchaseGateway({this.restoreOwnedPurchase = false});
+
+  final bool restoreOwnedPurchase;
   final StreamController<PurchaseUpdate> _updates =
       StreamController<PurchaseUpdate>.broadcast();
 
@@ -109,6 +145,16 @@ final class _FakePurchaseGateway implements PurchaseGateway {
   @override
   Future<void> restorePurchases() async {
     restoreCalls += 1;
+    if (restoreOwnedPurchase) {
+      _updates.add(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.restored,
+          needsCompletion: false,
+          platformPayload: 'opaque',
+        ),
+      );
+    }
   }
 
   @override
