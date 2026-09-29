@@ -18,6 +18,7 @@ void main() {
     expect(controller.state.product?.id, 'photo_cut_lifetime');
     expect(controller.state.product?.price, '3,99 €');
     expect(gateway.loadedProductId, 'photo_cut_lifetime');
+    expect(gateway.restoreCalls, 1);
     controller.dispose();
   });
 
@@ -120,8 +121,126 @@ void main() {
     await restored.future;
 
     expect(lifetimeUnlocked, isTrue);
-    expect(gateway.restoreCalls, 1);
+    expect(gateway.restoreCalls, 2);
     expect(gateway.completeCalls, 1);
+    controller.dispose();
+  });
+
+  test('initialization silently restores an already-owned lifetime purchase', () async {
+    bool lifetimeUnlocked = false;
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway();
+    gateway.onRestore = () {
+      gateway.emit(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.restored,
+          needsCompletion: true,
+          platformPayload: 'opaque',
+        ),
+      );
+    };
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      entitlementWriter: (bool unlocked) async {
+        lifetimeUnlocked = unlocked;
+      },
+    );
+
+    final Completer<void> unlocked = Completer<void>();
+    controller.addListener(() {
+      if (controller.state.phase == LifetimePurchasePhase.unlocked &&
+          !unlocked.isCompleted) {
+        unlocked.complete();
+      }
+    });
+
+    await controller.initialize();
+    await unlocked.future;
+
+    expect(lifetimeUnlocked, isTrue);
+    expect(gateway.restoreCalls, 1);
+    expect(gateway.buyCalls, 0);
+    expect(controller.state.phase, LifetimePurchasePhase.unlocked);
+    controller.dispose();
+  });
+
+  test('failed purchase launch recovers an existing store purchase', () async {
+    bool lifetimeUnlocked = false;
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway(
+      failPurchaseLaunch: true,
+    );
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      entitlementWriter: (bool unlocked) async {
+        lifetimeUnlocked = unlocked;
+      },
+    );
+    await controller.initialize();
+
+    gateway.onRestore = () {
+      gateway.emit(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.restored,
+          needsCompletion: true,
+          platformPayload: 'opaque',
+        ),
+      );
+    };
+
+    final Completer<void> unlocked = Completer<void>();
+    controller.addListener(() {
+      if (controller.state.phase == LifetimePurchasePhase.unlocked &&
+          !unlocked.isCompleted) {
+        unlocked.complete();
+      }
+    });
+
+    await controller.buy();
+    await unlocked.future;
+
+    expect(gateway.buyCalls, 1);
+    expect(gateway.restoreCalls, 2);
+    expect(lifetimeUnlocked, isTrue);
+    expect(controller.state.phase, LifetimePurchasePhase.unlocked);
+    controller.dispose();
+  });
+
+  test('failed purchase launch without ownership exits the busy state', () async {
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway(
+      failPurchaseLaunch: true,
+    );
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      entitlementWriter: (_) async {},
+    );
+    await controller.initialize();
+
+    await controller.buy();
+
+    expect(gateway.buyCalls, 1);
+    expect(gateway.restoreCalls, 2);
+    expect(controller.state.phase, LifetimePurchasePhase.error);
+    expect(controller.state.errorCode, 'purchase_launch_failed');
+    expect(controller.state.isBusy, isFalse);
+    controller.dispose();
+  });
+
+  test('silent ownership check failure still leaves purchase available', () async {
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway(
+      failFirstRestore: true,
+    );
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      entitlementWriter: (_) async {},
+    );
+
+    await controller.initialize();
+
+    expect(gateway.restoreCalls, 1);
+    expect(controller.state.phase, LifetimePurchasePhase.ready);
+    expect(controller.state.errorCode, isNull);
+    expect(controller.state.isBusy, isFalse);
     controller.dispose();
   });
 
@@ -179,9 +298,15 @@ void main() {
 }
 
 final class _FakePurchaseGateway implements PurchaseGateway {
-  _FakePurchaseGateway({this.completionOrder});
+  _FakePurchaseGateway({
+    this.completionOrder,
+    this.failPurchaseLaunch = false,
+    this.failFirstRestore = false,
+  });
 
   final List<String>? completionOrder;
+  final bool failPurchaseLaunch;
+  final bool failFirstRestore;
   final StreamController<PurchaseUpdate> _updates =
       StreamController<PurchaseUpdate>.broadcast();
 
@@ -216,11 +341,17 @@ final class _FakePurchaseGateway implements PurchaseGateway {
   @override
   Future<void> buyNonConsumable(PurchaseProduct product) async {
     buyCalls += 1;
+    if (failPurchaseLaunch) {
+      throw StateError('synthetic purchase launch failure');
+    }
   }
 
   @override
   Future<void> restorePurchases() async {
     restoreCalls += 1;
+    if (failFirstRestore && restoreCalls == 1) {
+      throw StateError('synthetic restore failure');
+    }
     onRestore?.call();
   }
 
