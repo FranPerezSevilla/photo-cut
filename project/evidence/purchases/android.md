@@ -24,6 +24,20 @@ The same real-device session exposed two product issues:
 Both findings are addressed by M4-T03 and must be rechecked on the internal-track
 build produced after that task lands.
 
+## 2026-09-29 already-owned purchase finding
+
+On Google Play internal testing, the tester attempted to buy the lifetime unlock
+again with an account that already owned `photo_cut_lifetime`. Google Play
+reported that the item had already been purchased, and Photo Cut remained in a
+busy/loading purchase state instead of recovering the existing entitlement.
+
+M4-T04 changes the paywall startup to silently restore an existing lifetime
+purchase before enabling Buy, and adds a restore fallback if launching a new
+purchase fails. This finding must be re-tested on a new internal-track build.
+
+Implementation verification: GitHub Actions CI run `36599000630` passed the full
+Flutter test suite, Quality/Android build and iOS simulator build for M4-T04.
+
 ## Still required for M4-H01
 
 - re-test the M4-T03 build on Android;
