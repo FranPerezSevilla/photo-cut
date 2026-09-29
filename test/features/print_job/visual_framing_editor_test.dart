@@ -186,6 +186,15 @@ void main() {
         currentPreview = previewProvider();
         expect(currentPreview.bytes, isNotEmpty);
         expect(identical(currentPreview.bytes, inlineBefore.bytes), isFalse);
+        final Image returnedImage = tester.widget<Image>(
+          find
+              .descendant(
+                of: find.byKey(const Key('visual-framing-preview')),
+                matching: find.byType(Image),
+              )
+              .first,
+        );
+        expect(returnedImage.gaplessPlayback, isTrue);
       }
     },
   );
