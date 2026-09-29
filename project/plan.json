@@ -797,7 +797,7 @@
       "id": "M4-T04",
       "milestone": "M4",
       "title": "Recover an already-owned lifetime purchase",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T02",
@@ -827,13 +827,19 @@
         "test/features/paywall/lifetime_purchase_controller_test.dart",
         "test/features/paywall/lifetime_paywall_test.dart",
         "project/evidence/purchases/android.md"
+      ],
+      "completedAt": "2026-09-29",
+      "verification": [
+        "GitHub Actions CI run 36599000630: Quality and Android — success",
+        "GitHub Actions CI run 36599000630: iOS simulator build — success",
+        "Controller/widget tests cover preflight ownership restore, failed purchase-launch recovery, no-purchase recovery and non-stuck error state."
       ]
     },
     {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
-      "status": "blocked",
+      "status": "awaiting_human",
       "executor": "human",
       "dependsOn": [
         "M4-T02",
@@ -852,7 +858,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "Android internal testing exposed an already-owned lifetime purchase path that can leave the paywall busy. Re-test purchases after M4-T04 lands."
+      "statusReason": "M4-T04 fixed the already-owned purchase regression. Re-test Android on the internal track with the account that already owns photo_cut_lifetime, then complete cancellation/restore evidence; iPhone validation is deferred by product choice."
     },
     {
       "id": "M5-H01",
