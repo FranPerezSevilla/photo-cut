@@ -883,6 +883,45 @@
       ]
     },
     {
+      "id": "M4-T06",
+      "milestone": "M4",
+      "title": "Clarify paper presets and support custom paper dimensions",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T05"
+      ],
+      "objective": "Make paper choices self-explanatory and let users enter an exact custom paper width and height without weakening preview/PDF geometry.",
+      "acceptance": [
+        "A4, US Letter and 10 × 15 cm presets show user-readable names plus their physical dimensions.",
+        "The paper step offers a Custom option with independent width, height and mm/cm/in unit controls.",
+        "Custom paper dimensions flow through the same layout engine, live preview and final PDF as presets.",
+        "Automatic, Portrait and Landscape orientation continue to work for custom paper.",
+        "English, Spanish, French, Portuguese and German copy covers the clarified paper labels and custom paper editor.",
+        "Unit/controller/widget/document tests cover custom dimensions, unit conversion, validation and final PDF propagation."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/units test/core/layout test/features/print_job",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/units/paper_size.dart",
+        "lib/features/print_job/print_configuration_state.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/guided_print_wizard_localized.dart",
+        "lib/l10n/photo_cut_localizations_impl.dart",
+        "test/core/units/",
+        "test/core/layout/",
+        "test/features/print_job/"
+      ]
+    },
+    {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
