@@ -119,6 +119,8 @@ Planned model:
 - Step 1 previews do not consume the free use;
 - sharing and printing an already-generated final PDF do not consume another use;
 - lifetime unlock as a non-consumable in-app purchase;
+- on a fresh reinstall, store ownership is checked before first-free-PDF messaging; a restored lifetime owner is treated as unlocked and shown a one-time restoration confirmation;
+- if ownership cannot be checked, the app says so instead of claiming there is no previous purchase;
 - no subscription, advertising or consumable credits.
 
 Prices and product IDs remain provisional until the store milestone.
