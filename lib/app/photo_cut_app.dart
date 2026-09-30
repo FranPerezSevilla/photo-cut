@@ -2,22 +2,34 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:photo_cut/core/entitlement/entitlement.dart';
 import 'package:photo_cut/core/theme/app_theme.dart';
+import 'package:photo_cut/features/export/export.dart';
+import 'package:photo_cut/features/paywall/paywall.dart';
 import 'package:photo_cut/core/theme/photo_cut_brand.dart';
 import 'package:photo_cut/features/home/home_screen.dart';
 import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
+import 'package:photo_cut/platform/entitlement/entitlement.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
+import 'package:photo_cut/platform/purchase/purchase.dart';
 
 class PhotoCutApp extends StatefulWidget {
   PhotoCutApp({
     super.key,
     ImagePickerGateway? imagePickerGateway,
+    EntitlementStore? entitlementStore,
+    PurchaseGateway? purchaseGateway,
     this.imageProcessor,
     this.pdfSpikeBuilder,
-  }) : imagePickerGateway = imagePickerGateway ?? PluginImagePickerGateway();
+  }) : imagePickerGateway = imagePickerGateway ?? PluginImagePickerGateway(),
+       entitlementStore =
+           entitlementStore ?? const MethodChannelEntitlementStore(),
+       purchaseGateway = purchaseGateway ?? InAppPurchaseGateway();
 
   final ImagePickerGateway imagePickerGateway;
+  final EntitlementStore entitlementStore;
+  final PurchaseGateway purchaseGateway;
   final ImageProcessor? imageProcessor;
   final WidgetBuilder? pdfSpikeBuilder;
 
@@ -53,6 +65,8 @@ final class _PhotoCutAppState extends State<PhotoCutApp> {
         return const Locale('en');
       },
       home: _SplashGate(
+        entitlementStore: widget.entitlementStore,
+        purchaseGateway: widget.purchaseGateway,
         child: HomeScreen(
           imagePickerGateway: widget.imagePickerGateway,
           imageProcessor: widget.imageProcessor,
@@ -68,39 +82,137 @@ final class _PhotoCutAppState extends State<PhotoCutApp> {
 }
 
 final class _SplashGate extends StatefulWidget {
-  const _SplashGate({required this.child});
+  const _SplashGate({
+    required this.child,
+    required this.entitlementStore,
+    required this.purchaseGateway,
+  });
 
   final Widget child;
+  final EntitlementStore entitlementStore;
+  final PurchaseGateway purchaseGateway;
 
   @override
   State<_SplashGate> createState() => _SplashGateState();
 }
 
 final class _SplashGateState extends State<_SplashGate> {
-  bool _ready = false;
+  bool _minimumSplashReady = false;
+  bool _ownershipCheckReady = false;
+  bool _restoredPurchase = false;
   Timer? _timer;
+  LifetimePurchaseController? _purchaseController;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer(const Duration(milliseconds: 800), () {
       if (mounted) {
-        setState(() => _ready = true);
+        setState(() => _minimumSplashReady = true);
       }
+    });
+    unawaited(_checkLifetimeOwnership());
+  }
+
+  Future<void> _checkLifetimeOwnership() async {
+    bool restored = false;
+    try {
+      final FinalPdfGenerationController generationController =
+          FinalPdfGenerationController(store: widget.entitlementStore);
+      final EntitlementState localEntitlement =
+          await generationController.state;
+      if (!localEntitlement.lifetimeUnlocked) {
+        final LifetimePurchaseController controller =
+            LifetimePurchaseController(
+              gateway: widget.purchaseGateway,
+              entitlementWriter: generationController.setLifetimeUnlocked,
+            );
+        _purchaseController = controller;
+        final OwnedPurchaseCheckResult result =
+            await controller.checkOwnedPurchase();
+        restored = result == OwnedPurchaseCheckResult.restored;
+      }
+    } on Object {
+      // Startup ownership recovery is best-effort. The final-PDF flow performs
+      // a second check before presenting free-use messaging.
+    }
+    if (!mounted) return;
+    setState(() {
+      _ownershipCheckReady = true;
+      _restoredPurchase = restored;
     });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _purchaseController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool ready = _minimumSplashReady && _ownershipCheckReady;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
-      child: _ready ? widget.child : const _PhotoCutSplash(),
+      child: !ready
+          ? const _PhotoCutSplash()
+          : _restoredPurchase
+          ? _RestoredPurchaseNotice(
+              onContinue: () => setState(() => _restoredPurchase = false),
+            )
+          : widget.child,
+    );
+  }
+}
+
+final class _RestoredPurchaseNotice extends StatelessWidget {
+  const _RestoredPurchaseNotice({required this.onContinue});
+
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Scaffold(
+      key: const Key('restored-purchase-notice'),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(28),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.workspace_premium_rounded,
+                    size: 60,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    l10n.text('purchaseRestoredTitle'),
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    l10n.text('purchaseRestoredBody'),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    key: const Key('continue-restored-purchase'),
+                    onPressed: onContinue,
+                    child: Text(l10n.text('continueAction')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
