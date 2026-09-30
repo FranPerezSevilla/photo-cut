@@ -65,6 +65,49 @@ void main() {
     );
   });
 
+  test('custom paper dimensions and units recalculate the preview plan', () {
+    final PrintConfigurationController controller =
+        PrintConfigurationController(
+          image: _image(),
+          imageProcessor: _FakeImageProcessor(),
+        );
+
+    controller.useCustomPaper();
+    expect(controller.state.configuration.paperSize.isCustom, isTrue);
+    expect(controller.state.paperWidthInput, '210');
+    expect(controller.state.paperHeightInput, '297');
+
+    controller.changePaperUnit(LengthUnit.centimetres);
+    expect(controller.state.paperWidthInput, '21');
+    expect(controller.state.paperHeightInput, '29.7');
+
+    controller.changePaperWidth('12');
+    controller.changePaperHeight('18');
+
+    final PaperSize paper = controller.state.configuration.paperSize;
+    expect(paper.width.inMillimetres, closeTo(120, 0.001));
+    expect(paper.height.inMillimetres, closeTo(180, 0.001));
+    expect(controller.state.previewPlan?.paperSize, paper);
+
+    controller.changePageOrientation(PageOrientationPreference.landscape);
+    expect(controller.state.previewPlan?.pageWidth.inMillimetres, closeTo(180, 0.001));
+    expect(controller.state.previewPlan?.pageHeight.inMillimetres, closeTo(120, 0.001));
+  });
+
+  test('invalid custom paper dimension blocks layout progression', () {
+    final PrintConfigurationController controller =
+        PrintConfigurationController(
+          image: _image(),
+          imageProcessor: _FakeImageProcessor(),
+        );
+
+    controller.useCustomPaper();
+    controller.changePaperWidth('0');
+
+    expect(controller.state.paperWidthError, isNotNull);
+    expect(controller.state.configuration.paperSize.isCustom, isTrue);
+  });
+
   test('paper orientation preference recalculates the preview plan', () {
     final PrintConfigurationController controller =
         PrintConfigurationController(
