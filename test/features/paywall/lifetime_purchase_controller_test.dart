@@ -23,6 +23,69 @@ void main() {
   });
 
 
+  test('preflight ownership check restores without loading the product', () async {
+    bool lifetimeUnlocked = false;
+    final _FakePurchaseGateway gateway = _FakePurchaseGateway();
+    gateway.onRestore = () {
+      gateway.emit(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.restored,
+          needsCompletion: true,
+          platformPayload: 'opaque',
+        ),
+      );
+    };
+    final LifetimePurchaseController controller = LifetimePurchaseController(
+      gateway: gateway,
+      entitlementWriter: (bool unlocked) async {
+        lifetimeUnlocked = unlocked;
+      },
+    );
+
+    final OwnedPurchaseCheckResult result =
+        await controller.checkOwnedPurchase();
+
+    expect(result, OwnedPurchaseCheckResult.restored);
+    expect(lifetimeUnlocked, isTrue);
+    expect(gateway.loadedProductId, isNull);
+    expect(gateway.restoreCalls, 1);
+    expect(gateway.completeCalls, 1);
+    controller.dispose();
+  });
+
+  test('preflight ownership check distinguishes no purchase from failure', () async {
+    final _FakePurchaseGateway noPurchaseGateway = _FakePurchaseGateway();
+    final LifetimePurchaseController noPurchaseController =
+        LifetimePurchaseController(
+          gateway: noPurchaseGateway,
+          entitlementWriter: (_) async {},
+        );
+
+    expect(
+      await noPurchaseController.checkOwnedPurchase(),
+      OwnedPurchaseCheckResult.notFound,
+    );
+    expect(noPurchaseGateway.loadedProductId, isNull);
+    noPurchaseController.dispose();
+
+    final _FakePurchaseGateway failedGateway = _FakePurchaseGateway(
+      failFirstRestore: true,
+    );
+    final LifetimePurchaseController failedController =
+        LifetimePurchaseController(
+          gateway: failedGateway,
+          entitlementWriter: (_) async {},
+        );
+
+    expect(
+      await failedController.checkOwnedPurchase(),
+      OwnedPurchaseCheckResult.unavailable,
+    );
+    expect(failedGateway.loadedProductId, isNull);
+    failedController.dispose();
+  });
+
   test('pending purchase keeps the paywall busy without unlocking', () async {
     int unlockCalls = 0;
     final _FakePurchaseGateway gateway = _FakePurchaseGateway();

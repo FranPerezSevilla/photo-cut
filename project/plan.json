@@ -928,6 +928,51 @@
       ]
     },
     {
+      "id": "M4-T07",
+      "milestone": "M4",
+      "title": "Restore lifetime ownership before showing free-use messaging",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T06"
+      ],
+      "objective": "Treat a reinstalled lifetime owner as unlocked before any first-free-PDF messaging is shown.",
+      "acceptance": [
+        "On app startup, Photo Cut silently checks store ownership when the local lifetime flag is absent.",
+        "A restored lifetime purchase is persisted locally and the user sees a one-time localized confirmation instead of first-free-PDF messaging.",
+        "Subsequent launches with the local lifetime entitlement skip the store restore check and the restored-purchase confirmation.",
+        "Before showing the first-free-PDF confirmation, the review flow performs a fallback ownership check when local entitlement is still fresh.",
+        "A failed store ownership check is distinguishable from a confirmed no-purchase result and does not falsely claim the user has no purchase.",
+        "English, Spanish, French, Portuguese and German copy covers restored ownership and unavailable ownership checks.",
+        "Controller, app-startup and review widget tests cover reinstall restore, already-local ownership, no purchase and failed ownership checks."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/paywall test/features/print_job/print_review_screen_test.dart test/app/photo_cut_app_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/features/paywall/lifetime_purchase_controller.dart",
+        "lib/app/photo_cut_app.dart",
+        "lib/features/print_job/print_review_screen_localized.dart",
+        "lib/l10n/photo_cut_localizations_impl.dart",
+        "test/features/paywall/",
+        "test/features/print_job/print_review_screen_test.dart",
+        "test/app/photo_cut_app_test.dart"
+      ],
+      "completedAt": "2026-09-30",
+      "verification": [
+        "GitHub Actions CI run 36712841784: Quality and Android — success",
+        "GitHub Actions CI run 36712841784: iOS simulator build — success",
+        "Full Flutter suite covers startup reinstall restore, local entitlement shortcut, review fallback, confirmed no-purchase and unavailable ownership checks."
+      ]
+    },
+    {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
@@ -938,7 +983,8 @@
         "M4-T03",
         "M4-T04",
         "M4-T05",
-        "M4-T06"
+        "M4-T06",
+        "M4-T07"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -952,7 +998,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "M4-T06 clarifies paper presets and adds exact custom paper dimensions. Re-test Android on the next internal build, including custom paper/orientation and already-owned lifetime restoration."
+      "statusReason": "M4-T07 restores lifetime ownership before any free-use messaging after reinstall. Re-test Android on the next internal build, including reinstall/restore, custom paper/orientation and purchase cancellation."
     },
     {
       "id": "M5-H01",

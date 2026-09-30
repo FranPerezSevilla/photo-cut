@@ -71,6 +71,8 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
   Future<FinalPdfGenerationResult<PrintDocument>>? _documentFuture;
   bool _checkingEntitlement = true;
   bool _awaitingFreePdfConfirmation = false;
+  bool _awaitingRestoredPurchaseNotice = false;
+  bool _purchaseCheckUnavailable = false;
   bool _actionInProgress = false;
   String? _statusMessage;
 
@@ -88,6 +90,16 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
       body: SafeArea(
         child: _checkingEntitlement
             ? const _CheckingEntitlement()
+            : _awaitingRestoredPurchaseNotice
+            ? _RestoredPurchaseNotice(
+                onContinue: _continueAfterRestoredPurchase,
+              )
+            : _purchaseCheckUnavailable
+            ? _OwnershipCheckUnavailable(
+                onBack: _goBack,
+                onContinueWithoutCheck: _continueWithoutOwnershipCheck,
+                onRetry: _retryOwnershipCheck,
+              )
             : _awaitingFreePdfConfirmation
             ? _FreeFinalPdfConfirmation(
                 onBack: _goBack,
@@ -110,9 +122,38 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
       if (!mounted) return;
       if (!entitlement.lifetimeUnlocked &&
           !entitlement.freeFinalPdfConsumed) {
+        final LifetimePurchaseController? purchaseController =
+            widget.lifetimePurchaseController;
+        if (purchaseController != null) {
+          final OwnedPurchaseCheckResult result =
+              await purchaseController.checkOwnedPurchase();
+          if (!mounted) return;
+          if (result == OwnedPurchaseCheckResult.restored) {
+            setState(() {
+              _checkingEntitlement = false;
+              _awaitingFreePdfConfirmation = false;
+              _awaitingRestoredPurchaseNotice = true;
+              _purchaseCheckUnavailable = false;
+              _documentFuture = null;
+            });
+            return;
+          }
+          if (result == OwnedPurchaseCheckResult.unavailable) {
+            setState(() {
+              _checkingEntitlement = false;
+              _awaitingFreePdfConfirmation = false;
+              _awaitingRestoredPurchaseNotice = false;
+              _purchaseCheckUnavailable = true;
+              _documentFuture = null;
+            });
+            return;
+          }
+        }
         setState(() {
           _checkingEntitlement = false;
           _awaitingFreePdfConfirmation = true;
+          _awaitingRestoredPurchaseNotice = false;
+          _purchaseCheckUnavailable = false;
           _documentFuture = null;
         });
         return;
@@ -125,6 +166,8 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     setState(() {
       _checkingEntitlement = false;
       _awaitingFreePdfConfirmation = false;
+      _awaitingRestoredPurchaseNotice = false;
+      _purchaseCheckUnavailable = false;
       _documentFuture = _loadDocument();
     });
   }
@@ -197,6 +240,32 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     });
   }
 
+  void _continueAfterRestoredPurchase() {
+    setState(() {
+      _awaitingRestoredPurchaseNotice = false;
+      _documentFuture = _loadDocument();
+    });
+  }
+
+  void _retryOwnershipCheck() {
+    setState(() {
+      _checkingEntitlement = true;
+      _purchaseCheckUnavailable = false;
+      _awaitingRestoredPurchaseNotice = false;
+      _awaitingFreePdfConfirmation = false;
+      _documentFuture = null;
+    });
+    unawaited(_prepareInitialDocument());
+  }
+
+  void _continueWithoutOwnershipCheck() {
+    setState(() {
+      _purchaseCheckUnavailable = false;
+      _awaitingFreePdfConfirmation = true;
+      _documentFuture = null;
+    });
+  }
+
   Future<FinalPdfGenerationResult<PrintDocument>> _loadDocument() {
     return widget.finalPdfGenerationController.generate<PrintDocument>(
       widget.documentLoader,
@@ -207,6 +276,8 @@ final class _PrintReviewScreenState extends State<PrintReviewScreen> {
     setState(() {
       _checkingEntitlement = false;
       _awaitingFreePdfConfirmation = false;
+      _awaitingRestoredPurchaseNotice = false;
+      _purchaseCheckUnavailable = false;
       _statusMessage = null;
       _documentFuture = _loadDocument();
     });
@@ -404,6 +475,117 @@ final class _CheckingEntitlement extends StatelessWidget {
     return const Center(
       child: CircularProgressIndicator(
         key: Key('checking-final-pdf-entitlement'),
+      ),
+    );
+  }
+}
+
+final class _RestoredPurchaseNotice extends StatelessWidget {
+  const _RestoredPurchaseNotice({required this.onContinue});
+
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.workspace_premium_rounded,
+                size: 54,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.text('purchaseRestoredTitle'),
+                key: const Key('review-restored-purchase-notice'),
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.text('purchaseRestoredBody'),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 22),
+              FilledButton(
+                key: const Key('continue-review-restored-purchase'),
+                onPressed: onContinue,
+                child: Text(l10n.text('continueAction')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _OwnershipCheckUnavailable extends StatelessWidget {
+  const _OwnershipCheckUnavailable({
+    required this.onBack,
+    required this.onContinueWithoutCheck,
+    required this.onRetry,
+  });
+
+  final VoidCallback onBack;
+  final VoidCallback onContinueWithoutCheck;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const Icon(
+                Icons.cloud_off_outlined,
+                key: Key('ownership-check-unavailable'),
+                size: 52,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.text('ownershipCheckFailedTitle'),
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.text('ownershipCheckFailedBody'),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                key: const Key('retry-ownership-check'),
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(l10n.text('retryPurchaseCheck')),
+              ),
+              const SizedBox(height: 6),
+              TextButton(
+                key: const Key('continue-without-ownership-check'),
+                onPressed: onContinueWithoutCheck,
+                child: Text(l10n.text('continueWithoutCheck')),
+              ),
+              TextButton(
+                key: const Key('ownership-check-back'),
+                onPressed: onBack,
+                child: Text(l10n.text('edit')),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
