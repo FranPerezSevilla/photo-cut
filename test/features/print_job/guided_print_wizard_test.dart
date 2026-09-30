@@ -38,7 +38,8 @@ void main() {
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
     expect(find.textContaining('Paso 1 de 4'), findsOneWidget);
     expect(find.text('¿Qué tamaño quieres imprimir?'), findsOneWidget);
-    expect(find.byKey(const Key('size-preset-35x45')), findsOneWidget);
+    expect(find.byKey(const Key('size-preset-26x32')), findsOneWidget);
+    expect(find.text('26 × 32 mm'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
@@ -54,10 +55,51 @@ void main() {
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
     expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
+    expect(find.byKey(const Key('wizard-paper-orientation')), findsOneWidget);
+    expect(find.byKey(const Key('paper-orientation-auto')), findsOneWidget);
     expect(find.byKey(const Key('wizard-copy-count')), findsOneWidget);
     expect(find.byKey(const Key('copies-plus')), findsOneWidget);
     expect(find.byKey(const Key('wizard-advanced-options')), findsOneWidget);
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
+  });
+
+  testWidgets('paper orientation can be forced to landscape', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('paper-orientation-landscape')));
+    await tester.pumpAndSettle();
+
+    final ChoiceChip landscape = tester.widget<ChoiceChip>(
+      find.byKey(const Key('paper-orientation-landscape')),
+    );
+    expect(landscape.selected, isTrue);
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('A4 · Horizontal'), findsOneWidget);
   });
 
   testWidgets('refreshes the live preview after returning from framing', (
