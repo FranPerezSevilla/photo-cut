@@ -117,6 +117,8 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                     ),
                     child: _StepViewport(
                       step: _step,
+                      forceScroll:
+                          _step == 2 && state.configuration.paperSize.isCustom,
                       child: switch (_step) {
                         0 => _SizeStep(state: state, controller: _controller),
                         1 => _FramingStep(
@@ -167,15 +169,21 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
 }
 
 final class _StepViewport extends StatelessWidget {
-  const _StepViewport({required this.step, required this.child});
+  const _StepViewport({
+    required this.step,
+    required this.child,
+    this.forceScroll = false,
+  });
 
   final int step;
   final Widget child;
+  final bool forceScroll;
 
   @override
   Widget build(BuildContext context) {
     final MediaQueryData media = MediaQuery.of(context);
     final bool needsFallbackScroll =
+        forceScroll ||
         step == 3 ||
         media.size.height < 700 ||
         media.textScaler.scale(1) > 1.15;
