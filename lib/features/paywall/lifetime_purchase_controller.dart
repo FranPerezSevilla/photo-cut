@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:photo_cut/platform/purchase/purchase.dart';
 
+enum OwnedPurchaseCheckResult { restored, notFound, unavailable }
+
 enum LifetimePurchasePhase {
   idle,
   loading,
@@ -60,6 +62,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
   LifetimePurchaseState _state = const LifetimePurchaseState();
   late final StreamSubscription<PurchaseUpdate> _subscription;
   Completer<bool>? _restoreObservation;
+  bool _subscribed = false;
   bool _initialized = false;
   bool _disposed = false;
 
@@ -71,17 +74,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
     }
     _initialized = true;
 
-    _subscription = gateway.updates.listen(
-      _handleUpdate,
-      onError: (_) {
-        _setState(
-          _state.copyWith(
-            phase: LifetimePurchasePhase.error,
-            errorCode: 'purchase_stream_error',
-          ),
-        );
-      },
-    );
+    _ensureSubscribed();
 
     _setState(_state.copyWith(phase: LifetimePurchasePhase.loading));
     final PurchaseProductResult result = await gateway.loadProduct(productId);
@@ -116,12 +109,14 @@ final class LifetimePurchaseController extends ChangeNotifier {
       ),
     );
 
-    final bool restored = await _restoreOwnedPurchase(
+    final OwnedPurchaseCheckResult restoreResult = await _restoreOwnedPurchase(
       busyPhase: LifetimePurchasePhase.loading,
       reportNothing: false,
       reportFailure: false,
     );
-    if (_disposed || restored || _state.phase == LifetimePurchasePhase.unlocked) {
+    if (_disposed ||
+        restoreResult == OwnedPurchaseCheckResult.restored ||
+        _state.phase == LifetimePurchasePhase.unlocked) {
       return;
     }
 
@@ -151,12 +146,15 @@ final class LifetimePurchaseController extends ChangeNotifier {
     try {
       await gateway.buyNonConsumable(product);
     } on Object {
-      final bool restored = await _restoreOwnedPurchase(
-        busyPhase: LifetimePurchasePhase.restoring,
-        reportNothing: false,
-        reportFailure: false,
-      );
-      if (_disposed || restored || _state.phase == LifetimePurchasePhase.unlocked) {
+      final OwnedPurchaseCheckResult restoreResult =
+          await _restoreOwnedPurchase(
+            busyPhase: LifetimePurchasePhase.restoring,
+            reportNothing: false,
+            reportFailure: false,
+          );
+      if (_disposed ||
+          restoreResult == OwnedPurchaseCheckResult.restored ||
+          _state.phase == LifetimePurchasePhase.unlocked) {
         return;
       }
       _setState(
@@ -180,7 +178,19 @@ final class LifetimePurchaseController extends ChangeNotifier {
     );
   }
 
-  Future<bool> _restoreOwnedPurchase({
+  Future<OwnedPurchaseCheckResult> checkOwnedPurchase() async {
+    if (_disposed) {
+      return OwnedPurchaseCheckResult.unavailable;
+    }
+    _ensureSubscribed();
+    return _restoreOwnedPurchase(
+      busyPhase: LifetimePurchasePhase.loading,
+      reportNothing: false,
+      reportFailure: false,
+    );
+  }
+
+  Future<OwnedPurchaseCheckResult> _restoreOwnedPurchase({
     required LifetimePurchasePhase busyPhase,
     required bool reportNothing,
     required bool reportFailure,
@@ -205,7 +215,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
       if (_disposed ||
           purchaseObserved ||
           _state.phase == LifetimePurchasePhase.unlocked) {
-        return true;
+        return OwnedPurchaseCheckResult.restored;
       }
 
       if (_state.phase == busyPhase) {
@@ -229,7 +239,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
           );
         }
       }
-      return false;
+      return OwnedPurchaseCheckResult.notFound;
     } on Object {
       if (!_disposed && _state.phase != LifetimePurchasePhase.unlocked) {
         if (reportFailure) {
@@ -250,12 +260,30 @@ final class LifetimePurchaseController extends ChangeNotifier {
           );
         }
       }
-      return false;
+      return OwnedPurchaseCheckResult.unavailable;
     } finally {
       if (identical(_restoreObservation, observation)) {
         _restoreObservation = null;
       }
     }
+  }
+
+  void _ensureSubscribed() {
+    if (_subscribed || _disposed) {
+      return;
+    }
+    _subscribed = true;
+    _subscription = gateway.updates.listen(
+      _handleUpdate,
+      onError: (_) {
+        _setState(
+          _state.copyWith(
+            phase: LifetimePurchasePhase.error,
+            errorCode: 'purchase_stream_error',
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _handleUpdate(PurchaseUpdate update) async {
@@ -335,7 +363,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    if (_initialized) {
+    if (_subscribed) {
       unawaited(_subscription.cancel());
     }
     super.dispose();
