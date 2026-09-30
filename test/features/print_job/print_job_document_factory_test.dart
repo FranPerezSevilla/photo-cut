@@ -53,6 +53,28 @@ void main() {
     expect(pdfRenderer.plan?.pageHeight.inMillimetres, closeTo(210, 0.000001));
   });
 
+  test('final PDF honors custom paper dimensions', () async {
+    final _FakeSheetPdfRenderer pdfRenderer = _FakeSheetPdfRenderer();
+    final PrintJobDocumentFactory factory = PrintJobDocumentFactory(
+      imageProcessor: _FakeImageProcessor(),
+      pdfRenderer: pdfRenderer,
+    );
+    final PrintJobConfiguration configuration = _configuration(
+      paperSize: PaperSize.custom(
+        width: PhysicalLength.millimetres(120),
+        height: PhysicalLength.millimetres(180),
+      ),
+      pageOrientationPreference: PageOrientationPreference.landscape,
+    );
+
+    final document = await factory.build(configuration);
+
+    expect(pdfRenderer.plan?.paperSize.isCustom, isTrue);
+    expect(document.pageWidth.inMillimetres, closeTo(180, 0.000001));
+    expect(document.pageHeight.inMillimetres, closeTo(120, 0.000001));
+    expect(document.filename, contains('custom-120x180mm'));
+  });
+
   test('filename is deterministic and strips unsafe source characters', () {
     const PrintJobFilenameBuilder builder = PrintJobFilenameBuilder();
     final PrintJobConfiguration configuration = _configuration();
@@ -79,6 +101,7 @@ void main() {
 PrintJobConfiguration _configuration({
   PageOrientationPreference pageOrientationPreference =
       PageOrientationPreference.automatic,
+  PaperSize? paperSize,
 }) {
   return PrintJobConfiguration(
     image: SelectedImage(
@@ -87,7 +110,7 @@ PrintJobConfiguration _configuration({
     ),
     photoWidth: PhysicalLength.millimetres(35),
     photoHeight: PhysicalLength.millimetres(45),
-    paperSize: PaperSize.a4,
+    paperSize: paperSize ?? PaperSize.a4,
     pageOrientationPreference: pageOrientationPreference,
     copyCount: 8,
     margin: PhysicalLength.millimetres(8),
