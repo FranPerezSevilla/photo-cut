@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/core/layout/layout.dart';
 import 'package:photo_cut/core/units/units.dart';
 import 'package:photo_cut/features/print_job/length_unit.dart';
 import 'package:photo_cut/features/print_job/print_configuration_controller.dart';
@@ -303,11 +304,11 @@ final class _SizeStep extends StatelessWidget {
           runSpacing: 8,
           children: <Widget>[
             _SizePresetCard(
-              key: const Key('size-preset-35x45'),
-              label: '35 × 45 mm',
+              key: const Key('size-preset-26x32'),
+              label: '26 × 32 mm',
               caption: l10n.text('idPhoto'),
-              selected: _matchesMillimetres(state, 35, 45),
-              onTap: () => _applyMillimetrePreset(controller, 35, 45),
+              selected: _matchesMillimetres(state, 26, 32),
+              onTap: () => _applyMillimetrePreset(controller, 26, 32),
             ),
             _SizePresetCard(
               key: const Key('size-preset-10x15'),
@@ -503,6 +504,16 @@ final class _SheetStep extends StatelessWidget {
               .toList(growable: false),
         ),
         const SizedBox(height: 12),
+        Text(
+          l10n.text('paperOrientation'),
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        const SizedBox(height: 6),
+        _PaperOrientationSelector(
+          preference: state.configuration.pageOrientationPreference,
+          onChanged: controller.changePageOrientation,
+        ),
+        const SizedBox(height: 12),
         Row(
           children: <Widget>[
             Expanded(
@@ -565,7 +576,9 @@ final class _ReviewStep extends StatelessWidget {
             _SummaryRow(label: l10n.text('framing'), value: framing),
             _SummaryRow(
               label: l10n.text('paper'),
-              value: _paperLabel(context, configuration.paperSize),
+              value:
+                  '${_paperLabel(context, configuration.paperSize)} · '
+                  '${_paperOrientationPreferenceLabel(context, configuration.pageOrientationPreference)}',
             ),
             _SummaryRow(
               label: l10n.text('copies'),
@@ -631,6 +644,52 @@ final class _SizePresetCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+final class _PaperOrientationSelector extends StatelessWidget {
+  const _PaperOrientationSelector({
+    required this.preference,
+    required this.onChanged,
+  });
+
+  final PageOrientationPreference preference;
+  final ValueChanged<PageOrientationPreference> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Row(
+      key: const Key('wizard-paper-orientation'),
+      children: <Widget>[
+        Expanded(
+          child: ChoiceChip(
+            key: const Key('paper-orientation-auto'),
+            label: Text(l10n.text('automatic')),
+            selected: preference == PageOrientationPreference.automatic,
+            onSelected: (_) => onChanged(PageOrientationPreference.automatic),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: ChoiceChip(
+            key: const Key('paper-orientation-portrait'),
+            label: Text(l10n.text('portrait')),
+            selected: preference == PageOrientationPreference.portrait,
+            onSelected: (_) => onChanged(PageOrientationPreference.portrait),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: ChoiceChip(
+            key: const Key('paper-orientation-landscape'),
+            label: Text(l10n.text('landscape')),
+            selected: preference == PageOrientationPreference.landscape,
+            onSelected: (_) => onChanged(PageOrientationPreference.landscape),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -1169,6 +1228,18 @@ String _compactNumber(double value) {
   return value == value.roundToDouble()
       ? value.toStringAsFixed(0)
       : value.toStringAsFixed(2);
+}
+
+String _paperOrientationPreferenceLabel(
+  BuildContext context,
+  PageOrientationPreference preference,
+) {
+  final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+  return switch (preference) {
+    PageOrientationPreference.automatic => l10n.text('automatic'),
+    PageOrientationPreference.portrait => l10n.text('portrait'),
+    PageOrientationPreference.landscape => l10n.text('landscape'),
+  };
 }
 
 String _paperLabel(BuildContext context, PaperSize paper) {
