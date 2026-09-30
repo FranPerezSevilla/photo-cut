@@ -155,6 +155,8 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
       return state.copyCountError == null &&
           state.marginError == null &&
           state.gapError == null &&
+          state.paperWidthError == null &&
+          state.paperHeightError == null &&
           state.layoutError == null;
     }
     if (_step == stepCount - 1) {
@@ -492,17 +494,29 @@ final class _SheetStep extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: PaperSize.presets
-              .map(
-                (PaperSize paper) => _PaperCard(
-                  key: ValueKey<String>('wizard-paper-${paper.id}'),
-                  paper: paper,
-                  selected: paper == state.configuration.paperSize,
-                  onTap: () => controller.changePaperSize(paper),
-                ),
-              )
-              .toList(growable: false),
+          children: <Widget>[
+            ...PaperSize.presets.map(
+              (PaperSize paper) => _PaperCard(
+                key: ValueKey<String>('wizard-paper-${paper.id}'),
+                title: _paperTitle(context, paper),
+                subtitle: _paperDimensions(paper),
+                selected: paper == state.configuration.paperSize,
+                onTap: () => controller.changePaperSize(paper),
+              ),
+            ),
+            _PaperCard(
+              key: const Key('wizard-paper-custom'),
+              title: l10n.text('customPaper'),
+              subtitle: l10n.text('customPaperHint'),
+              selected: state.configuration.paperSize.isCustom,
+              onTap: controller.useCustomPaper,
+            ),
+          ],
         ),
+        if (state.configuration.paperSize.isCustom) ...<Widget>[
+          const SizedBox(height: 10),
+          _CustomPaperEditor(state: state, controller: controller),
+        ],
         const SizedBox(height: 12),
         Text(
           l10n.text('paperOrientation'),
@@ -648,6 +662,106 @@ final class _SizePresetCard extends StatelessWidget {
   }
 }
 
+final class _CustomPaperEditor extends StatelessWidget {
+  const _CustomPaperEditor({required this.state, required this.controller});
+
+  final PrintConfigurationState state;
+  final PrintConfigurationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final PhotoCutLocalizations l10n = PhotoCutLocalizations.of(context);
+    return Container(
+      key: const Key('wizard-custom-paper-editor'),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  l10n.text('customPaperSize'),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ),
+              _PaperUnitSelector(state: state, controller: controller),
+            ],
+          ),
+          const SizedBox(height: 3),
+          Text(
+            l10n.text('paperSizeHint'),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 7),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: _LengthField(
+                  key: ValueKey<String>(
+                    'wizard-paper-width-${state.paperUnit.name}-${state.paperWidthInput}',
+                  ),
+                  label: l10n.text('width'),
+                  suffix: state.paperUnit.shortLabel,
+                  value: state.paperWidthInput,
+                  error: _localizedValidation(context, state.paperWidthError),
+                  onChanged: controller.changePaperWidth,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _LengthField(
+                  key: ValueKey<String>(
+                    'wizard-paper-height-${state.paperUnit.name}-${state.paperHeightInput}',
+                  ),
+                  label: l10n.text('height'),
+                  suffix: state.paperUnit.shortLabel,
+                  value: state.paperHeightInput,
+                  error: _localizedValidation(context, state.paperHeightError),
+                  onChanged: controller.changePaperHeight,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final class _PaperUnitSelector extends StatelessWidget {
+  const _PaperUnitSelector({required this.state, required this.controller});
+
+  final PrintConfigurationState state;
+  final PrintConfigurationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      key: const Key('wizard-paper-unit'),
+      mainAxisSize: MainAxisSize.min,
+      children: LengthUnit.values
+          .map(
+            (LengthUnit unit) => Padding(
+              padding: const EdgeInsets.only(left: 3),
+              child: ChoiceChip(
+                visualDensity: VisualDensity.compact,
+                label: Text(unit.shortLabel),
+                selected: unit == state.paperUnit,
+                onSelected: (_) => controller.changePaperUnit(unit),
+              ),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
 final class _PaperOrientationSelector extends StatelessWidget {
   const _PaperOrientationSelector({
     required this.preference,
@@ -785,12 +899,14 @@ final class _ChoiceCard extends StatelessWidget {
 final class _PaperCard extends StatelessWidget {
   const _PaperCard({
     super.key,
-    required this.paper,
+    required this.title,
+    required this.subtitle,
     required this.selected,
     required this.onTap,
   });
 
-  final PaperSize paper;
+  final String title;
+  final String subtitle;
   final bool selected;
   final VoidCallback onTap;
 
@@ -798,7 +914,7 @@ final class _PaperCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 96,
+      width: 150,
       child: Material(
         color: selected ? colors.primaryContainer : colors.surface,
         shape: RoundedRectangleBorder(
@@ -809,17 +925,29 @@ final class _PaperCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(13),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Icon(Icons.description_outlined, size: 18),
-                const SizedBox(width: 5),
-                Flexible(
-                  child: Text(
-                    _paperLabel(context, paper),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelMedium,
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.labelMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1243,16 +1371,29 @@ String _paperOrientationPreferenceLabel(
 }
 
 String _paperLabel(BuildContext context, PaperSize paper) {
+  if (paper.isCustom) {
+    return '${PhotoCutLocalizations.of(context).text('custom')} · '
+        '${_paperDimensions(paper)}';
+  }
+  return _paperTitle(context, paper);
+}
+
+String _paperTitle(BuildContext context, PaperSize paper) {
   if (paper == PaperSize.a4) {
     return 'A4';
   }
   if (paper == PaperSize.usLetter) {
-    return PhotoCutLocalizations.of(context).text('letter');
+    return PhotoCutLocalizations.of(context).text('usLetterPaper');
   }
   if (paper == PaperSize.photo10x15) {
-    return '10 × 15';
+    return PhotoCutLocalizations.of(context).text('photoPaper10x15');
   }
-  return paper.id;
+  return PhotoCutLocalizations.of(context).text('customPaper');
+}
+
+String _paperDimensions(PaperSize paper) {
+  return '${_formatMillimetres(paper.width)} × '
+      '${_formatMillimetres(paper.height)} mm';
 }
 
 String _formatMillimetres(PhysicalLength length) {
