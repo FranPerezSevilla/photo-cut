@@ -16,7 +16,6 @@ final class PrintJobConfiguration {
     required this.photoHeight,
     required this.paperSize,
     required this.copyCount,
-    this.pageOrientationPreference = PageOrientationPreference.automatic,
     required this.margin,
     required this.gap,
     required this.showCutMarks,
@@ -26,6 +25,7 @@ final class PrintJobConfiguration {
     required this.cropRect,
     required this.sourceSize,
     this.framingZoom = 1,
+    this.pageOrientationPreference = PageOrientationPreference.automatic,
   });
 
   final ImageColorMode colorMode;
