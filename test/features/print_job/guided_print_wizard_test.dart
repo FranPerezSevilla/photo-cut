@@ -97,6 +97,7 @@ void main() {
     await tester.tap(find.byKey(const Key('wizard-paper-custom')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('wizard-custom-paper-editor')), findsOneWidget);
+    expect(find.byKey(const Key('wizard-step-scroll')), findsOneWidget);
 
     final Finder paperFields = find.descendant(
       of: find.byKey(const Key('wizard-custom-paper-editor')),
@@ -113,6 +114,10 @@ void main() {
     await tester.enterText(refreshedFields.at(1), '180');
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(
+      find.byKey(const Key('paper-orientation-landscape')),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('paper-orientation-landscape')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('wizard-next')));
