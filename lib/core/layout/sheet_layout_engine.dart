@@ -22,14 +22,28 @@ final class SheetLayoutEngine {
       }
     }
 
-    consider(PageOrientation.portrait, false);
-    consider(PageOrientation.landscape, false);
+    final List<PageOrientation> pageOrientations = switch (
+      spec.pageOrientationPreference
+    ) {
+      PageOrientationPreference.automatic => PageOrientation.values,
+      PageOrientationPreference.portrait => <PageOrientation>[
+        PageOrientation.portrait,
+      ],
+      PageOrientationPreference.landscape => <PageOrientation>[
+        PageOrientation.landscape,
+      ],
+    };
+
+    for (final PageOrientation orientation in pageOrientations) {
+      consider(orientation, false);
+    }
 
     final bool photoCanRotate =
         spec.allowPhotoRotation && spec.photoWidth != spec.photoHeight;
     if (photoCanRotate) {
-      consider(PageOrientation.portrait, true);
-      consider(PageOrientation.landscape, true);
+      for (final PageOrientation orientation in pageOrientations) {
+        consider(orientation, true);
+      }
     }
 
     if (candidates.isEmpty) {
