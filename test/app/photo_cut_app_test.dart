@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_cut/app/photo_cut_app.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/core/entitlement/entitlement.dart';
 import 'package:photo_cut/features/home/home_screen.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
+import 'package:photo_cut/platform/purchase/purchase.dart';
 
 void main() {
   testWidgets('shows language-neutral branded splash before the home screen', (
@@ -28,6 +30,66 @@ void main() {
     await _settleSplash(tester);
     expect(find.byKey(const Key('photo-cut-splash')), findsNothing);
     expect(find.text('Print photos at the exact size'), findsOneWidget);
+  });
+
+  testWidgets('reinstall restores lifetime ownership before showing home', (
+    WidgetTester tester,
+  ) async {
+    final _FakeEntitlementStore store = _FakeEntitlementStore();
+    final _FakePurchaseGateway purchaseGateway = _FakePurchaseGateway(
+      restoreOwned: true,
+    );
+
+    await tester.pumpWidget(
+      PhotoCutApp(
+        imagePickerGateway: _FakeImagePickerGateway(),
+        imageProcessor: _FakeImageProcessor(),
+        entitlementStore: store,
+        purchaseGateway: purchaseGateway,
+      ),
+    );
+    await _settleSplash(tester);
+
+    expect(find.byKey(const Key('restored-purchase-notice')), findsOneWidget);
+    expect(find.text('Purchase restored'), findsOneWidget);
+    expect(
+      find.textContaining('already bought Photo Cut'),
+      findsOneWidget,
+    );
+    expect(store.state.lifetimeUnlocked, isTrue);
+    expect(purchaseGateway.restoreCalls, 1);
+    expect(purchaseGateway.loadProductCalls, 0);
+
+    await tester.tap(find.byKey(const Key('continue-restored-purchase')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('restored-purchase-notice')), findsNothing);
+    expect(find.text('Print photos at the exact size'), findsOneWidget);
+  });
+
+  testWidgets('local lifetime entitlement skips startup store restore', (
+    WidgetTester tester,
+  ) async {
+    final _FakeEntitlementStore store = _FakeEntitlementStore(
+      const EntitlementState(lifetimeUnlocked: true),
+    );
+    final _FakePurchaseGateway purchaseGateway = _FakePurchaseGateway(
+      restoreOwned: true,
+    );
+
+    await tester.pumpWidget(
+      PhotoCutApp(
+        imagePickerGateway: _FakeImagePickerGateway(),
+        imageProcessor: _FakeImageProcessor(),
+        entitlementStore: store,
+        purchaseGateway: purchaseGateway,
+      ),
+    );
+    await _settleSplash(tester);
+
+    expect(find.byKey(const Key('restored-purchase-notice')), findsNothing);
+    expect(find.text('Print photos at the exact size'), findsOneWidget);
+    expect(purchaseGateway.restoreCalls, 0);
   });
 
   testWidgets('uses system locale by default and allows a manual override', (
@@ -247,6 +309,72 @@ final class _FakeImagePickerGateway implements ImagePickerGateway {
   Future<ImageSelectionResult> recoverLostSelection() async {
     recoveryCalls += 1;
     return recoveryResult;
+  }
+}
+
+final class _FakeEntitlementStore implements EntitlementStore {
+  _FakeEntitlementStore([this.state = const EntitlementState()]);
+
+  EntitlementState state;
+  int writeCount = 0;
+
+  @override
+  Future<EntitlementState> read() async => state;
+
+  @override
+  Future<void> write(EntitlementState state) async {
+    this.state = state;
+    writeCount += 1;
+  }
+}
+
+final class _FakePurchaseGateway implements PurchaseGateway {
+  _FakePurchaseGateway({
+    this.restoreOwned = false,
+    this.failRestore = false,
+  });
+
+  final bool restoreOwned;
+  final bool failRestore;
+  final StreamController<PurchaseUpdate> _updates =
+      StreamController<PurchaseUpdate>.broadcast();
+
+  int restoreCalls = 0;
+  int loadProductCalls = 0;
+  int completeCalls = 0;
+
+  @override
+  Stream<PurchaseUpdate> get updates => _updates.stream;
+
+  @override
+  Future<PurchaseProductResult> loadProduct(String productId) async {
+    loadProductCalls += 1;
+    return const PurchaseProductResult(storeAvailable: false);
+  }
+
+  @override
+  Future<void> buyNonConsumable(PurchaseProduct product) async {}
+
+  @override
+  Future<void> restorePurchases() async {
+    restoreCalls += 1;
+    if (failRestore) {
+      throw StateError('synthetic restore failure');
+    }
+    if (restoreOwned) {
+      _updates.add(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.restored,
+          needsCompletion: false,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> completePurchase(PurchaseUpdate update) async {
+    completeCalls += 1;
   }
 }
 
