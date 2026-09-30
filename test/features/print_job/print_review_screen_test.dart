@@ -217,6 +217,144 @@ void main() {
     expect(store.writeCount, 0);
   });
 
+  testWidgets('reinstall restore replaces free-PDF messaging', (
+    WidgetTester tester,
+  ) async {
+    int generationCalls = 0;
+    final _FakeEntitlementStore entitlementStore = _FakeEntitlementStore();
+    final FinalPdfGenerationController generationController =
+        FinalPdfGenerationController(store: entitlementStore);
+    final _FakePurchaseGateway purchaseGateway = _FakePurchaseGateway(
+      restoreOwned: true,
+    );
+    final LifetimePurchaseController purchaseController =
+        LifetimePurchaseController(
+          gateway: purchaseGateway,
+          entitlementWriter: generationController.setLifetimeUnlocked,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrintReviewScreen(
+          configuration: _configuration(),
+          documentLoader: () async {
+            generationCalls += 1;
+            return _document();
+          },
+          printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: generationController,
+          lifetimePurchaseController: purchaseController,
+          previewBuilder: (BuildContext context, PrintDocument document) {
+            return const Center(child: Text('Restored lifetime preview'));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(generationCalls, 0);
+    expect(
+      find.byKey(const Key('review-restored-purchase-notice')),
+      findsOneWidget,
+    );
+    expect(find.text('Compra restaurada'), findsOneWidget);
+    expect(find.textContaining('Ya habías comprado Photo Cut'), findsOneWidget);
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsNothing,
+    );
+    expect(entitlementStore.state.lifetimeUnlocked, isTrue);
+    expect(purchaseGateway.restoreCalls, 1);
+
+    await tester.tap(
+      find.byKey(const Key('continue-review-restored-purchase')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(generationCalls, 1);
+    expect(find.text('Restored lifetime preview'), findsOneWidget);
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('confirmed no previous purchase still shows free PDF offer', (
+    WidgetTester tester,
+  ) async {
+    final FinalPdfGenerationController generationController =
+        FinalPdfGenerationController(store: _FakeEntitlementStore());
+    final LifetimePurchaseController purchaseController =
+        LifetimePurchaseController(
+          gateway: _FakePurchaseGateway(),
+          entitlementWriter: generationController.setLifetimeUnlocked,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrintReviewScreen(
+          configuration: _configuration(),
+          documentLoader: () async => _document(),
+          printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: generationController,
+          lifetimePurchaseController: purchaseController,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsOneWidget,
+    );
+    expect(find.text('Tu primer PDF final es gratis'), findsOneWidget);
+  });
+
+  testWidgets('failed ownership check does not pretend user is new', (
+    WidgetTester tester,
+  ) async {
+    final FinalPdfGenerationController generationController =
+        FinalPdfGenerationController(store: _FakeEntitlementStore());
+    final LifetimePurchaseController purchaseController =
+        LifetimePurchaseController(
+          gateway: _FakePurchaseGateway(failRestore: true),
+          entitlementWriter: generationController.setLifetimeUnlocked,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PrintReviewScreen(
+          configuration: _configuration(),
+          documentLoader: () async => _document(),
+          printGateway: _FakePrintGateway(),
+          finalPdfGenerationController: generationController,
+          lifetimePurchaseController: purchaseController,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('ownership-check-unavailable')),
+      findsOneWidget,
+    );
+    expect(find.text('No pudimos comprobar tu compra anterior'), findsOneWidget);
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsNothing,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('continue-without-ownership-check')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('free-final-pdf-confirmation')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('lifetime unlock bypasses the free PDF confirmation', (
     WidgetTester tester,
   ) async {
@@ -412,9 +550,15 @@ final class _FakeEntitlementStore implements EntitlementStore {
 
 
 final class _FakePurchaseGateway implements PurchaseGateway {
-  _FakePurchaseGateway({this.autoPurchase = false});
+  _FakePurchaseGateway({
+    this.autoPurchase = false,
+    this.restoreOwned = false,
+    this.failRestore = false,
+  });
 
   final bool autoPurchase;
+  final bool restoreOwned;
+  final bool failRestore;
   final StreamController<PurchaseUpdate> _updates =
       StreamController<PurchaseUpdate>.broadcast();
 
@@ -454,7 +598,23 @@ final class _FakePurchaseGateway implements PurchaseGateway {
   }
 
   @override
-  Future<void> restorePurchases() async {}
+  Future<void> restorePurchases() async {
+    restoreCalls += 1;
+    if (failRestore) {
+      throw StateError('synthetic restore failure');
+    }
+    if (restoreOwned) {
+      _updates.add(
+        const PurchaseUpdate(
+          productId: 'photo_cut_lifetime',
+          status: PurchaseUpdateStatus.restored,
+          needsCompletion: false,
+        ),
+      );
+    }
+  }
+
+  int restoreCalls = 0;
 
   @override
   Future<void> completePurchase(PurchaseUpdate update) async {
