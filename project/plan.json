@@ -886,7 +886,7 @@
       "id": "M4-T06",
       "milestone": "M4",
       "title": "Clarify paper presets and support custom paper dimensions",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T05"
@@ -919,6 +919,12 @@
         "test/core/units/",
         "test/core/layout/",
         "test/features/print_job/"
+      ],
+      "completedAt": "2026-09-30",
+      "verification": [
+        "GitHub Actions CI run 36705892508: Quality and Android — success",
+        "GitHub Actions CI run 36705892508: iOS simulator build — success",
+        "Full Flutter suite covers clear paper presets, custom dimensions/unit conversion, custom-paper scrolling and final PDF propagation."
       ]
     },
     {
