@@ -16,10 +16,14 @@ final class PrintJobFilenameBuilder {
     final String colour = configuration.colorMode == ImageColorMode.grayscale
         ? 'bn'
         : 'color';
+    final String paper = configuration.paperSize.isCustom
+        ? 'custom-${_formatMillimetres(configuration.paperSize.width.inMillimetres)}'
+              'x${_formatMillimetres(configuration.paperSize.height.inMillimetres)}mm'
+        : configuration.paperSize.id;
 
     return 'photo-cut-$stem-${width}x${height}mm-'
         '${configuration.copyCount}copias-'
-        '${configuration.paperSize.id}-$colour.pdf';
+        '$paper-$colour.pdf';
   }
 
   static String _safeStem(String filename) {

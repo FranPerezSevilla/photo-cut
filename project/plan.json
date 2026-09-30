@@ -883,6 +883,51 @@
       ]
     },
     {
+      "id": "M4-T06",
+      "milestone": "M4",
+      "title": "Clarify paper presets and support custom paper dimensions",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T05"
+      ],
+      "objective": "Make paper choices self-explanatory and let users enter an exact custom paper width and height without weakening preview/PDF geometry.",
+      "acceptance": [
+        "A4, US Letter and 10 × 15 cm presets show user-readable names plus their physical dimensions.",
+        "The paper step offers a Custom option with independent width, height and mm/cm/in unit controls.",
+        "Custom paper dimensions flow through the same layout engine, live preview and final PDF as presets.",
+        "Automatic, Portrait and Landscape orientation continue to work for custom paper.",
+        "English, Spanish, French, Portuguese and German copy covers the clarified paper labels and custom paper editor.",
+        "Unit/controller/widget/document tests cover custom dimensions, unit conversion, validation and final PDF propagation."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/units test/core/layout test/features/print_job",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/units/paper_size.dart",
+        "lib/features/print_job/print_configuration_state.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/guided_print_wizard_localized.dart",
+        "lib/l10n/photo_cut_localizations_impl.dart",
+        "test/core/units/",
+        "test/core/layout/",
+        "test/features/print_job/"
+      ],
+      "completedAt": "2026-09-30",
+      "verification": [
+        "GitHub Actions CI run 36705892508: Quality and Android — success",
+        "GitHub Actions CI run 36705892508: iOS simulator build — success",
+        "Full Flutter suite covers clear paper presets, custom dimensions/unit conversion, custom-paper scrolling and final PDF propagation."
+      ]
+    },
+    {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
@@ -892,7 +937,8 @@
         "M4-T02",
         "M4-T03",
         "M4-T04",
-        "M4-T05"
+        "M4-T05",
+        "M4-T06"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -906,7 +952,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "M4-T05 adds manual paper orientation and the 26 × 32 mm ID-photo preset. Re-test Android on the next internal build, including already-owned lifetime restoration from M4-T04."
+      "statusReason": "M4-T06 clarifies paper presets and adds exact custom paper dimensions. Re-test Android on the next internal build, including custom paper/orientation and already-owned lifetime restoration."
     },
     {
       "id": "M5-H01",

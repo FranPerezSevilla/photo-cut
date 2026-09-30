@@ -4,6 +4,13 @@ import 'package:photo_cut/core/units/physical_length.dart';
 final class PaperSize {
   PaperSize._({required this.id, required this.width, required this.height});
 
+  factory PaperSize.custom({
+    required PhysicalLength width,
+    required PhysicalLength height,
+  }) {
+    return PaperSize._(id: 'custom', width: width, height: height);
+  }
+
   static final PaperSize a4 = PaperSize._(
     id: 'a4',
     width: PhysicalLength.millimetres(210),
@@ -29,6 +36,8 @@ final class PaperSize {
   final String id;
   final PhysicalLength width;
   final PhysicalLength height;
+
+  bool get isCustom => id == 'custom';
 
   static PaperSize byId(String id) {
     for (final paperSize in presets) {
