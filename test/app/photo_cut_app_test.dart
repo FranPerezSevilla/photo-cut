@@ -131,7 +131,8 @@ void main() {
     expect(find.textContaining('Step 1 of 4 · Size'), findsOneWidget);
     expect(find.byKey(const Key('wizard-live-preview')), findsOneWidget);
     expect(find.text('What size do you want to print?'), findsOneWidget);
-    expect(find.byKey(const Key('size-preset-35x45')), findsOneWidget);
+    expect(find.byKey(const Key('size-preset-26x32')), findsOneWidget);
+    expect(find.text('26 × 32 mm'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
