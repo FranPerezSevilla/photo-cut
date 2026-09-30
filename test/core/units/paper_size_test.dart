@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_cut/core/units/paper_size.dart';
+import 'package:photo_cut/core/units/physical_length.dart';
 
 void main() {
   group('PaperSize', () {
@@ -32,6 +33,19 @@ void main() {
       expect(PaperSize.byId('a4'), same(PaperSize.a4));
       expect(PaperSize.byId('us-letter'), same(PaperSize.usLetter));
       expect(PaperSize.byId('photo-10x15'), same(PaperSize.photo10x15));
+    });
+
+    test('supports an exact custom paper size without adding it to presets', () {
+      final PaperSize custom = PaperSize.custom(
+        width: PhysicalLength.millimetres(123),
+        height: PhysicalLength.millimetres(234),
+      );
+
+      expect(custom.isCustom, isTrue);
+      expect(custom.id, 'custom');
+      expect(custom.width.inMillimetres, closeTo(123, 0.0000001));
+      expect(custom.height.inMillimetres, closeTo(234, 0.0000001));
+      expect(PaperSize.presets, isNot(contains(custom)));
     });
 
     test('rejects an unknown preset ID', () {
