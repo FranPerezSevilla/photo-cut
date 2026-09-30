@@ -330,13 +330,9 @@ final class _FakeEntitlementStore implements EntitlementStore {
 }
 
 final class _FakePurchaseGateway implements PurchaseGateway {
-  _FakePurchaseGateway({
-    this.restoreOwned = false,
-    this.failRestore = false,
-  });
+  _FakePurchaseGateway({this.restoreOwned = false});
 
   final bool restoreOwned;
-  final bool failRestore;
   final StreamController<PurchaseUpdate> _updates =
       StreamController<PurchaseUpdate>.broadcast();
 
@@ -359,9 +355,6 @@ final class _FakePurchaseGateway implements PurchaseGateway {
   @override
   Future<void> restorePurchases() async {
     restoreCalls += 1;
-    if (failRestore) {
-      throw StateError('synthetic restore failure');
-    }
     if (restoreOwned) {
       _updates.add(
         const PurchaseUpdate(
