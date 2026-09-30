@@ -16,6 +16,9 @@ final class PrintConfigurationState {
     required this.copyCountInput,
     required this.marginInput,
     required this.gapInput,
+    required this.paperUnit,
+    required this.paperWidthInput,
+    required this.paperHeightInput,
     required this.previewPlan,
     required this.isInspectingImage,
     this.widthError,
@@ -23,6 +26,8 @@ final class PrintConfigurationState {
     this.copyCountError,
     this.marginError,
     this.gapError,
+    this.paperWidthError,
+    this.paperHeightError,
     this.layoutError,
     this.imageError,
   });
@@ -38,6 +43,11 @@ final class PrintConfigurationState {
   final bool isInspectingImage;
   final String? layoutError;
   final String marginInput;
+  final LengthUnit paperUnit;
+  final String paperWidthInput;
+  final String paperHeightInput;
+  final String? paperWidthError;
+  final String? paperHeightError;
   final String? marginError;
   final SheetPlan? previewPlan;
   final LengthUnit unit;
@@ -50,6 +60,8 @@ final class PrintConfigurationState {
         copyCountError == null &&
         marginError == null &&
         gapError == null &&
+        paperWidthError == null &&
+        paperHeightError == null &&
         layoutError == null &&
         imageError == null &&
         !isInspectingImage &&
@@ -65,6 +77,9 @@ final class PrintConfigurationState {
     String? copyCountInput,
     String? marginInput,
     String? gapInput,
+    LengthUnit? paperUnit,
+    String? paperWidthInput,
+    String? paperHeightInput,
     bool? isInspectingImage,
     Object? previewPlan = _keepConfigurationValue,
     Object? widthError = _keepConfigurationValue,
@@ -72,6 +87,8 @@ final class PrintConfigurationState {
     Object? copyCountError = _keepConfigurationValue,
     Object? marginError = _keepConfigurationValue,
     Object? gapError = _keepConfigurationValue,
+    Object? paperWidthError = _keepConfigurationValue,
+    Object? paperHeightError = _keepConfigurationValue,
     Object? layoutError = _keepConfigurationValue,
     Object? imageError = _keepConfigurationValue,
   }) {
@@ -83,6 +100,9 @@ final class PrintConfigurationState {
       copyCountInput: copyCountInput ?? this.copyCountInput,
       marginInput: marginInput ?? this.marginInput,
       gapInput: gapInput ?? this.gapInput,
+      paperUnit: paperUnit ?? this.paperUnit,
+      paperWidthInput: paperWidthInput ?? this.paperWidthInput,
+      paperHeightInput: paperHeightInput ?? this.paperHeightInput,
       isInspectingImage: isInspectingImage ?? this.isInspectingImage,
       previewPlan: identical(previewPlan, _keepConfigurationValue)
           ? this.previewPlan
@@ -102,6 +122,12 @@ final class PrintConfigurationState {
       gapError: identical(gapError, _keepConfigurationValue)
           ? this.gapError
           : gapError as String?,
+      paperWidthError: identical(paperWidthError, _keepConfigurationValue)
+          ? this.paperWidthError
+          : paperWidthError as String?,
+      paperHeightError: identical(paperHeightError, _keepConfigurationValue)
+          ? this.paperHeightError
+          : paperHeightError as String?,
       layoutError: identical(layoutError, _keepConfigurationValue)
           ? this.layoutError
           : layoutError as String?,
