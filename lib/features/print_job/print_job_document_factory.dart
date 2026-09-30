@@ -27,6 +27,7 @@ final class PrintJobDocumentFactory {
     final SheetPlan plan = layoutEngine.createPlan(
       SheetLayoutSpec(
         paperSize: configuration.paperSize,
+        pageOrientationPreference: configuration.pageOrientationPreference,
         photoWidth: configuration.photoWidth,
         photoHeight: configuration.photoHeight,
         copyCount: configuration.copyCount,
