@@ -20,6 +20,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: _FakeImagePickerGateway(),
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
 
@@ -103,6 +105,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: _FakeImagePickerGateway(),
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
     await _settleSplash(tester);
@@ -127,6 +131,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: _FakeImagePickerGateway(),
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
     await _settleSplash(tester);
@@ -149,6 +155,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: gateway,
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
     await _settleSplash(tester);
@@ -176,6 +184,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: gateway,
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
     await _settleSplash(tester);
@@ -216,6 +226,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: gateway,
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
     await _settleSplash(tester);
@@ -233,6 +245,8 @@ void main() {
       PhotoCutApp(
         imagePickerGateway: gateway,
         imageProcessor: _FakeImageProcessor(),
+        entitlementStore: _FakeEntitlementStore(),
+        purchaseGateway: _FakePurchaseGateway(),
       ),
     );
     await _settleSplash(tester);
