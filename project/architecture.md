@@ -120,9 +120,12 @@ not rounded for layout. UI formatting may round for display only.
 
 Sheet placement uses a top-left physical origin and row-major copy order. The
 engine evaluates portrait and landscape paper plus optional 90-degree photo
-rotation. It selects greatest capacity, then preserves photo orientation, then
-prefers portrait paper as a deterministic tie-breaker. The complete grid is
-centred inside the configured minimum margin; page overflow reuses that grid.
+rotation when the paper-orientation preference is Automatic. A forced Portrait
+or Landscape preference restricts candidate layouts to that physical page
+orientation. Within the allowed candidates it selects greatest capacity, then
+preserves photo orientation, then prefers portrait paper as a deterministic
+tie-breaker. The complete grid is centred inside the configured minimum margin;
+page overflow reuses that grid.
 
 ## Supported platforms
 

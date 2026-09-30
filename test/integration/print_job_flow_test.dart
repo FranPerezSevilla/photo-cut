@@ -97,11 +97,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Paso 2 de 2 · Revisa el PDF final'), findsOneWidget);
-    expect(find.text('40 × 45 mm · 8 copias · A4'), findsOneWidget);
+    expect(find.text('40 × 32 mm · 8 copias · A4'), findsOneWidget);
     expect(find.text('Final PDF preview'), findsOneWidget);
     expect(
       reviewedDocument?.filename,
-      'photo-cut-synthetic-40x45mm-8copias-a4-bn.pdf',
+      'photo-cut-synthetic-40x32mm-8copias-a4-bn.pdf',
     );
     expect(imageProcessor.request?.colorMode, ImageColorMode.grayscale);
     expect(pdfRenderer.showCutMarks, isTrue);

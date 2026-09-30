@@ -1,3 +1,4 @@
+import 'package:photo_cut/core/layout/page_orientation.dart';
 import 'package:photo_cut/core/units/units.dart';
 
 /// Inputs required to distribute repeated copies of one physical photo size.
@@ -10,6 +11,7 @@ final class SheetLayoutSpec {
     required this.margin,
     required this.gap,
     this.allowPhotoRotation = true,
+    this.pageOrientationPreference = PageOrientationPreference.automatic,
   }) {
     if (copyCount <= 0) {
       throw ArgumentError.value(
@@ -24,6 +26,7 @@ final class SheetLayoutSpec {
   final int copyCount;
   final PhysicalLength gap;
   final PhysicalLength margin;
+  final PageOrientationPreference pageOrientationPreference;
   final PaperSize paperSize;
   final PhysicalLength photoHeight;
   final PhysicalLength photoWidth;

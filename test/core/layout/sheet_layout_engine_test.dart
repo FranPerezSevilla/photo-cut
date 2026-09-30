@@ -74,6 +74,40 @@ void main() {
     },
   );
 
+  test('forced portrait constrains page orientation', () {
+    final SheetPlan plan = engine.createPlan(
+      SheetLayoutSpec(
+        paperSize: PaperSize.a4,
+        photoWidth: PhysicalLength.millimetres(50),
+        photoHeight: PhysicalLength.millimetres(50),
+        copyCount: 1,
+        margin: PhysicalLength.millimetres(8),
+        gap: PhysicalLength.millimetres(2),
+        pageOrientationPreference: PageOrientationPreference.portrait,
+      ),
+    );
+
+    expect(plan.pageOrientation, PageOrientation.portrait);
+  });
+
+  test('forced landscape constrains page orientation', () {
+    final SheetPlan plan = engine.createPlan(
+      SheetLayoutSpec(
+        paperSize: PaperSize.a4,
+        photoWidth: PhysicalLength.millimetres(50),
+        photoHeight: PhysicalLength.millimetres(50),
+        copyCount: 1,
+        margin: PhysicalLength.millimetres(8),
+        gap: PhysicalLength.millimetres(2),
+        pageOrientationPreference: PageOrientationPreference.landscape,
+      ),
+    );
+
+    expect(plan.pageOrientation, PageOrientation.landscape);
+    expect(plan.pageWidth.inMillimetres, closeTo(297, tolerance));
+    expect(plan.pageHeight.inMillimetres, closeTo(210, tolerance));
+  });
+
   test('uses portrait paper as the deterministic final tie-breaker', () {
     final SheetPlan plan = engine.createPlan(
       SheetLayoutSpec(

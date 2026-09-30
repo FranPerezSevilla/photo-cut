@@ -121,7 +121,7 @@ void main() {
 
     final Finder copyField = find.byKey(const Key('copy-count'));
     await _scrollTo(tester, copyField);
-    await tester.enterText(copyField, '40');
+    await tester.enterText(copyField, '80');
     await tester.pump();
 
     await _scrollTo(
@@ -129,7 +129,7 @@ void main() {
       find.byKey(const Key('layout-page-summary')),
       delta: -300,
     );
-    expect(find.text('Página 1 de 2 · 40 copias'), findsOneWidget);
+    expect(find.text('Página 1 de 2 · 80 copias'), findsOneWidget);
   });
 
   testWidgets('valid review emits crop, fit and colour configuration', (
@@ -160,7 +160,8 @@ void main() {
     await tester.pump();
 
     expect(reviewed, isNotNull);
-    expect(reviewed?.photoWidth.inMillimetres, 35);
+    expect(reviewed?.photoWidth.inMillimetres, 26);
+    expect(reviewed?.photoHeight.inMillimetres, 32);
     expect(reviewed?.copyCount, 8);
     expect(reviewed?.colorMode, ImageColorMode.grayscale);
     expect(reviewed?.fitMode, ImageFitMode.cropToFill);

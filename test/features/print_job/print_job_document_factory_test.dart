@@ -36,6 +36,23 @@ void main() {
     expect(request?.quarterTurns, pdfRenderer.plan!.photoRotated ? 1 : 0);
   });
 
+  test('final PDF honors forced landscape paper orientation', () async {
+    final _FakeSheetPdfRenderer pdfRenderer = _FakeSheetPdfRenderer();
+    final PrintJobDocumentFactory factory = PrintJobDocumentFactory(
+      imageProcessor: _FakeImageProcessor(),
+      pdfRenderer: pdfRenderer,
+    );
+    final PrintJobConfiguration configuration = _configuration(
+      pageOrientationPreference: PageOrientationPreference.landscape,
+    );
+
+    await factory.build(configuration);
+
+    expect(pdfRenderer.plan?.pageOrientation, PageOrientation.landscape);
+    expect(pdfRenderer.plan?.pageWidth.inMillimetres, closeTo(297, 0.000001));
+    expect(pdfRenderer.plan?.pageHeight.inMillimetres, closeTo(210, 0.000001));
+  });
+
   test('filename is deterministic and strips unsafe source characters', () {
     const PrintJobFilenameBuilder builder = PrintJobFilenameBuilder();
     final PrintJobConfiguration configuration = _configuration();
@@ -59,7 +76,10 @@ void main() {
   });
 }
 
-PrintJobConfiguration _configuration() {
+PrintJobConfiguration _configuration({
+  PageOrientationPreference pageOrientationPreference =
+      PageOrientationPreference.automatic,
+}) {
   return PrintJobConfiguration(
     image: SelectedImage(
       bytes: Uint8List.fromList(<int>[1, 2, 3]),
@@ -68,6 +88,7 @@ PrintJobConfiguration _configuration() {
     photoWidth: PhysicalLength.millimetres(35),
     photoHeight: PhysicalLength.millimetres(45),
     paperSize: PaperSize.a4,
+    pageOrientationPreference: pageOrientationPreference,
     copyCount: 8,
     margin: PhysicalLength.millimetres(8),
     gap: PhysicalLength.millimetres(2),

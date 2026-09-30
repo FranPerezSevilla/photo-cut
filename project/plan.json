@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-09-30",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -836,6 +836,53 @@
       ]
     },
     {
+      "id": "M4-T05",
+      "milestone": "M4",
+      "title": "Add paper orientation control and smaller ID-photo preset",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T04"
+      ],
+      "objective": "Let users choose automatic, portrait or landscape paper orientation and make the default ID-photo preset 26 × 32 mm.",
+      "acceptance": [
+        "Paper orientation offers Automatic, Portrait and Landscape while preserving the current automatic optimization as the default.",
+        "Forced Portrait and Landscape constrain the layout engine and the PDF/preview use the selected page orientation.",
+        "The ID-photo preset and initial wizard size are 26 × 32 mm.",
+        "The review summary exposes the chosen paper-orientation preference.",
+        "English, Spanish, French, Portuguese and German UI copy covers paper orientation.",
+        "Layout/controller/widget/document tests cover automatic and forced orientations plus the new ID-photo default."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/layout test/features/print_job",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "lib/core/layout/",
+        "lib/features/print_job/print_job_configuration.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/guided_print_wizard_localized.dart",
+        "lib/features/print_job/print_job_document_factory.dart",
+        "lib/l10n/photo_cut_localizations_impl.dart",
+        "test/core/layout/sheet_layout_engine_test.dart",
+        "test/features/print_job/print_configuration_controller_test.dart",
+        "test/features/print_job/guided_print_wizard_test.dart",
+        "test/features/print_job/print_job_document_factory_test.dart"
+      ],
+      "completedAt": "2026-09-30",
+      "verification": [
+        "GitHub Actions CI run 36665244305: Quality and Android — success",
+        "GitHub Actions CI run 36665244305: iOS simulator build — success",
+        "Full Flutter suite covers forced portrait/landscape, 26 × 32 mm ID-photo default, wizard orientation control and final PDF propagation."
+      ]
+    },
+    {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
@@ -844,7 +891,8 @@
       "dependsOn": [
         "M4-T02",
         "M4-T03",
-        "M4-T04"
+        "M4-T04",
+        "M4-T05"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -858,7 +906,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "M4-T04 fixed the already-owned purchase regression. Re-test Android on the internal track with the account that already owns photo_cut_lifetime, then complete cancellation/restore evidence; iPhone validation is deferred by product choice."
+      "statusReason": "M4-T05 adds manual paper orientation and the 26 × 32 mm ID-photo preset. Re-test Android on the next internal build, including already-owned lifetime restoration from M4-T04."
     },
     {
       "id": "M5-H01",
