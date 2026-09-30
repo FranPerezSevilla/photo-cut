@@ -181,6 +181,75 @@ final class PrintConfigurationController extends ChangeNotifier {
     _replaceWithPlanAndCrop(
       _state.copyWith(
         configuration: _state.configuration.copyWith(paperSize: paperSize),
+        paperWidthInput: _formatLength(paperSize.width, _state.paperUnit),
+        paperHeightInput: _formatLength(paperSize.height, _state.paperUnit),
+        paperWidthError: null,
+        paperHeightError: null,
+      ),
+    );
+  }
+
+  void useCustomPaper() {
+    final PaperSize current = _state.configuration.paperSize;
+    changePaperSize(
+      PaperSize.custom(width: current.width, height: current.height),
+    );
+  }
+
+  void changePaperWidth(String input) {
+    _changeCustomPaperDimension(widthInput: input);
+  }
+
+  void changePaperHeight(String input) {
+    _changeCustomPaperDimension(heightInput: input);
+  }
+
+  void changePaperUnit(LengthUnit unit) {
+    if (unit == _state.paperUnit) {
+      return;
+    }
+    final PaperSize paper = _state.configuration.paperSize;
+    _replace(
+      _state.copyWith(
+        paperUnit: unit,
+        paperWidthInput: _formatLength(paper.width, unit),
+        paperHeightInput: _formatLength(paper.height, unit),
+        paperWidthError: null,
+        paperHeightError: null,
+      ),
+    );
+  }
+
+  void _changeCustomPaperDimension({
+    String? widthInput,
+    String? heightInput,
+  }) {
+    final String nextWidthInput = widthInput ?? _state.paperWidthInput;
+    final String nextHeightInput = heightInput ?? _state.paperHeightInput;
+    final _ParsedLength width = _parseLength(nextWidthInput, _state.paperUnit);
+    final _ParsedLength height = _parseLength(nextHeightInput, _state.paperUnit);
+
+    final PrintConfigurationState edited = _state.copyWith(
+      paperWidthInput: nextWidthInput,
+      paperHeightInput: nextHeightInput,
+      paperWidthError: width.error,
+      paperHeightError: height.error,
+    );
+    if (width.length == null || height.length == null) {
+      _replace(edited);
+      return;
+    }
+
+    _replaceWithPlanAndCrop(
+      edited.copyWith(
+        configuration: _state.configuration.copyWith(
+          paperSize: PaperSize.custom(
+            width: width.length!,
+            height: height.length!,
+          ),
+        ),
+        paperWidthError: null,
+        paperHeightError: null,
       ),
     );
   }
@@ -325,6 +394,9 @@ final class PrintConfigurationController extends ChangeNotifier {
       copyCountInput: '8',
       marginInput: '8',
       gapInput: '2',
+      paperUnit: LengthUnit.millimetres,
+      paperWidthInput: '210',
+      paperHeightInput: '297',
       previewPlan: plan,
       isInspectingImage: true,
     );
