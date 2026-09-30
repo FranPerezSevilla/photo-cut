@@ -839,7 +839,7 @@
       "id": "M4-T05",
       "milestone": "M4",
       "title": "Add paper orientation control and smaller ID-photo preset",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T04"
@@ -874,13 +874,19 @@
         "test/features/print_job/print_configuration_controller_test.dart",
         "test/features/print_job/guided_print_wizard_test.dart",
         "test/features/print_job/print_job_document_factory_test.dart"
+      ],
+      "completedAt": "2026-09-30",
+      "verification": [
+        "GitHub Actions CI run 36665244305: Quality and Android — success",
+        "GitHub Actions CI run 36665244305: iOS simulator build — success",
+        "Full Flutter suite covers forced portrait/landscape, 26 × 32 mm ID-photo default, wizard orientation control and final PDF propagation."
       ]
     },
     {
       "id": "M4-H01",
       "milestone": "M4",
       "title": "Validate sandbox purchases on Android and iPhone",
-      "status": "blocked",
+      "status": "awaiting_human",
       "executor": "human",
       "dependsOn": [
         "M4-T02",
@@ -900,7 +906,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "Android validation is paused until the new paper-orientation control and 26 × 32 mm ID-photo preset in M4-T05 are tested on the next internal build."
+      "statusReason": "M4-T05 adds manual paper orientation and the 26 × 32 mm ID-photo preset. Re-test Android on the next internal build, including already-owned lifetime restoration from M4-T04."
     },
     {
       "id": "M5-H01",
