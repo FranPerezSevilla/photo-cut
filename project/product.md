@@ -33,7 +33,7 @@ scaling, margins, duplication and “fit to page” behaviour.
 6. Choose crop-to-fill or fit-inside and adjust the visual framing when needed.
 7. Crop-to-fill framing may be zoomed deliberately; zoom reduces the pixels used
    for the final result, so the app must communicate that quality trade-off.
-8. Choose paper and copy count and see the layout update immediately.
+8. Choose paper, paper orientation (automatic, portrait or landscape) and copy count and see the layout update immediately.
 9. Choose colour/grayscale and optionally open advanced margin, spacing and
    cut-mark controls.
 10. Review a compact summary before producing the final PDF.
@@ -71,7 +71,8 @@ remains language-neutral.
 - One source image per print job.
 - Width and height in explicit physical units.
 - A4, US Letter and 10 × 15 cm paper presets.
-- Automatic portrait/landscape page orientation when it fits more copies.
+- Automatic portrait/landscape page orientation when it fits more copies, with manual portrait or landscape override.
+- The default ID-photo preset is 26 × 32 mm while custom exact dimensions remain available.
 - Repeated copies, page overflow and deterministic ordering.
 - Crop-to-fill and fit-inside modes.
 - Visual framing with deliberate zoom for crop-to-fill.
