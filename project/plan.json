@@ -931,7 +931,8 @@
         "M4-T02",
         "M4-T03",
         "M4-T04",
-        "M4-T05"
+        "M4-T05",
+        "M4-T06"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -945,7 +946,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "M4-T05 adds manual paper orientation and the 26 × 32 mm ID-photo preset. Re-test Android on the next internal build, including already-owned lifetime restoration from M4-T04."
+      "statusReason": "M4-T06 clarifies paper presets and adds exact custom paper dimensions. Re-test Android on the next internal build, including custom paper/orientation and already-owned lifetime restoration."
     },
     {
       "id": "M5-H01",
