@@ -185,6 +185,16 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
+  void changePageOrientation(PageOrientationPreference preference) {
+    _replaceWithPlanAndCrop(
+      _state.copyWith(
+        configuration: _state.configuration.copyWith(
+          pageOrientationPreference: preference,
+        ),
+      ),
+    );
+  }
+
   void changeFitMode(ImageFitMode mode) {
     _replaceWithPlanAndCrop(
       _state.copyWith(
@@ -293,8 +303,8 @@ final class PrintConfigurationController extends ChangeNotifier {
   ) {
     final PrintJobConfiguration configuration = PrintJobConfiguration(
       image: image,
-      photoWidth: PhysicalLength.millimetres(35),
-      photoHeight: PhysicalLength.millimetres(45),
+      photoWidth: PhysicalLength.millimetres(26),
+      photoHeight: PhysicalLength.millimetres(32),
       paperSize: PaperSize.a4,
       copyCount: 8,
       margin: PhysicalLength.millimetres(8),
@@ -310,8 +320,8 @@ final class PrintConfigurationController extends ChangeNotifier {
     return PrintConfigurationState(
       configuration: configuration,
       unit: LengthUnit.millimetres,
-      widthInput: '35',
-      heightInput: '45',
+      widthInput: '26',
+      heightInput: '32',
       copyCountInput: '8',
       marginInput: '8',
       gapInput: '2',
@@ -323,6 +333,7 @@ final class PrintConfigurationController extends ChangeNotifier {
   static SheetLayoutSpec _specFor(PrintJobConfiguration configuration) {
     return SheetLayoutSpec(
       paperSize: configuration.paperSize,
+      pageOrientationPreference: configuration.pageOrientationPreference,
       photoWidth: configuration.photoWidth,
       photoHeight: configuration.photoHeight,
       copyCount: configuration.copyCount,
