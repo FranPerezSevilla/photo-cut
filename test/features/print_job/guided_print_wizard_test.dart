@@ -55,12 +55,71 @@ void main() {
     await tester.tap(find.byKey(const Key('wizard-next')));
     await tester.pumpAndSettle();
     expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
+    expect(find.text('A4'), findsOneWidget);
+    expect(find.text('210 × 297 mm'), findsOneWidget);
+    expect(find.text('Carta (US Letter)'), findsOneWidget);
+    expect(find.text('Foto 10 × 15 cm'), findsOneWidget);
+    expect(find.byKey(const Key('wizard-paper-custom')), findsOneWidget);
     expect(find.byKey(const Key('wizard-paper-orientation')), findsOneWidget);
     expect(find.byKey(const Key('paper-orientation-auto')), findsOneWidget);
     expect(find.byKey(const Key('wizard-copy-count')), findsOneWidget);
     expect(find.byKey(const Key('copies-plus')), findsOneWidget);
     expect(find.byKey(const Key('wizard-advanced-options')), findsOneWidget);
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
+  });
+
+  testWidgets('custom paper can be entered in the sheet step', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-paper-custom')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('wizard-custom-paper-editor')), findsOneWidget);
+
+    final Finder paperFields = find.descendant(
+      of: find.byKey(const Key('wizard-custom-paper-editor')),
+      matching: find.byType(TextFormField),
+    );
+    expect(paperFields, findsNWidgets(2));
+    await tester.enterText(paperFields.at(0), '120');
+    await tester.pumpAndSettle();
+
+    final Finder refreshedFields = find.descendant(
+      of: find.byKey(const Key('wizard-custom-paper-editor')),
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(refreshedFields.at(1), '180');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('paper-orientation-landscape')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Personalizado · 120 × 180 mm'), findsOneWidget);
+    expect(find.textContaining('Horizontal'), findsOneWidget);
   });
 
   testWidgets('paper orientation can be forced to landscape', (
