@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:photo_cut/core/crop/crop.dart';
+import 'package:photo_cut/core/layout/layout.dart';
 import 'package:photo_cut/core/units/units.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 
@@ -15,6 +16,7 @@ final class PrintJobConfiguration {
     required this.photoHeight,
     required this.paperSize,
     required this.copyCount,
+    this.pageOrientationPreference = PageOrientationPreference.automatic,
     required this.margin,
     required this.gap,
     required this.showCutMarks,
@@ -35,6 +37,7 @@ final class PrintJobConfiguration {
   final PhysicalLength gap;
   final SelectedImage image;
   final PhysicalLength margin;
+  final PageOrientationPreference pageOrientationPreference;
   final PaperSize paperSize;
   final PhysicalLength photoHeight;
   final PhysicalLength photoWidth;
@@ -49,6 +52,7 @@ final class PrintJobConfiguration {
     PhysicalLength? photoWidth,
     PhysicalLength? photoHeight,
     PaperSize? paperSize,
+    PageOrientationPreference? pageOrientationPreference,
     int? copyCount,
     PhysicalLength? margin,
     PhysicalLength? gap,
@@ -65,6 +69,8 @@ final class PrintJobConfiguration {
       photoWidth: photoWidth ?? this.photoWidth,
       photoHeight: photoHeight ?? this.photoHeight,
       paperSize: paperSize ?? this.paperSize,
+      pageOrientationPreference:
+          pageOrientationPreference ?? this.pageOrientationPreference,
       copyCount: copyCount ?? this.copyCount,
       margin: margin ?? this.margin,
       gap: gap ?? this.gap,
