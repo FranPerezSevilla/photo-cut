@@ -62,6 +62,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
   LifetimePurchaseState _state = const LifetimePurchaseState();
   late final StreamSubscription<PurchaseUpdate> _subscription;
   Completer<bool>? _restoreObservation;
+  Completer<void>? _restoreDelivery;
   bool _subscribed = false;
   bool _initialized = false;
   bool _disposed = false;
@@ -196,7 +197,9 @@ final class LifetimePurchaseController extends ChangeNotifier {
     required bool reportFailure,
   }) async {
     final Completer<bool> observation = Completer<bool>();
+    final Completer<void> delivery = Completer<void>();
     _restoreObservation = observation;
+    _restoreDelivery = delivery;
     _setState(
       _state.copyWith(
         phase: busyPhase,
@@ -212,10 +215,17 @@ final class LifetimePurchaseController extends ChangeNotifier {
 
       final bool purchaseObserved =
           observation.isCompleted ? await observation.future : false;
-      if (_disposed ||
-          purchaseObserved ||
+      if (purchaseObserved ||
           _state.phase == LifetimePurchasePhase.unlocked) {
-        return OwnedPurchaseCheckResult.restored;
+        if (!delivery.isCompleted) {
+          await delivery.future;
+        }
+        return _state.phase == LifetimePurchasePhase.unlocked
+            ? OwnedPurchaseCheckResult.restored
+            : OwnedPurchaseCheckResult.unavailable;
+      }
+      if (_disposed) {
+        return OwnedPurchaseCheckResult.unavailable;
       }
 
       if (_state.phase == busyPhase) {
@@ -264,6 +274,9 @@ final class LifetimePurchaseController extends ChangeNotifier {
     } finally {
       if (identical(_restoreObservation, observation)) {
         _restoreObservation = null;
+      }
+      if (identical(_restoreDelivery, delivery)) {
+        _restoreDelivery = null;
       }
     }
   }
@@ -326,6 +339,7 @@ final class LifetimePurchaseController extends ChangeNotifier {
         return;
       case PurchaseUpdateStatus.purchased:
       case PurchaseUpdateStatus.restored:
+        final Completer<void>? delivery = _restoreDelivery;
         try {
           await entitlementWriter(true);
           try {
@@ -347,6 +361,10 @@ final class LifetimePurchaseController extends ChangeNotifier {
               errorCode: 'purchase_delivery_failed',
             ),
           );
+        } finally {
+          if (delivery != null && !delivery.isCompleted) {
+            delivery.complete();
+          }
         }
         return;
     }
