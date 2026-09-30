@@ -23,8 +23,8 @@ void main() {
       await controller.inspectImage();
 
       final PrintConfigurationState state = controller.state;
-      expect(state.configuration.photoWidth.inMillimetres, 35);
-      expect(state.configuration.photoHeight.inMillimetres, 45);
+      expect(state.configuration.photoWidth.inMillimetres, 26);
+      expect(state.configuration.photoHeight.inMillimetres, 32);
       expect(state.configuration.paperSize, PaperSize.a4);
       expect(state.configuration.copyCount, 8);
       expect(state.configuration.margin.inMillimetres, 8);
@@ -50,17 +50,47 @@ void main() {
         controller.state.configuration.photoWidth.inMillimetres;
 
     controller.changeUnit(LengthUnit.centimetres);
-    expect(controller.state.widthInput, '3.5');
+    expect(controller.state.widthInput, '2.6');
     expect(
       controller.state.configuration.photoWidth.inMillimetres,
       originalWidth,
     );
 
     controller.changeUnit(LengthUnit.inches);
-    expect(controller.state.widthInput, '1.378');
+    expect(controller.state.widthInput, '1.024');
     expect(
       controller.state.configuration.photoWidth.inMillimetres,
       closeTo(originalWidth, 0.001),
+    );
+  });
+
+  test('paper orientation preference recalculates the preview plan', () {
+    final PrintConfigurationController controller =
+        PrintConfigurationController(
+          image: _image(),
+          imageProcessor: _FakeImageProcessor(),
+        );
+
+    expect(
+      controller.state.configuration.pageOrientationPreference,
+      PageOrientationPreference.automatic,
+    );
+
+    controller.changePageOrientation(PageOrientationPreference.landscape);
+
+    expect(
+      controller.state.configuration.pageOrientationPreference,
+      PageOrientationPreference.landscape,
+    );
+    expect(
+      controller.state.previewPlan?.pageOrientation,
+      PageOrientation.landscape,
+    );
+
+    controller.changePageOrientation(PageOrientationPreference.portrait);
+    expect(
+      controller.state.previewPlan?.pageOrientation,
+      PageOrientation.portrait,
     );
   });
 
