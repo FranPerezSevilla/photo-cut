@@ -1058,6 +1058,48 @@
       ]
     },
     {
+      "id": "M4-T10",
+      "milestone": "M4",
+      "title": "Restore free-use consumption through Android backup",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T09"
+      ],
+      "objective": "Reduce repeat free-PDF claims after normal Android reinstall by backing up only the consumed-free-use marker, while keeping lifetime ownership authoritative to the store.",
+      "acceptance": [
+        "Android stores freeFinalPdfConsumed in a dedicated SharedPreferences file separate from lifetimeUnlocked.",
+        "Existing installs migrate the legacy free-use value without losing entitlement state.",
+        "Android Auto Backup and device-transfer rules include only the dedicated free-use SharedPreferences file.",
+        "The lifetimeUnlocked cache and purchase data are excluded from Android backup.",
+        "The app documentation states that backup restoration is best-effort and is not an antifraud guarantee.",
+        "Automated tests verify the manifest, backup XML and Android persistence split.",
+        "The next internal Android build uses versionCode 4."
+      ],
+      "checks": [
+        {
+          "command": "python3 -m unittest discover -s tool/tests -p \"test_*.py\"",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        }
+      ],
+      "evidence": [
+        "android/app/src/main/AndroidManifest.xml",
+        "android/app/src/main/res/xml/backup_rules.xml",
+        "android/app/src/main/res/xml/data_extraction_rules.xml",
+        "android/app/src/main/kotlin/com/frainzzel/photocut/MainActivity.kt",
+        "tool/tests/test_android_backup.py",
+        "project/architecture.md"
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
@@ -1065,7 +1107,8 @@
       "executor": "human",
       "dependsOn": [
         "M4-T08",
-        "M4-T09"
+        "M4-T09",
+        "M4-T10"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1079,7 +1122,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Rerun Play Release AAB from main after M4-T09 merges. The corrected verifier keeps cryptographic JAR verification and exact upload-certificate SHA-256 matching without treating the expected self-signed chain warning as fatal."
+      "statusReason": "Generate the next protected Play AAB after M4-T10 so the internal build includes Android free-use backup restoration, then confirm Play accepts the signed bundle."
     },
     {
       "id": "M4-H01",
