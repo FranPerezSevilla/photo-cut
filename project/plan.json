@@ -1043,7 +1043,7 @@
         },
         {
           "command": "GitHub Actions repository CI",
-          "runner": "github"
+          "runner": "linux"
         }
       ],
       "evidence": [
