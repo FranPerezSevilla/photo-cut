@@ -1,3 +1,27 @@
+val keystoreProperties = java.util.Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use(keystoreProperties::load)
+}
+
+fun signingValue(environmentName: String, propertyName: String): String? =
+    System.getenv(environmentName)
+        ?.takeIf { it.isNotBlank() }
+        ?: keystoreProperties.getProperty(propertyName)?.takeIf { it.isNotBlank() }
+
+val uploadStoreFile = signingValue("ANDROID_UPLOAD_KEYSTORE_PATH", "storeFile")
+val uploadStorePassword =
+    signingValue("ANDROID_UPLOAD_STORE_PASSWORD", "storePassword")
+val uploadKeyAlias = signingValue("ANDROID_UPLOAD_KEY_ALIAS", "keyAlias")
+val uploadKeyPassword = signingValue("ANDROID_UPLOAD_KEY_PASSWORD", "keyPassword")
+val hasUploadSigning = listOf(
+    uploadStoreFile,
+    uploadStorePassword,
+    uploadKeyAlias,
+    uploadKeyPassword,
+).all { !it.isNullOrBlank() }
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -15,25 +39,33 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.frainzzel.photocut"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasUploadSigning) {
+            create("release") {
+                keyAlias = uploadKeyAlias
+                keyPassword = uploadKeyPassword
+                storeFile = rootProject.file(uploadStoreFile!!)
+                storePassword = uploadStorePassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasUploadSigning) {
+                signingConfigs.getByName("release")
+            } else {
+                // Ordinary CI and local test builds keep the existing fallback.
+                // Play-release CI always supplies protected upload credentials.
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
