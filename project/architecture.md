@@ -149,6 +149,15 @@ not retained. EXIF orientation is applied locally and removed from processed
 output. Purchase state is derived from the store API and minimal local entitlement
 state where required.
 
+On Android, the consumed free-final-PDF marker is stored separately from the
+lifetime entitlement cache. Android Auto Backup and device-transfer rules include
+only that dedicated free-use SharedPreferences file, so a normal reinstall may
+restore the consumed-free-use state without backing up store ownership. This is a
+best-effort convenience rather than an antifraud boundary: backup freshness,
+account settings and device restore behaviour are controlled by Android/Google.
+The lifetime entitlement remains store-authoritative and is restored through the
+purchase API.
+
 ## Dependency policy
 
 Current runtime dependencies have narrow boundaries:
