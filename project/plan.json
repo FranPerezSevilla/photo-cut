@@ -1024,7 +1024,7 @@
       "id": "M4-T09",
       "milestone": "M4",
       "title": "Accept valid self-signed upload certificate warnings",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T08"
@@ -1049,6 +1049,12 @@
       "evidence": [
         ".github/workflows/play-release.yml",
         "GitHub Actions Play Release AAB run 36886615246"
+      ],
+      "completedAt": "2026-10-01",
+      "verification": [
+        "Protected Play Release AAB run 36886615246 reconstructed and verified the original upload certificate, then built the signed AAB; only jarsigner -strict self-signed-chain warnings caused the post-build failure.",
+        "GitHub Actions CI run 36887769397: Quality and Android — success",
+        "GitHub Actions CI run 36887769397: iOS simulator build — success"
       ]
     },
     {
@@ -1073,7 +1079,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "The first protected run 36886615246 confirmed the original upload keystore/certificate and built a signed AAB, but the post-build verifier treated the expected self-signed certificate warning as fatal. Complete M4-T09, then rerun Play Release AAB from main."
+      "statusReason": "Rerun Play Release AAB from main after M4-T09 merges. The corrected verifier keeps cryptographic JAR verification and exact upload-certificate SHA-256 matching without treating the expected self-signed chain warning as fatal."
     },
     {
       "id": "M4-H01",
