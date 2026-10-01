@@ -976,7 +976,7 @@
       "id": "M4-T08",
       "milestone": "M4",
       "title": "Add protected Android Play release workflow",
-      "status": "awaiting_human",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T07"
@@ -1013,7 +1013,35 @@
         ".gitignore",
         "project/evidence/M4-T08/README.md"
       ],
-      "statusReason": "Repository CI is green on run 36883096302. Merge the protected workflow to main, then dispatch Play Release AAB once so the play-release Environment secrets are exercised and a signed AAB is produced."
+      "completedAt": "2026-10-01",
+      "verification": [
+        "GitHub Actions CI run 36883096302: Quality and Android — success",
+        "GitHub Actions CI run 36883096302: iOS simulator build — success",
+        "Protected workflow execution is delegated to M4-H02 so signing secrets remain a human-controlled gate."
+      ]
+    },
+    {
+      "id": "M4-H02",
+      "milestone": "M4",
+      "title": "Validate protected Android Play release signing",
+      "status": "awaiting_human",
+      "executor": "human",
+      "dependsOn": [
+        "M4-T08"
+      ],
+      "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
+      "acceptance": [
+        "Play Release AAB is dispatched from main using the play-release GitHub Environment.",
+        "The workflow verifies the original upload certificate SHA-256 before and after the build.",
+        "The workflow completes successfully and publishes a signed PhotoCut AAB artifact.",
+        "The generated AAB uses the intended versionName/versionCode and is accepted by Google Play internal testing."
+      ],
+      "checks": [],
+      "evidence": [
+        "GitHub Actions Play Release AAB run",
+        "Google Play internal-test release"
+      ],
+      "statusReason": "Run the newly added Play Release AAB workflow from main after PR #48 is merged, then upload its artifact to the existing Google Play internal test."
     },
     {
       "id": "M4-H01",
@@ -1028,7 +1056,7 @@
         "M4-T05",
         "M4-T06",
         "M4-T07",
-        "M4-T08"
+        "M4-H02"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -1042,7 +1070,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "M4-T07 restore behavior is validated in app tests. M4-T08 must produce the next correctly signed internal Play AAB, then re-test Android reinstall/restore, custom paper/orientation and purchase cancellation."
+      "statusReason": "After M4-H02 produces and Play accepts the signed internal AAB, re-test Android reinstall/restore, custom paper/orientation and purchase cancellation; iPhone sandbox validation remains required."
     },
     {
       "id": "M5-H01",
