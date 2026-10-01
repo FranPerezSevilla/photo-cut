@@ -1,8 +1,12 @@
-val keystoreProperties = java.util.Properties()
+import java.util.Properties
+
+val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 
 if (keystorePropertiesFile.exists()) {
-    keystorePropertiesFile.inputStream().use(keystoreProperties::load)
+    keystorePropertiesFile.inputStream().use { stream ->
+        keystoreProperties.load(stream)
+    }
 }
 
 fun signingValue(environmentName: String, propertyName: String): String? =
