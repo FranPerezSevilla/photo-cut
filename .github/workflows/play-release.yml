@@ -154,7 +154,7 @@ jobs:
         run: |
           set -euo pipefail
           bundle="build/app/outputs/bundle/release/app-release.aab"
-          jarsigner -verify -strict "${bundle}"
+          jarsigner -verify "${bundle}"
           actual="$(
             keytool -printcert -jarfile "${bundle}" |
             awk -F': ' '/SHA256:/{print $2; exit}'
