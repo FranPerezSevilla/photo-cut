@@ -983,7 +983,7 @@
       ],
       "objective": "Generate a signed Android App Bundle for internal Play testing through GitHub Actions without depending on a developer workstation or committed signing secrets.",
       "acceptance": [
-        "Android release signing reads ignored key.properties credentials when present while ordinary CI keeps its existing debug-signed release APK fallback.",
+        "Android release signing reads protected environment variables or an ignored local key.properties when present while ordinary CI keeps its existing debug-signed release APK fallback.",
         "A manual GitHub Actions workflow protected by the play-release environment reconstructs the upload keystore only on the runner, runs validation/analyze/tests and builds a release AAB.",
         "The workflow verifies the upload certificate SHA-256 before the build and verifies the generated AAB is signed by that same certificate.",
         "The generated artifact is named from the app version/build and is directly suitable for Play Console upload.",
