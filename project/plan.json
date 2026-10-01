@@ -1021,13 +1021,45 @@
       ]
     },
     {
+      "id": "M4-T09",
+      "milestone": "M4",
+      "title": "Accept valid self-signed upload certificate warnings",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T08"
+      ],
+      "objective": "Keep AAB signature verification strict about cryptographic validity and certificate identity without failing on the expected self-signed upload certificate chain warning.",
+      "acceptance": [
+        "The Play release workflow verifies the AAB JAR signature successfully without treating the upload certificate's self-signed chain warning as a build failure.",
+        "The workflow still extracts the generated AAB signer certificate and requires its SHA-256 fingerprint to match the known Photo Cut upload certificate.",
+        "A mismatched or invalid signature still fails the workflow.",
+        "No signing secret or certificate private material is committed."
+      ],
+      "checks": [
+        {
+          "command": "python3 tool/project.py validate",
+          "runner": "any"
+        },
+        {
+          "command": "GitHub Actions repository CI",
+          "runner": "github"
+        }
+      ],
+      "evidence": [
+        ".github/workflows/play-release.yml",
+        "GitHub Actions Play Release AAB run 36886615246"
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
       "status": "awaiting_human",
       "executor": "human",
       "dependsOn": [
-        "M4-T08"
+        "M4-T08",
+        "M4-T09"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1041,7 +1073,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Run the newly added Play Release AAB workflow from main after PR #48 is merged, then upload its artifact to the existing Google Play internal test."
+      "statusReason": "The first protected run 36886615246 confirmed the original upload keystore/certificate and built a signed AAB, but the post-build verifier treated the expected self-signed certificate warning as fatal. Complete M4-T09, then rerun Play Release AAB from main."
     },
     {
       "id": "M4-H01",
