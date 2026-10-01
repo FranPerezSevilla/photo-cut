@@ -976,7 +976,7 @@
       "id": "M4-T08",
       "milestone": "M4",
       "title": "Add protected Android Play release workflow",
-      "status": "ready",
+      "status": "awaiting_human",
       "executor": "agent",
       "dependsOn": [
         "M4-T07"
@@ -1012,7 +1012,8 @@
         "android/app/build.gradle.kts",
         ".gitignore",
         "project/evidence/M4-T08/README.md"
-      ]
+      ],
+      "statusReason": "Repository CI is green on run 36883096302. Merge the protected workflow to main, then dispatch Play Release AAB once so the play-release Environment secrets are exercised and a signed AAB is produced."
     },
     {
       "id": "M4-H01",
@@ -1026,7 +1027,8 @@
         "M4-T04",
         "M4-T05",
         "M4-T06",
-        "M4-T07"
+        "M4-T07",
+        "M4-T08"
       ],
       "objective": "Exercise purchase, cancellation and restoration using real sandbox/test accounts.",
       "acceptance": [
@@ -1040,7 +1042,7 @@
         "project/evidence/purchases/android.md",
         "project/evidence/purchases/ios.md"
       ],
-      "statusReason": "M4-T07 restores lifetime ownership before any free-use messaging after reinstall. Re-test Android on the next internal build, including reinstall/restore, custom paper/orientation and purchase cancellation."
+      "statusReason": "M4-T07 restore behavior is validated in app tests. M4-T08 must produce the next correctly signed internal Play AAB, then re-test Android reinstall/restore, custom paper/orientation and purchase cancellation."
     },
     {
       "id": "M5-H01",
