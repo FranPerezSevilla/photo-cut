@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-10-01",
+  "updatedAt": "2026-10-02",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -1061,7 +1061,7 @@
       "id": "M4-T10",
       "milestone": "M4",
       "title": "Restore free-use consumption through Android backup",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T09"
@@ -1097,6 +1097,13 @@
         "android/app/src/main/kotlin/com/frainzzel/photocut/MainActivity.kt",
         "tool/tests/test_android_backup.py",
         "project/architecture.md"
+      ],
+      "completedAt": "2026-10-02",
+      "verification": [
+        "GitHub Actions CI run 36894750223: Quality and Android — success",
+        "GitHub Actions CI run 36894750223: iOS simulator build — success",
+        "Repository tooling tests cover scoped Android backup configuration and lifetime exclusion.",
+        "Android debug/release test builds compile with versionCode 4."
       ]
     },
     {
@@ -1122,7 +1129,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Generate the next protected Play AAB after M4-T10 so the internal build includes Android free-use backup restoration, then confirm Play accepts the signed bundle."
+      "statusReason": "Generate PhotoCut 0.1.0+4 with Play Release AAB from main, then confirm Google Play accepts the signed internal-test bundle. This build includes best-effort Android restore of the consumed free-PDF marker."
     },
     {
       "id": "M4-H01",
