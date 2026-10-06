@@ -116,7 +116,7 @@ void main() {
       expect(editable(key).focusNode.hasFocus, isTrue);
 
       for (final String value in edits) {
-        await tester.testTextInput.enterText(value);
+        tester.testTextInput.enterText(value);
         await tester.pump();
         expect(
           editable(key).focusNode.hasFocus,
