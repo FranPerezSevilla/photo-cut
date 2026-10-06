@@ -112,7 +112,9 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                     child: _StepViewport(
                       step: _step,
                       forceScroll:
-                          _step == 2 && state.configuration.paperSize.isCustom,
+                          (_step == 0 && state.layoutError != null) ||
+                          (_step == 2 &&
+                              state.configuration.paperSize.isCustom),
                       child: switch (_step) {
                         0 => _SizeStep(state: state, controller: _controller),
                         1 => _FramingStep(
