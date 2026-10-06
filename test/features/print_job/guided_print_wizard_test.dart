@@ -68,6 +68,112 @@ void main() {
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
   });
 
+  testWidgets('numeric inputs keep focus across typing and deletion', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Finder textField(Key key) {
+      return find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(TextFormField),
+      );
+    }
+
+    EditableText editable(Key key) {
+      return tester.widget<EditableText>(
+        find.descendant(
+          of: find.byKey(key),
+          matching: find.byType(EditableText),
+        ),
+      );
+    }
+
+    Future<void> editWithoutLosingFocus(
+      Key key,
+      List<String> edits,
+    ) async {
+      final Finder field = textField(key);
+      expect(field, findsOneWidget);
+      await tester.ensureVisible(field);
+      await tester.pumpAndSettle();
+      await tester.tap(field);
+      await tester.pump();
+      expect(editable(key).focusNode.hasFocus, isTrue);
+
+      for (final String value in edits) {
+        tester.testTextInput.enterText(value);
+        await tester.pump();
+        expect(
+          editable(key).focusNode.hasFocus,
+          isTrue,
+          reason: 'Focus was lost after editing $key to "$value".',
+        );
+        expect(editable(key).controller.text, value);
+      }
+    }
+
+    await editWithoutLosingFocus(
+      const Key('wizard-width-input'),
+      <String>['1', '18', '180', '18', '1', '', '26'],
+    );
+    await editWithoutLosingFocus(
+      const Key('wizard-height-input'),
+      <String>['3', '32', '3', '', '32'],
+    );
+
+    await tester.tap(find.byKey(const Key('size-preset-10x15')));
+    await tester.pumpAndSettle();
+    expect(editable(const Key('wizard-width-input')).controller.text, '100');
+    expect(editable(const Key('wizard-height-input')).controller.text, '150');
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-paper-custom')));
+    await tester.pumpAndSettle();
+
+    await editWithoutLosingFocus(
+      const Key('wizard-paper-width-input'),
+      <String>['1', '12', '120', '12', '', '120'],
+    );
+    await editWithoutLosingFocus(
+      const Key('wizard-paper-height-input'),
+      <String>['1', '18', '180', '18', '', '180'],
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('wizard-advanced-options')));
+    await tester.tap(find.byKey(const Key('wizard-advanced-options')));
+    await tester.pumpAndSettle();
+
+    await editWithoutLosingFocus(
+      const Key('wizard-margin-input'),
+      <String>['1', '12', '1', '', '8'],
+    );
+    await editWithoutLosingFocus(
+      const Key('wizard-gap-input'),
+      <String>['1', '12', '1', '', '2'],
+    );
+  });
+
   testWidgets('custom paper can be entered in the sheet step', (
     WidgetTester tester,
   ) async {

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-10-02",
+  "updatedAt": "2026-10-06",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -1107,6 +1107,51 @@
       ]
     },
     {
+      "id": "M4-T11",
+      "milestone": "M4",
+      "title": "Keep numeric keyboard open while editing",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T10"
+      ],
+      "objective": "Prevent all numeric text inputs in the guided print flow from losing focus and dismissing the Android keyboard on every keystroke.",
+      "acceptance": [
+        "Photo width and height inputs keep focus while typing and deleting multiple characters.",
+        "Custom paper width and height inputs keep focus while typing and deleting multiple characters.",
+        "Margin and spacing inputs keep focus while typing and deleting multiple characters.",
+        "Programmatic value changes such as presets and unit changes still update the visible field text.",
+        "Widget tests cover repeated edits without focus loss.",
+        "The next internal Android build uses versionCode 5."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/print_job/guided_print_wizard_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        }
+      ],
+      "evidence": [
+        "lib/features/print_job/guided_print_wizard_localized.dart",
+        "test/features/print_job/guided_print_wizard_test.dart",
+        "pubspec.yaml"
+      ],
+      "completedAt": "2026-10-06",
+      "verification": [
+        "GitHub Actions CI run 37410787404: Quality and Android — success",
+        "GitHub Actions CI run 37410787404: iOS simulator build — success",
+        "Widget regression covers repeated typing and deletion without focus loss for photo size, custom paper, margin and spacing.",
+        "Programmatic preset updates remain synchronized with the visible numeric fields."
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
@@ -1115,7 +1160,8 @@
       "dependsOn": [
         "M4-T08",
         "M4-T09",
-        "M4-T10"
+        "M4-T10",
+        "M4-T11"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1129,7 +1175,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Generate PhotoCut 0.1.0+4 with Play Release AAB from main, then confirm Google Play accepts the signed internal-test bundle. This build includes best-effort Android restore of the consumed free-PDF marker."
+      "statusReason": "Generate PhotoCut 0.1.0+5 with Play Release AAB from main, then confirm Google Play accepts the signed internal-test bundle. Build 5 includes the numeric keyboard/focus fix."
     },
     {
       "id": "M4-H01",

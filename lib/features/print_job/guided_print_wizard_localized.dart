@@ -354,9 +354,7 @@ final class _SizeStep extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _LengthField(
-                key: ValueKey<String>(
-                  'wizard-width-${state.unit.name}-${state.widthInput}',
-                ),
+                key: const Key('wizard-width-input'),
                 label: l10n.text('width'),
                 suffix: state.unit.shortLabel,
                 value: state.widthInput,
@@ -367,9 +365,7 @@ final class _SizeStep extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _LengthField(
-                key: ValueKey<String>(
-                  'wizard-height-${state.unit.name}-${state.heightInput}',
-                ),
+                key: const Key('wizard-height-input'),
                 label: l10n.text('height'),
                 suffix: state.unit.shortLabel,
                 value: state.heightInput,
@@ -711,9 +707,7 @@ final class _CustomPaperEditor extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: _LengthField(
-                  key: ValueKey<String>(
-                    'wizard-paper-width-${state.paperUnit.name}-${state.paperWidthInput}',
-                  ),
+                  key: const Key('wizard-paper-width-input'),
                   label: l10n.text('width'),
                   suffix: state.paperUnit.shortLabel,
                   value: state.paperWidthInput,
@@ -724,9 +718,7 @@ final class _CustomPaperEditor extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: _LengthField(
-                  key: ValueKey<String>(
-                    'wizard-paper-height-${state.paperUnit.name}-${state.paperHeightInput}',
-                  ),
+                  key: const Key('wizard-paper-height-input'),
                   label: l10n.text('height'),
                   suffix: state.paperUnit.shortLabel,
                   value: state.paperHeightInput,
@@ -1079,7 +1071,7 @@ final class _SummaryRow {
   final String value;
 }
 
-final class _LengthField extends StatelessWidget {
+final class _LengthField extends StatefulWidget {
   const _LengthField({
     super.key,
     required this.label,
@@ -1096,20 +1088,52 @@ final class _LengthField extends StatelessWidget {
   final ValueChanged<String> onChanged;
 
   @override
+  State<_LengthField> createState() => _LengthFieldState();
+}
+
+final class _LengthFieldState extends State<_LengthField> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void didUpdateWidget(covariant _LengthField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == _textController.text) {
+      return;
+    }
+
+    _textController.value = TextEditingValue(
+      text: widget.value,
+      selection: TextSelection.collapsed(offset: widget.value.length),
+    );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      initialValue: value,
+      controller: _textController,
       decoration: InputDecoration(
         isDense: true,
-        labelText: label,
-        suffixText: suffix,
-        errorText: error,
+        labelText: widget.label,
+        suffixText: widget.suffix,
+        errorText: widget.error,
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: <TextInputFormatter>[
         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
       ],
-      onChanged: onChanged,
+      onChanged: widget.onChanged,
     );
   }
 }
@@ -1246,9 +1270,7 @@ void _openSheetSettings(
                     children: <Widget>[
                       Expanded(
                         child: _LengthField(
-                          key: ValueKey<String>(
-                            'wizard-margin-${state.unit.name}-${state.marginInput}',
-                          ),
+                          key: const Key('wizard-margin-input'),
                           label: l10n.text('margin'),
                           suffix: state.unit.shortLabel,
                           value: state.marginInput,
@@ -1259,9 +1281,7 @@ void _openSheetSettings(
                       const SizedBox(width: 8),
                       Expanded(
                         child: _LengthField(
-                          key: ValueKey<String>(
-                            'wizard-gap-${state.unit.name}-${state.gapInput}',
-                          ),
+                          key: const Key('wizard-gap-input'),
                           label: l10n.text('spacing'),
                           suffix: state.unit.shortLabel,
                           value: state.gapInput,
