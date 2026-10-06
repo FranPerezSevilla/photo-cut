@@ -68,6 +68,192 @@ void main() {
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
   });
 
+  testWidgets('warns only on Next for an unusually small photo size', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder widthField = find.descendant(
+      of: find.byKey(const Key('wizard-width-input')),
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(widthField, '9');
+    await tester.pump();
+
+    expect(find.byKey(const Key('unusual-photo-size-dialog')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('unusual-photo-size-dialog')), findsOneWidget);
+    expect(find.text('Comprueba este tamaño'), findsOneWidget);
+    expect(find.textContaining('inferior a 10 mm'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('unusual-photo-size-review')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('unusual-photo-size-dialog')), findsNothing);
+    expect(find.textContaining('Paso 1 de 4'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('unusual-photo-size-continue')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 2 de 4'), findsOneWidget);
+  });
+
+  testWidgets('warns and can continue for an unusually large photo size', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder widthField = find.descendant(
+      of: find.byKey(const Key('wizard-width-input')),
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(widthField, '1001');
+    await tester.pump();
+
+    expect(find.byKey(const Key('unusual-photo-size-dialog')), findsNothing);
+
+    final FilledButton nextButton = tester.widget<FilledButton>(
+      find.byKey(const Key('wizard-next')),
+    );
+    expect(nextButton.onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('unusual-photo-size-dialog')), findsOneWidget);
+    expect(find.textContaining('superior a 1000 mm'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('unusual-photo-size-continue')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 2 de 4'), findsOneWidget);
+  });
+
+  testWidgets('explains both anomalies for a mixed extreme photo size', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('wizard-width-input')),
+        matching: find.byType(TextFormField),
+      ),
+      '9',
+    );
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('wizard-height-input')),
+        matching: find.byType(TextFormField),
+      ),
+      '1001',
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('inferior a 10 mm'), findsOneWidget);
+    expect(find.textContaining('supera los 1000 mm'), findsOneWidget);
+  });
+
+  testWidgets('10 mm and 1000 mm boundaries do not show an unusual-size warning', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('wizard-width-input')),
+        matching: find.byType(TextFormField),
+      ),
+      '10',
+    );
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('wizard-height-input')),
+        matching: find.byType(TextFormField),
+      ),
+      '1000',
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('unusual-photo-size-dialog')), findsNothing);
+    expect(find.textContaining('Paso 2 de 4'), findsOneWidget);
+  });
+
   testWidgets('numeric inputs keep focus across typing and deletion', (
     WidgetTester tester,
   ) async {

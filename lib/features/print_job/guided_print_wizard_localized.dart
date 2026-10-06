@@ -75,13 +75,7 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
             stepCount: stepTitles.length,
             canContinue: _canContinue(_controller.state, stepTitles.length),
             onBack: _step == 0 ? null : () => setState(() => _step -= 1),
-            onNext: () {
-              if (_step < stepTitles.length - 1) {
-                setState(() => _step += 1);
-                return;
-              }
-              widget.onReview?.call(context, _controller.state.configuration);
-            },
+            onNext: () => unawaited(_handleNext(stepTitles.length)),
           );
         },
       ),
@@ -118,7 +112,9 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
                     child: _StepViewport(
                       step: _step,
                       forceScroll:
-                          _step == 2 && state.configuration.paperSize.isCustom,
+                          (_step == 0 && state.layoutError != null) ||
+                          (_step == 2 &&
+                              state.configuration.paperSize.isCustom),
                       child: switch (_step) {
                         0 => _SizeStep(state: state, controller: _controller),
                         1 => _FramingStep(
@@ -140,6 +136,9 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
     );
   }
 
+  static const double _unusuallySmallSideMillimetres = 10;
+  static const double _unusuallyLargeSideMillimetres = 1000;
+
   void _refreshLivePreview() {
     if (!mounted) return;
     setState(() {
@@ -147,11 +146,79 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
     });
   }
 
+  Future<void> _handleNext(int stepCount) async {
+    if (_step == 0) {
+      final String? warningBodyKey = _unusualSizeWarningBodyKey(
+        _controller.state.configuration,
+      );
+      if (warningBodyKey != null) {
+        final bool? shouldContinue = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            final PhotoCutLocalizations l10n =
+                PhotoCutLocalizations.of(dialogContext);
+            return AlertDialog(
+              key: const Key('unusual-photo-size-dialog'),
+              title: Text(l10n.text('unusualPhotoSizeTitle')),
+              content: Text(l10n.text(warningBodyKey)),
+              actions: <Widget>[
+                TextButton(
+                  key: const Key('unusual-photo-size-review'),
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: Text(l10n.text('reviewMeasurements')),
+                ),
+                FilledButton(
+                  key: const Key('unusual-photo-size-continue'),
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: Text(l10n.text('continueAnyway')),
+                ),
+              ],
+            );
+          },
+        );
+        if (!mounted || shouldContinue != true) {
+          return;
+        }
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+    if (_step < stepCount - 1) {
+      setState(() => _step += 1);
+      return;
+    }
+    widget.onReview?.call(context, _controller.state.configuration);
+  }
+
+  String? _unusualSizeWarningBodyKey(PrintJobConfiguration configuration) {
+    final List<double> sides = <double>[
+      configuration.photoWidth.inMillimetres,
+      configuration.photoHeight.inMillimetres,
+    ];
+    final bool unusuallySmall = sides.any(
+      (double side) => side < _unusuallySmallSideMillimetres,
+    );
+    final bool unusuallyLarge = sides.any(
+      (double side) => side > _unusuallyLargeSideMillimetres,
+    );
+
+    if (unusuallySmall && unusuallyLarge) {
+      return 'unusualPhotoSizeMixedBody';
+    }
+    if (unusuallySmall) {
+      return 'unusualPhotoSizeSmallBody';
+    }
+    if (unusuallyLarge) {
+      return 'unusualPhotoSizeLargeBody';
+    }
+    return null;
+  }
+
   bool _canContinue(PrintConfigurationState state, int stepCount) {
     if (_step == 0) {
-      return state.widthError == null &&
-          state.heightError == null &&
-          state.layoutError == null;
+      return state.widthError == null && state.heightError == null;
     }
     if (_step == 2) {
       return state.copyCountError == null &&
