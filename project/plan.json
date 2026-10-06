@@ -1110,7 +1110,7 @@
       "id": "M4-T11",
       "milestone": "M4",
       "title": "Keep numeric keyboard open while editing",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T10"
@@ -1142,6 +1142,13 @@
         "lib/features/print_job/guided_print_wizard_localized.dart",
         "test/features/print_job/guided_print_wizard_test.dart",
         "pubspec.yaml"
+      ],
+      "completedAt": "2026-10-06",
+      "verification": [
+        "GitHub Actions CI run 37410787404: Quality and Android — success",
+        "GitHub Actions CI run 37410787404: iOS simulator build — success",
+        "Widget regression covers repeated typing and deletion without focus loss for photo size, custom paper, margin and spacing.",
+        "Programmatic preset updates remain synchronized with the visible numeric fields."
       ]
     },
     {
@@ -1168,7 +1175,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Generate PhotoCut 0.1.0+5 after M4-T11 so Play/internal validation includes the numeric-keyboard focus fix."
+      "statusReason": "Generate PhotoCut 0.1.0+5 with Play Release AAB from main, then confirm Google Play accepts the signed internal-test bundle. Build 5 includes the numeric keyboard/focus fix."
     },
     {
       "id": "M4-H01",
