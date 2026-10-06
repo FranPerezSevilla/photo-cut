@@ -1155,7 +1155,7 @@
       "id": "M4-T12",
       "milestone": "M4",
       "title": "Warn before unusually small or large photo sizes",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T11"
@@ -1191,6 +1191,13 @@
         "lib/l10n/photo_cut_localizations_impl.dart",
         "test/features/print_job/guided_print_wizard_test.dart",
         "pubspec.yaml"
+      ],
+      "completedAt": "2026-10-06",
+      "verification": [
+        "GitHub Actions CI run 37415068869: Quality and Android — success",
+        "GitHub Actions CI run 37415068869: iOS simulator build — success",
+        "Widget tests cover below-10 mm, above-1000 mm, mixed extremes, exact 10/1000 mm boundaries, Review measurements and Continue anyway.",
+        "Oversized size-step content falls back to scrolling instead of overflowing."
       ]
     },
     {
@@ -1218,7 +1225,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Generate PhotoCut 0.1.0+6 after M4-T12 so the next Play/internal validation includes unusual-size warnings and the keyboard fix."
+      "statusReason": "Generate PhotoCut 0.1.0+6 with Play Release AAB from main, then confirm Google Play accepts the signed internal-test bundle. Build 6 includes keyboard focus and unusual-size safeguards."
     },
     {
       "id": "M4-H01",
