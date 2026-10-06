@@ -111,6 +111,8 @@ void main() {
     ) async {
       final Finder field = textField(key);
       expect(field, findsOneWidget);
+      await tester.ensureVisible(field);
+      await tester.pumpAndSettle();
       await tester.tap(field);
       await tester.pump();
       expect(editable(key).focusNode.hasFocus, isTrue);
