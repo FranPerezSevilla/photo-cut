@@ -1152,6 +1152,48 @@
       ]
     },
     {
+      "id": "M4-T12",
+      "milestone": "M4",
+      "title": "Warn before unusually small or large photo sizes",
+      "status": "ready",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T11"
+      ],
+      "objective": "Catch likely unit-entry mistakes without blocking legitimate unusual sizes by warning only when leaving the size step.",
+      "acceptance": [
+        "Pressing Next with either photo side below 10 mm shows a localized non-blocking warning.",
+        "Pressing Next with either photo side above 1000 mm shows a localized non-blocking warning.",
+        "If one side is below 10 mm and another exceeds 1000 mm, the dialog explains both anomalies.",
+        "The warning appears only when attempting to leave the size step, never on each keystroke.",
+        "Review measurements keeps the user on the size step; Continue anyway advances.",
+        "The size step validates numeric dimensions independently of the current default paper so large sizes can reach the paper-selection step.",
+        "English, Spanish, French, Portuguese and German copy is provided.",
+        "Widget tests cover small, large and boundary/no-warning behavior.",
+        "The next internal Android build uses versionCode 6."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/features/print_job/guided_print_wizard_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        }
+      ],
+      "evidence": [
+        "lib/features/print_job/guided_print_wizard_localized.dart",
+        "lib/l10n/photo_cut_localizations_impl.dart",
+        "test/features/print_job/guided_print_wizard_test.dart",
+        "pubspec.yaml"
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
@@ -1161,7 +1203,8 @@
         "M4-T08",
         "M4-T09",
         "M4-T10",
-        "M4-T11"
+        "M4-T11",
+        "M4-T12"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1175,7 +1218,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Generate PhotoCut 0.1.0+5 with Play Release AAB from main, then confirm Google Play accepts the signed internal-test bundle. Build 5 includes the numeric keyboard/focus fix."
+      "statusReason": "Generate PhotoCut 0.1.0+6 after M4-T12 so the next Play/internal validation includes unusual-size warnings and the keyboard fix."
     },
     {
       "id": "M4-H01",
