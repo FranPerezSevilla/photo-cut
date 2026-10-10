@@ -1204,7 +1204,7 @@
       "id": "M4-T13",
       "milestone": "M4",
       "title": "Refresh sheet layout after wizard backtracking",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T12"
@@ -1236,6 +1236,13 @@
         "lib/features/print_job/guided_print_wizard_localized.dart",
         "test/features/print_job/guided_print_wizard_test.dart",
         "pubspec.yaml"
+      ],
+      "completedAt": "2026-10-10",
+      "verification": [
+        "GitHub Actions CI run 38027890075: Quality and Android — success",
+        "GitHub Actions CI run 38027890075: iOS simulator build — success",
+        "Widget regression covers invalid paper fit, backtracking without correction, then corrected photo size and successful re-entry to the paper step.",
+        "Paper-step navigation explicitly recomputes the current sheet plan before evaluating Next."
       ]
     },
     {
