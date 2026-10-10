@@ -74,7 +74,7 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
             step: _step,
             stepCount: stepTitles.length,
             canContinue: _canContinue(_controller.state, stepTitles.length),
-            onBack: _step == 0 ? null : () => setState(() => _step -= 1),
+            onBack: _step == 0 ? null : () => _moveToStep(_step - 1),
             onNext: () => unawaited(_handleNext(stepTitles.length)),
           );
         },
@@ -146,6 +146,16 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
     });
   }
 
+  void _moveToStep(int nextStep) {
+    if (!mounted) {
+      return;
+    }
+    if (nextStep == 2) {
+      _controller.revalidateLayout();
+    }
+    setState(() => _step = nextStep);
+  }
+
   Future<void> _handleNext(int stepCount) async {
     if (_step == 0) {
       final String? warningBodyKey = _unusualSizeWarningBodyKey(
@@ -186,7 +196,7 @@ final class _GuidedPrintWizardState extends State<GuidedPrintWizard> {
       return;
     }
     if (_step < stepCount - 1) {
-      setState(() => _step += 1);
+      _moveToStep(_step + 1);
       return;
     }
     widget.onReview?.call(context, _controller.state.configuration);
