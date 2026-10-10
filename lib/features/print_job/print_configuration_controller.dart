@@ -40,6 +40,14 @@ final class PrintConfigurationController extends ChangeNotifier {
 
   PrintConfigurationState get state => _state;
 
+  /// Recomputes crop and sheet-fit validation from the current configuration.
+  ///
+  /// Wizard navigation calls this when entering the paper step so a validation
+  /// result from an earlier visit cannot remain stale after backtracking.
+  void revalidateLayout() {
+    _replaceWithPlanAndCrop(_state);
+  }
+
   Future<void> inspectImage() async {
     if (_inspectionAttempted || _disposed) {
       return;
