@@ -68,6 +68,78 @@ void main() {
     expect(find.byKey(const Key('wizard-step-scroll')), findsNothing);
   });
 
+  testWidgets('refreshes sheet validation after backtracking and correction', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Finder lengthField(Key key) => find.descendant(
+      of: find.byKey(key),
+      matching: find.byType(TextFormField),
+    );
+
+    FilledButton nextButton() => tester.widget<FilledButton>(
+      find.byKey(const Key('wizard-next')),
+    );
+
+    await tester.enterText(
+      lengthField(const Key('wizard-width-input')),
+      '400',
+    );
+    await tester.enterText(
+      lengthField(const Key('wizard-height-input')),
+      '400',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
+    expect(nextButton().onPressed, isNull);
+
+    await tester.tap(find.byKey(const Key('wizard-back')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
+    expect(nextButton().onPressed, isNull);
+
+    await tester.tap(find.byKey(const Key('wizard-back')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-back')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('size-preset-26x32')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
+    expect(nextButton().onPressed, isNotNull);
+  });
+
   testWidgets('warns only on Next for an unusually small photo size', (
     WidgetTester tester,
   ) async {
