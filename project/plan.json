@@ -1293,7 +1293,8 @@
         "lib/features/print_job/guided_print_wizard_localized.dart",
         "test/features/print_job/print_configuration_controller_test.dart",
         "test/features/print_job/guided_print_wizard_test.dart",
-        "pubspec.yaml"
+        "pubspec.yaml",
+        "project/architecture.md"
       ]
     },
     {
