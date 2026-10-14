@@ -3,6 +3,13 @@ import 'package:photo_cut/core/units/physical_length.dart';
 
 void main() {
   group('PhysicalLength', () {
+    test('provides an explicit zero distance for optional offsets', () {
+      expect(PhysicalLength.zero.inMillimetres, 0);
+      expect(PhysicalLength.zero.inCentimetres, 0);
+      expect(PhysicalLength.zero.inInches, 0);
+      expect(PhysicalLength.zero.inPdfPoints, 0);
+    });
+
     test('converts centimetres to canonical millimetres', () {
       final length = PhysicalLength.centimetres(3.5);
 
