@@ -8,8 +8,6 @@
 final class PhysicalLength implements Comparable<PhysicalLength> {
   PhysicalLength._(this._millimetres);
 
-  static final PhysicalLength zero = PhysicalLength._(0);
-
   factory PhysicalLength.millimetres(num value) {
     return PhysicalLength._(
       _validatedMillimetres(value, unitName: 'millimetres'),
@@ -30,6 +28,8 @@ final class PhysicalLength implements Comparable<PhysicalLength> {
     final points = _validatedValue(value, unitName: 'PDF points');
     return PhysicalLength._(points * millimetresPerInch / pdfPointsPerInch);
   }
+
+  static final PhysicalLength zero = PhysicalLength._(0);
 
   static const double millimetresPerCentimetre = 10;
   static const double millimetresPerInch = 25.4;
