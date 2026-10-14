@@ -466,20 +466,20 @@ void main() {
     FilledButton nextButton() => tester.widget<FilledButton>(
       find.byKey(const Key('wizard-next')),
     );
-    expect(nextButton().onPressed, isNull);
+    expect(nextButton().onPressed, isNotNull);
 
     await tester.tap(find.byKey(const Key('wizard-advanced-options')));
     await tester.pumpAndSettle();
 
-    Finder lengthField(Key key) => find.descendant(
-      of: find.byKey(key),
-      matching: find.byType(TextFormField),
+    EditableText editable(Key key) => tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(EditableText),
+      ),
     );
 
-    await tester.enterText(lengthField(const Key('wizard-margin-input')), '0');
-    await tester.enterText(lengthField(const Key('wizard-gap-input')), '0');
-    await tester.pumpAndSettle();
-
+    expect(editable(const Key('wizard-margin-input')).controller.text, '0');
+    expect(editable(const Key('wizard-gap-input')).controller.text, '0');
     expect(find.text('Introduce una medida mayor que 0.'), findsNothing);
 
     await tester.tap(find.text('Hecho'));
