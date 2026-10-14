@@ -1266,6 +1266,10 @@
       ],
       "checks": [
         {
+          "command": "flutter test test/core/units/physical_length_test.dart",
+          "runner": "any"
+        },
+        {
           "command": "flutter test test/features/print_job/print_configuration_controller_test.dart",
           "runner": "any"
         },
@@ -1283,6 +1287,8 @@
         }
       ],
       "evidence": [
+        "test/core/units/physical_length_test.dart",
+        "lib/core/units/physical_length.dart",
         "lib/features/print_job/print_configuration_controller.dart",
         "lib/features/print_job/guided_print_wizard_localized.dart",
         "test/features/print_job/print_configuration_controller_test.dart",
