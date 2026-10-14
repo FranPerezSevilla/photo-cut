@@ -482,7 +482,7 @@ void main() {
     expect(editable(const Key('wizard-gap-input')).controller.text, '0');
     expect(find.text('Introduce una medida mayor que 0.'), findsNothing);
 
-    await tester.tap(find.text('Hecho'));
+    await tester.tap(find.text('Listo'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
