@@ -94,6 +94,37 @@ void main() {
     expect(controller.state.previewPlan?.pageHeight.inMillimetres, closeTo(120, 0.001));
   });
 
+  test('zero margin and spacing allow an exact 10 x 15 cm fit', () {
+    final PrintConfigurationController controller =
+        PrintConfigurationController(
+          image: _image(),
+          imageProcessor: _FakeImageProcessor(),
+        );
+
+    controller.changeWidth('100');
+    controller.changeHeight('150');
+    controller.changePaperSize(PaperSize.photo10x15);
+
+    expect(controller.state.layoutError, isNotNull);
+
+    controller.changeMargin('0');
+    controller.changeGap('0');
+
+    final PrintConfigurationState state = controller.state;
+    expect(state.marginError, isNull);
+    expect(state.gapError, isNull);
+    expect(state.configuration.margin.inMillimetres, 0);
+    expect(state.configuration.gap.inMillimetres, 0);
+    expect(state.layoutError, isNull);
+    expect(state.previewPlan, isNotNull);
+
+    final PlacedPhoto placement = state.previewPlan!.placements.first;
+    expect(placement.left.inMillimetres, closeTo(0, 0.000001));
+    expect(placement.top.inMillimetres, closeTo(0, 0.000001));
+    expect(placement.width.inMillimetres, closeTo(100, 0.000001));
+    expect(placement.height.inMillimetres, closeTo(150, 0.000001));
+  });
+
   test('invalid custom paper dimension blocks layout progression', () {
     final PrintConfigurationController controller =
         PrintConfigurationController(
