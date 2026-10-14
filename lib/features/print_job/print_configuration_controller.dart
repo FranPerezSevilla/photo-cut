@@ -194,13 +194,31 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changePaperSize(PaperSize paperSize) {
+    final bool exactPhotoPaperFit =
+        paperSize == PaperSize.photo10x15 &&
+        _isTenByFifteenPhoto(_state.configuration);
+    final PhysicalLength margin = exactPhotoPaperFit
+        ? PhysicalLength.zero
+        : PhysicalLength.millimetres(8);
+    final PhysicalLength gap = exactPhotoPaperFit
+        ? PhysicalLength.zero
+        : PhysicalLength.millimetres(2);
+
     _replaceWithPlanAndCrop(
       _state.copyWith(
-        configuration: _state.configuration.copyWith(paperSize: paperSize),
+        configuration: _state.configuration.copyWith(
+          paperSize: paperSize,
+          margin: margin,
+          gap: gap,
+        ),
         paperWidthInput: _formatLength(paperSize.width, _state.paperUnit),
         paperHeightInput: _formatLength(paperSize.height, _state.paperUnit),
+        marginInput: _formatLength(margin, _state.unit),
+        gapInput: _formatLength(gap, _state.unit),
         paperWidthError: null,
         paperHeightError: null,
+        marginError: null,
+        gapError: null,
       ),
     );
   }
@@ -416,6 +434,17 @@ final class PrintConfigurationController extends ChangeNotifier {
       previewPlan: plan,
       isInspectingImage: true,
     );
+  }
+
+  static bool _isTenByFifteenPhoto(PrintJobConfiguration configuration) {
+    final double width = configuration.photoWidth.inMillimetres;
+    final double height = configuration.photoHeight.inMillimetres;
+    const double tolerance = 0.001;
+    final bool portrait =
+        (width - 100).abs() < tolerance && (height - 150).abs() < tolerance;
+    final bool landscape =
+        (width - 150).abs() < tolerance && (height - 100).abs() < tolerance;
+    return portrait || landscape;
   }
 
   static SheetLayoutSpec _specFor(PrintJobConfiguration configuration) {
