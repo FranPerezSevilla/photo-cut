@@ -52,6 +52,31 @@ void main() {
     );
   });
 
+  test('supports an exact edge-to-edge 10 x 15 cm placement', () {
+    final SheetPlan plan = engine.createPlan(
+      SheetLayoutSpec(
+        paperSize: PaperSize.photo10x15,
+        photoWidth: PhysicalLength.millimetres(100),
+        photoHeight: PhysicalLength.millimetres(150),
+        copyCount: 1,
+        margin: PhysicalLength.zero,
+        gap: PhysicalLength.zero,
+      ),
+    );
+
+    expect(plan.pageCount, 1);
+    expect(plan.columns, 1);
+    expect(plan.rows, 1);
+    expect(plan.capacityPerPage, 1);
+    expect(plan.placements, hasLength(1));
+
+    final PlacedPhoto photo = plan.placements.single;
+    expect(photo.left.inMillimetres, closeTo(0, tolerance));
+    expect(photo.top.inMillimetres, closeTo(0, tolerance));
+    expect(photo.width.inMillimetres, closeTo(100, tolerance));
+    expect(photo.height.inMillimetres, closeTo(150, tolerance));
+  });
+
   test(
     'chooses landscape paper before rotating the photo when capacity ties',
     () {
