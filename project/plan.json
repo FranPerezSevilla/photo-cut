@@ -1249,7 +1249,7 @@
       "id": "M4-T14",
       "milestone": "M4",
       "title": "Allow zero margin and spacing for exact paper fits",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T13"
@@ -1312,6 +1312,14 @@
         "lib/l10n/photo_cut_localizations_impl.dart",
         "test/features/print_job/print_review_screen_test.dart",
         "project/product.md"
+      ],
+      "completedAt": "2026-10-14",
+      "verification": [
+        "GitHub Actions CI run 38587150994: Quality and Android — success",
+        "GitHub Actions CI run 38587150994: iOS simulator build — success",
+        "174 tests pass, including exact 100 x 150 mm edge-to-edge placement at origin 0,0.",
+        "Controller and wizard regressions confirm 10 x 15 photo paper defaults to margin 0 / spacing 0 and A4 restores 8 / 2.",
+        "Final PDF review regression confirms the localized printer-margin and borderless-printing reminder is always visible."
       ]
     },
     {
@@ -1341,7 +1349,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Build 7 validation found that exact 10 x 15 cm edge-to-edge layouts were blocked because margin and spacing could not be set to zero. Complete M4-T14, generate build 8 with Play Release AAB, then confirm Google Play accepts the signed internal-test bundle."
+      "statusReason": "Build 8 now supports exact 10 x 15 cm edge-to-edge photo paper with automatic zero margin/spacing and a final printer-margin reminder. Generate build 8 with Play Release AAB, then confirm Google Play accepts the signed internal-test bundle."
     },
     {
       "id": "M4-H01",
