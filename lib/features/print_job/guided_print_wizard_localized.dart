@@ -1396,8 +1396,12 @@ String? _localizedValidation(BuildContext context, String? error) {
   final String languageCode = Localizations.localeOf(context).languageCode;
   final bool invalidCopies = error.contains('1 y 999');
   final bool invalidLength = error.contains('mayor que 0');
+  final bool invalidNonNegative = error.contains('0 o mayor');
   final bool layoutError = error.contains('no cabe en el papel');
-  if (!invalidCopies && !invalidLength && !layoutError) {
+  if (!invalidCopies &&
+      !invalidLength &&
+      !invalidNonNegative &&
+      !layoutError) {
     return error;
   }
   return switch (languageCode) {
@@ -1405,27 +1409,37 @@ String? _localizedValidation(BuildContext context, String? error) {
         ? 'Introduce un número entre 1 y 999.'
         : invalidLength
               ? 'Introduce una medida mayor que 0.'
-              : 'La foto no cabe en el papel con estas medidas y márgenes.',
+              : invalidNonNegative
+                    ? 'Introduce una medida de 0 o mayor.'
+                    : 'La foto no cabe en el papel con estas medidas y márgenes.',
     'fr' => invalidCopies
         ? 'Saisissez un nombre entre 1 et 999.'
         : invalidLength
               ? 'Saisissez une mesure supérieure à 0.'
-              : 'La photo ne tient pas sur le papier avec ces dimensions et marges.',
+              : invalidNonNegative
+                    ? 'Saisissez une mesure supérieure ou égale à 0.'
+                    : 'La photo ne tient pas sur le papier avec ces dimensions et marges.',
     'pt' => invalidCopies
         ? 'Introduza um número entre 1 e 999.'
         : invalidLength
               ? 'Introduza uma medida superior a 0.'
-              : 'A foto não cabe no papel com estas dimensões e margens.',
+              : invalidNonNegative
+                    ? 'Introduza uma medida igual ou superior a 0.'
+                    : 'A foto não cabe no papel com estas dimensões e margens.',
     'de' => invalidCopies
         ? 'Gib eine Zahl zwischen 1 und 999 ein.'
         : invalidLength
               ? 'Gib ein Maß größer als 0 ein.'
-              : 'Das Foto passt mit diesen Maßen und Rändern nicht auf das Papier.',
+              : invalidNonNegative
+                    ? 'Gib ein Maß größer oder gleich 0 ein.'
+                    : 'Das Foto passt mit diesen Maßen und Rändern nicht auf das Papier.',
     _ => invalidCopies
         ? 'Enter a number between 1 and 999.'
         : invalidLength
               ? 'Enter a measurement greater than 0.'
-              : 'The photo does not fit on the paper with these dimensions and margins.',
+              : invalidNonNegative
+                    ? 'Enter a measurement greater than or equal to 0.'
+                    : 'The photo does not fit on the paper with these dimensions and margins.',
   };
 }
 
