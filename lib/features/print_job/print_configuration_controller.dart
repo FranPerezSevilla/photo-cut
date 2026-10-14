@@ -136,7 +136,11 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changeMargin(String input) {
-    final _ParsedLength parsed = _parseLength(input, _state.unit);
+    final _ParsedLength parsed = _parseLength(
+      input,
+      _state.unit,
+      allowZero: true,
+    );
     if (parsed.length == null) {
       _replace(_state.copyWith(marginInput: input, marginError: parsed.error));
       return;
@@ -151,7 +155,11 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changeGap(String input) {
-    final _ParsedLength parsed = _parseLength(input, _state.unit);
+    final _ParsedLength parsed = _parseLength(
+      input,
+      _state.unit,
+      allowZero: true,
+    );
     if (parsed.length == null) {
       _replace(_state.copyWith(gapInput: input, gapError: parsed.error));
       return;
@@ -186,13 +194,31 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changePaperSize(PaperSize paperSize) {
+    final bool exactPhotoPaperFit =
+        paperSize == PaperSize.photo10x15 &&
+        _isTenByFifteenPhoto(_state.configuration);
+    final PhysicalLength margin = exactPhotoPaperFit
+        ? PhysicalLength.zero
+        : PhysicalLength.millimetres(8);
+    final PhysicalLength gap = exactPhotoPaperFit
+        ? PhysicalLength.zero
+        : PhysicalLength.millimetres(2);
+
     _replaceWithPlanAndCrop(
       _state.copyWith(
-        configuration: _state.configuration.copyWith(paperSize: paperSize),
+        configuration: _state.configuration.copyWith(
+          paperSize: paperSize,
+          margin: margin,
+          gap: gap,
+        ),
         paperWidthInput: _formatLength(paperSize.width, _state.paperUnit),
         paperHeightInput: _formatLength(paperSize.height, _state.paperUnit),
+        marginInput: _formatLength(margin, _state.unit),
+        gapInput: _formatLength(gap, _state.unit),
         paperWidthError: null,
         paperHeightError: null,
+        marginError: null,
+        gapError: null,
       ),
     );
   }
@@ -410,6 +436,17 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
+  static bool _isTenByFifteenPhoto(PrintJobConfiguration configuration) {
+    final double width = configuration.photoWidth.inMillimetres;
+    final double height = configuration.photoHeight.inMillimetres;
+    const double tolerance = 0.001;
+    final bool portrait =
+        (width - 100).abs() < tolerance && (height - 150).abs() < tolerance;
+    final bool landscape =
+        (width - 150).abs() < tolerance && (height - 100).abs() < tolerance;
+    return portrait || landscape;
+  }
+
   static SheetLayoutSpec _specFor(PrintJobConfiguration configuration) {
     return SheetLayoutSpec(
       paperSize: configuration.paperSize,
@@ -422,11 +459,27 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
-  static _ParsedLength _parseLength(String input, LengthUnit unit) {
+  static _ParsedLength _parseLength(
+    String input,
+    LengthUnit unit, {
+    bool allowZero = false,
+  }) {
     final String normalised = input.trim().replaceAll(',', '.');
     final double? value = double.tryParse(normalised);
-    if (value == null || !value.isFinite || value <= 0) {
-      return const _ParsedLength(error: 'Introduce una medida mayor que 0.');
+    final bool invalid =
+        value == null ||
+        !value.isFinite ||
+        value < 0 ||
+        (!allowZero && value == 0);
+    if (invalid) {
+      return _ParsedLength(
+        error: allowZero
+            ? 'Introduce una medida de 0 o mayor.'
+            : 'Introduce una medida mayor que 0.',
+      );
+    }
+    if (allowZero && value == 0) {
+      return _ParsedLength(length: PhysicalLength.zero);
     }
     return _ParsedLength(length: unit.toPhysicalLength(value));
   }

@@ -116,7 +116,10 @@ millimetres = points × 25.4 / 72
 ```
 
 Conversions should happen at boundaries. Domain values remain explicit and are
-not rounded for layout. UI formatting may round for display only.
+not rounded for layout. UI formatting may round for display only. Named
+`PhysicalLength` unit constructors remain strictly positive for dimensions;
+`PhysicalLength.zero` is reserved for fields that explicitly allow no distance,
+such as sheet margin and inter-copy spacing.
 
 Sheet placement uses a top-left physical origin and row-major copy order. The
 engine evaluates portrait and landscape paper plus optional 90-degree photo

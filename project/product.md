@@ -46,7 +46,8 @@ a separate preview screen for ordinary configuration.
 
 11. Review the immutable final PDF and a compact settings summary.
 12. Go back to edit, share the PDF or explicitly open native printing.
-13. Use the matching paper at 100% / actual size in the operating-system dialog.
+13. Show a friendly final reminder to check printer margin support and enable borderless printing for edge-to-edge photos when available.
+14. Use the matching paper at 100% / actual size in the operating-system dialog.
 
 The native print dialog controls the destination printer and printer-specific
 options. It is not a second editor for Photo Cut geometry.
@@ -71,6 +72,7 @@ remains language-neutral.
 - One source image per print job.
 - Width and height in explicit physical units.
 - Clear A4, US Letter and 10 × 15 cm paper presets, plus exact custom paper dimensions in mm, cm or inches.
+- A 10 × 15 cm photo on the 10 × 15 cm photo-paper preset defaults to edge-to-edge layout with zero margin and zero inter-copy spacing; other paper selections restore the standard 8 mm margin and 2 mm spacing defaults.
 - Automatic portrait/landscape page orientation when it fits more copies, with manual portrait or landscape override.
 - The default ID-photo preset is 26 × 32 mm while custom exact dimensions remain available.
 - Repeated copies, page overflow and deterministic ordering.

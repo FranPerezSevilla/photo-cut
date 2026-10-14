@@ -432,6 +432,69 @@ void main() {
     );
   });
 
+  testWidgets('10 x 15 photo fits 10 x 15 paper with zero margin and spacing', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: GuidedPrintWizard(
+          image: SelectedImage(
+            bytes: Uint8List.fromList(<int>[1, 2, 3]),
+            displayName: 'foto.jpg',
+          ),
+          imageProcessor: const _FakeImageProcessor(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('size-preset-10x15')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('wizard-paper-photo-10x15')));
+    await tester.pumpAndSettle();
+
+    FilledButton nextButton() => tester.widget<FilledButton>(
+      find.byKey(const Key('wizard-next')),
+    );
+    expect(nextButton().onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const Key('wizard-advanced-options')));
+    await tester.pumpAndSettle();
+
+    EditableText editable(Key key) => tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byType(EditableText),
+      ),
+    );
+
+    expect(editable(const Key('wizard-margin-input')).controller.text, '0');
+    expect(editable(const Key('wizard-gap-input')).controller.text, '0');
+    expect(find.text('Introduce una medida mayor que 0.'), findsNothing);
+
+    await tester.tap(find.text('Listo'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 3 de 4'), findsOneWidget);
+    expect(nextButton().onPressed, isNotNull);
+
+    await tester.tap(find.byKey(const Key('wizard-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Paso 4 de 4'), findsOneWidget);
+    expect(find.textContaining('100 × 150 mm'), findsWidgets);
+  });
+
   testWidgets('custom paper can be entered in the sheet step', (
     WidgetTester tester,
   ) async {

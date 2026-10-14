@@ -1,5 +1,8 @@
-/// A strictly positive physical distance stored canonically in millimetres.
+/// A physical distance stored canonically in millimetres.
 ///
+/// Named unit constructors require a strictly positive value so dimensions
+/// cannot accidentally become zero. Use [zero] only for domain fields such as
+/// margin or spacing that explicitly allow a zero distance.
 /// Constructors encode the source unit in their name so callers never pass an
 /// ambiguous numeric length across a domain boundary.
 final class PhysicalLength implements Comparable<PhysicalLength> {
@@ -25,6 +28,8 @@ final class PhysicalLength implements Comparable<PhysicalLength> {
     final points = _validatedValue(value, unitName: 'PDF points');
     return PhysicalLength._(points * millimetresPerInch / pdfPointsPerInch);
   }
+
+  static final PhysicalLength zero = PhysicalLength._(0);
 
   static const double millimetresPerCentimetre = 10;
   static const double millimetresPerInch = 25.4;

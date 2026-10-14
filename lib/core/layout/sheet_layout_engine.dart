@@ -72,8 +72,8 @@ final class SheetLayoutEngine {
         PlacedPhoto(
           copyIndex: copyIndex,
           pageIndex: pageIndex,
-          left: PhysicalLength.millimetres(leftMillimetres),
-          top: PhysicalLength.millimetres(topMillimetres),
+          left: _positionLength(leftMillimetres),
+          top: _positionLength(topMillimetres),
           width: PhysicalLength.millimetres(selected.photoWidthMillimetres),
           height: PhysicalLength.millimetres(selected.photoHeightMillimetres),
         ),
@@ -185,6 +185,14 @@ final class SheetLayoutEngine {
       columns: columns,
       rows: rows,
     );
+  }
+
+  static PhysicalLength _positionLength(double millimetres) {
+    const double zeroTolerance = 0.000000001;
+    if (millimetres.abs() <= zeroTolerance) {
+      return PhysicalLength.zero;
+    }
+    return PhysicalLength.millimetres(millimetres);
   }
 
   static int _fitCount({

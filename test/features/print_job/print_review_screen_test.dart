@@ -63,6 +63,12 @@ void main() {
     expect(find.text('Rellenar · B/N · Con marcas de corte'), findsOneWidget);
     expect(find.text('Abrir impresión de Android'), findsOneWidget);
     expect(find.textContaining(document.filename), findsOneWidget);
+    expect(find.byKey(const Key('print-margin-reminder')), findsOneWidget);
+    expect(find.text('Antes de imprimir'), findsOneWidget);
+    expect(
+      find.textContaining('impresión sin bordes'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('share-final-pdf')));
     await tester.pumpAndSettle();

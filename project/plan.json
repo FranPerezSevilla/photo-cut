@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-10-10",
+  "updatedAt": "2026-10-14",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -1246,6 +1246,83 @@
       ]
     },
     {
+      "id": "M4-T14",
+      "milestone": "M4",
+      "title": "Allow zero margin and spacing for exact paper fits",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T13"
+      ],
+      "objective": "Make common 10 x 15 cm photo-paper printing work without hidden setup by allowing zero offsets, defaulting exact 10 x 15 layouts to edge-to-edge, and reminding users to check printer margin support before printing.",
+      "acceptance": [
+        "Margin accepts 0 while still rejecting invalid or negative values.",
+        "Internal spacing accepts 0 while still rejecting invalid or negative values.",
+        "Photo and custom paper dimensions continue to require values greater than 0.",
+        "Selecting 10 x 15 cm paper for a 100 x 150 mm or 150 x 100 mm photo automatically sets margin and spacing to 0 and produces a valid layout.",
+        "Selecting A4, US Letter or custom paper restores the standard 8 mm margin and 2 mm spacing defaults.",
+        "Manual margin/spacing edits remain unchanged during ordinary back/forward navigation.",
+        "The final PDF review always shows a localized, user-friendly reminder to check printer margin support and enable borderless printing for edge-to-edge photos when available.",
+        "Localized validation copy for margin/spacing invalid input does not incorrectly require a value greater than 0.",
+        "Unit, controller, wizard and final-review tests cover the zero-offset and reminder behavior.",
+        "The next internal Android build uses versionCode 8."
+      ],
+      "checks": [
+        {
+          "command": "flutter test test/core/layout/sheet_layout_engine_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test test/core/units/physical_length_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test test/features/print_job/print_configuration_controller_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test test/features/print_job/guided_print_wizard_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test test/features/print_job/print_review_screen_test.dart",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter build apk --debug",
+          "runner": "linux"
+        }
+      ],
+      "evidence": [
+        "test/core/layout/sheet_layout_engine_test.dart",
+        "lib/core/layout/sheet_layout_engine.dart",
+        "test/core/units/physical_length_test.dart",
+        "lib/core/units/physical_length.dart",
+        "lib/features/print_job/print_configuration_controller.dart",
+        "lib/features/print_job/guided_print_wizard_localized.dart",
+        "test/features/print_job/print_configuration_controller_test.dart",
+        "test/features/print_job/guided_print_wizard_test.dart",
+        "pubspec.yaml",
+        "project/architecture.md",
+        "lib/features/print_job/print_review_screen_localized.dart",
+        "lib/l10n/photo_cut_localizations_impl.dart",
+        "test/features/print_job/print_review_screen_test.dart",
+        "project/product.md"
+      ],
+      "completedAt": "2026-10-14",
+      "verification": [
+        "GitHub Actions CI run 38587150994: Quality and Android — success",
+        "GitHub Actions CI run 38587150994: iOS simulator build — success",
+        "174 tests pass, including exact 100 x 150 mm edge-to-edge placement at origin 0,0.",
+        "Controller and wizard regressions confirm 10 x 15 photo paper defaults to margin 0 / spacing 0 and A4 restores 8 / 2.",
+        "Final PDF review regression confirms the localized printer-margin and borderless-printing reminder is always visible."
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
@@ -1257,7 +1334,8 @@
         "M4-T10",
         "M4-T11",
         "M4-T12",
-        "M4-T13"
+        "M4-T13",
+        "M4-T14"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1271,7 +1349,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Build 6 exposed a possible stale sheet-layout validation during Play testing. Complete M4-T13, generate build 7 with Play Release AAB, then confirm Google Play accepts the signed internal-test bundle."
+      "statusReason": "Build 8 now supports exact 10 x 15 cm edge-to-edge photo paper with automatic zero margin/spacing and a final printer-margin reminder. Generate build 8 with Play Release AAB, then confirm Google Play accepts the signed internal-test bundle."
     },
     {
       "id": "M4-H01",

@@ -94,6 +94,47 @@ void main() {
     expect(controller.state.previewPlan?.pageHeight.inMillimetres, closeTo(120, 0.001));
   });
 
+  test('10 x 15 photo paper defaults exact 10 x 15 photos to edge-to-edge', () {
+    final PrintConfigurationController controller =
+        PrintConfigurationController(
+          image: _image(),
+          imageProcessor: _FakeImageProcessor(),
+        );
+
+    controller.changeWidth('100');
+    controller.changeHeight('150');
+    controller.changePaperSize(PaperSize.photo10x15);
+
+    PrintConfigurationState state = controller.state;
+    expect(state.marginError, isNull);
+    expect(state.gapError, isNull);
+    expect(state.marginInput, '0');
+    expect(state.gapInput, '0');
+    expect(state.configuration.margin.inMillimetres, 0);
+    expect(state.configuration.gap.inMillimetres, 0);
+    expect(state.layoutError, isNull);
+    expect(state.previewPlan, isNotNull);
+
+    final PlacedPhoto placement = state.previewPlan!.placements.first;
+    expect(placement.left.inMillimetres, closeTo(0, 0.000001));
+    expect(placement.top.inMillimetres, closeTo(0, 0.000001));
+    expect(placement.width.inMillimetres, closeTo(100, 0.000001));
+    expect(placement.height.inMillimetres, closeTo(150, 0.000001));
+
+    controller.changeMargin('3');
+    controller.changeGap('1');
+    controller.revalidateLayout();
+    expect(controller.state.marginInput, '3');
+    expect(controller.state.gapInput, '1');
+
+    controller.changePaperSize(PaperSize.a4);
+    state = controller.state;
+    expect(state.marginInput, '8');
+    expect(state.gapInput, '2');
+    expect(state.configuration.margin.inMillimetres, 8);
+    expect(state.configuration.gap.inMillimetres, 2);
+  });
+
   test('invalid custom paper dimension blocks layout progression', () {
     final PrintConfigurationController controller =
         PrintConfigurationController(
