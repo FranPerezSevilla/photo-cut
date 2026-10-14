@@ -449,6 +449,9 @@ final class PrintConfigurationController extends ChangeNotifier {
             : 'Introduce una medida mayor que 0.',
       );
     }
+    if (allowZero && value == 0) {
+      return _ParsedLength(length: PhysicalLength.zero);
+    }
     return _ParsedLength(length: unit.toPhysicalLength(value));
   }
 
