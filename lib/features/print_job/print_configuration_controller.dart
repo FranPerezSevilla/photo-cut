@@ -136,7 +136,11 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changeMargin(String input) {
-    final _ParsedLength parsed = _parseLength(input, _state.unit);
+    final _ParsedLength parsed = _parseLength(
+      input,
+      _state.unit,
+      allowZero: true,
+    );
     if (parsed.length == null) {
       _replace(_state.copyWith(marginInput: input, marginError: parsed.error));
       return;
@@ -151,7 +155,11 @@ final class PrintConfigurationController extends ChangeNotifier {
   }
 
   void changeGap(String input) {
-    final _ParsedLength parsed = _parseLength(input, _state.unit);
+    final _ParsedLength parsed = _parseLength(
+      input,
+      _state.unit,
+      allowZero: true,
+    );
     if (parsed.length == null) {
       _replace(_state.copyWith(gapInput: input, gapError: parsed.error));
       return;
@@ -422,11 +430,24 @@ final class PrintConfigurationController extends ChangeNotifier {
     );
   }
 
-  static _ParsedLength _parseLength(String input, LengthUnit unit) {
+  static _ParsedLength _parseLength(
+    String input,
+    LengthUnit unit, {
+    bool allowZero = false,
+  }) {
     final String normalised = input.trim().replaceAll(',', '.');
     final double? value = double.tryParse(normalised);
-    if (value == null || !value.isFinite || value <= 0) {
-      return const _ParsedLength(error: 'Introduce una medida mayor que 0.');
+    final bool invalid =
+        value == null ||
+        !value.isFinite ||
+        value < 0 ||
+        (!allowZero && value == 0);
+    if (invalid) {
+      return _ParsedLength(
+        error: allowZero
+            ? 'Introduce una medida de 0 o mayor.'
+            : 'Introduce una medida mayor que 0.',
+      );
     }
     return _ParsedLength(length: unit.toPhysicalLength(value));
   }
