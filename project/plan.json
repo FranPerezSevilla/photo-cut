@@ -1326,7 +1326,7 @@
       "id": "M4-T15",
       "milestone": "M4",
       "title": "Publish Photo Cut website and privacy policy",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T14"
@@ -1359,6 +1359,13 @@
         "website/_headers",
         "netlify.toml",
         "tool/tests/test_website.py"
+      ],
+      "completedAt": "2026-10-23",
+      "verification": [
+        "GitHub Actions CI run 39945438141: Quality and Android — success",
+        "GitHub Actions CI run 39945438141: iOS simulator build — success",
+        "Repository website test verifies Netlify publish configuration, privacy-policy coverage and absence of tracking scripts.",
+        "Privacy policy covers local photo processing, store purchases, share/print hand-off, Android backup, retention/deletion, Netlify hosting and a public inquiry mechanism."
       ]
     },
     {
@@ -1389,7 +1396,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Build 8 is signed and ready for Play closed testing. Publish the Photo Cut website/privacy policy in M4-T15, then provide the resulting privacy URL in Play Console and confirm the signed build is accepted."
+      "statusReason": "Photo Cut website and privacy policy are prepared for Netlify. Deploy the site, add the resulting /privacy/ URL to Play Console (and later inside the app), then confirm the signed build is accepted."
     },
     {
       "id": "M4-H01",
