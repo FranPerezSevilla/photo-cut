@@ -30,6 +30,8 @@ class WebsiteTest(unittest.TestCase):
             "Sharing and printing",
             "Android backup",
             "Data retention and deletion",
+            "Netlify",
+            "marketing cookies",
             "Security",
             "privacy contact",
             "github.com/FranPerezSevilla/photo-cut/issues",
