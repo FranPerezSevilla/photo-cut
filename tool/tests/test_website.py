@@ -12,6 +12,13 @@ class WebsiteTest(unittest.TestCase):
         config = (ROOT / "netlify.toml").read_text(encoding="utf-8")
         self.assertIn('publish = "website"', config)
 
+    def test_netlify_relies_on_pretty_urls_for_privacy_route(self):
+        config = (ROOT / "netlify.toml").read_text(encoding="utf-8")
+        self.assertIn("pretty_urls = true", config)
+        self.assertNotIn('from = "/privacy"', config)
+        self.assertNotIn('to = "/privacy/"', config)
+        self.assertTrue((WEBSITE / "privacy" / "index.html").exists())
+
     def test_home_links_to_privacy_and_has_no_tracking_scripts(self):
         html = (WEBSITE / "index.html").read_text(encoding="utf-8")
         self.assertIn("Print photos at the exact size", html)
