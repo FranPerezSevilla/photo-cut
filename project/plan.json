@@ -1409,7 +1409,7 @@
       "id": "M4-T17",
       "milestone": "M4",
       "title": "Remove public GitHub support links",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T16"
@@ -1435,6 +1435,12 @@
         "website/index.html",
         "website/privacy/index.html",
         "tool/tests/test_website.py"
+      ],
+      "completedAt": "2026-10-26",
+      "verification": [
+        "GitHub Actions CI run 40320241204: Quality and Android — success",
+        "GitHub Actions CI run 40320241204: iOS simulator build — success",
+        "Website tests confirm no GitHub support link remains and public pages contain no external URLs."
       ]
     },
     {
@@ -1467,7 +1473,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "The Photo Cut privacy site is public on Netlify. Remove GitHub Issues as the customer-facing support channel in M4-T17, then use the final /privacy/ URL in Play Console and confirm the signed closed-test build is accepted."
+      "statusReason": "The Photo Cut public site no longer exposes GitHub as a support channel. Let Netlify redeploy main, verify the final /privacy/ page, then use that URL in Play Console and confirm the signed closed-test build is accepted."
     },
     {
       "id": "M4-H01",
