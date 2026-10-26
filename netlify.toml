@@ -1,8 +1,5 @@
 [build]
   publish = "website"
 
-[[redirects]]
-  from = "/privacy"
-  to = "/privacy/"
-  status = 301
-  force = true
+[build.processing.html]
+  pretty_urls = true
