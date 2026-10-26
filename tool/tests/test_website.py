@@ -41,7 +41,7 @@ class WebsiteTest(unittest.TestCase):
             "marketing cookies",
             "Security",
             "privacy contact",
-            "github.com/FranPerezSevilla/photo-cut/issues",
+            "official app-store listing",
         ]
         for text in required:
             self.assertIn(text, html)
@@ -54,13 +54,10 @@ class WebsiteTest(unittest.TestCase):
         )
         for path in html_files:
             html = path.read_text(encoding="utf-8")
-            for match in external_asset.finditer(html):
-                fragment = html[match.start(): match.start() + 160]
-                self.assertIn(
-                    "github.com/FranPerezSevilla/photo-cut/issues",
-                    fragment,
-                    msg=f"Unexpected external asset or link in {path}: {fragment}",
-                )
+            self.assertIsNone(
+                external_asset.search(html),
+                msg=f"Unexpected external URL in {path}",
+            )
 
 
 if __name__ == "__main__":

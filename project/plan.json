@@ -1406,6 +1406,44 @@
       ]
     },
     {
+      "id": "M4-T17",
+      "milestone": "M4",
+      "title": "Remove public GitHub support links",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T16"
+      ],
+      "objective": "Keep the Photo Cut website customer-facing by removing GitHub Issues as a public support/privacy channel and referring users to official store contact information instead.",
+      "acceptance": [
+        "The Photo Cut website footer no longer links to GitHub support.",
+        "The privacy policy no longer links to GitHub Issues or describes GitHub as a support channel.",
+        "Privacy/support inquiries are directed to the official app-store developer contact information.",
+        "Website tests reject external URLs and prevent GitHub support links from returning."
+      ],
+      "checks": [
+        {
+          "command": "python3 -m unittest discover -s tool/tests -p \"test_*.py\"",
+          "runner": "any"
+        },
+        {
+          "command": "python3 tool/project.py validate",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "website/index.html",
+        "website/privacy/index.html",
+        "tool/tests/test_website.py"
+      ],
+      "completedAt": "2026-10-26",
+      "verification": [
+        "GitHub Actions CI run 40320241204: Quality and Android — success",
+        "GitHub Actions CI run 40320241204: iOS simulator build — success",
+        "Website tests confirm no GitHub support link remains and public pages contain no external URLs."
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
@@ -1420,7 +1458,8 @@
         "M4-T13",
         "M4-T14",
         "M4-T15",
-        "M4-T16"
+        "M4-T16",
+        "M4-T17"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1434,7 +1473,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "The Netlify /privacy redirect loop is fixed in M4-T16. Let Netlify redeploy main, verify the public privacy URL, then add it to Play Console and confirm the signed closed-test build is accepted."
+      "statusReason": "The Photo Cut public site no longer exposes GitHub as a support channel. Let Netlify redeploy main, verify the final /privacy/ page, then use that URL in Play Console and confirm the signed closed-test build is accepted."
     },
     {
       "id": "M4-H01",
