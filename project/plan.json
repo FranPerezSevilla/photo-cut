@@ -1372,7 +1372,7 @@
       "id": "M4-T16",
       "milestone": "M4",
       "title": "Fix Netlify privacy route redirect loop",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T15"
@@ -1397,6 +1397,12 @@
       "evidence": [
         "netlify.toml",
         "tool/tests/test_website.py"
+      ],
+      "completedAt": "2026-10-26",
+      "verification": [
+        "GitHub Actions CI run 40315641908: Quality and Android — success",
+        "GitHub Actions CI run 40315641908: iOS simulator build — success",
+        "Website regression test confirms netlify.toml has no forced /privacy trailing-slash redirect and Pretty URLs are enabled."
       ]
     },
     {
@@ -1428,7 +1434,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "The Photo Cut site is deployed on Netlify, but the initial forced trailing-slash rule caused a /privacy redirect loop. Complete M4-T16, let Netlify redeploy main, then use the working /privacy/ URL in Play Console."
+      "statusReason": "The Netlify /privacy redirect loop is fixed in M4-T16. Let Netlify redeploy main, verify the public privacy URL, then add it to Play Console and confirm the signed closed-test build is accepted."
     },
     {
       "id": "M4-H01",
