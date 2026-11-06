@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_cut/core/crop/crop.dart';
@@ -23,7 +21,7 @@ void main() {
   testWidgets('renders faithful Google Play screenshots from production widgets', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 780);
+    tester.view.physicalSize = const Size(450, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -111,25 +109,6 @@ void main() {
     expect(find.textContaining('100 × 150 mm'), findsWidgets);
     await _capture(tester, '06-review.png');
 
-    final Directory output = Directory('build/store-screenshots');
-    final List<String> generated = output
-        .listSync()
-        .whereType<File>()
-        .map((File file) => file.path.split(Platform.pathSeparator).last)
-        .where((String name) => name.endsWith('.png'))
-        .toList()
-      ..sort();
-    expect(
-      generated,
-      <String>[
-        '01-home-selected.png',
-        '02-size-10x15.png',
-        '03-framing-focus.png',
-        '04-sheet-a4.png',
-        '05-sheet-10x15.png',
-        '06-review.png',
-      ],
-    );
   });
 }
 
@@ -182,19 +161,11 @@ Future<void> _configureTenByFifteen(WidgetTester tester) async {
 }
 
 Future<void> _capture(WidgetTester tester, String filename) async {
-  await tester.pump();
-  final RenderRepaintBoundary boundary =
-      tester.renderObject<RenderRepaintBoundary>(find.byKey(_captureKey));
-  final ui.Image image = await boundary.toImage(pixelRatio: 3);
-  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
-  image.dispose();
-  if (data == null) {
-    throw StateError('Could not encode $filename');
-  }
-
-  final File file = File('build/store-screenshots/$filename');
-  await file.parent.create(recursive: true);
-  await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+  await _pumpUi(tester);
+  await expectLater(
+    find.byKey(_captureKey),
+    matchesGoldenFile('generated/$filename'),
+  );
 }
 
 final class _StoreImagePicker implements ImagePickerGateway {
