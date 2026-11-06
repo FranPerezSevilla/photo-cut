@@ -14,17 +14,17 @@ The Google Play phone screenshots are generated from Photo Cut's **real Flutter
 widgets**, not recreated UI mockups. Run:
 
 ```bash
-flutter test tool/store_screenshots/store_screenshots_test.dart
+flutter test test/store_screenshots/store_screenshots_test.dart
 ```
 
 The command writes six PNG files to:
 
 ```text
-build/store-screenshots/
+test/store_screenshots/generated/
 ```
 
 Each image is rendered at an Android-like 390 x 780 logical-pixel viewport and
-captured at 3x density, producing 1170 x 2340 PNGs.
+captured as 450 x 900 PNGs using Flutter's native golden renderer.
 
 Current set:
 
