@@ -5,7 +5,7 @@ on:
   pull_request:
     paths:
       - 'lib/**'
-      - 'tool/store_screenshots/**'
+      - 'test/store_screenshots/**'
       - 'store/google-play/**'
       - '.github/workflows/store-screenshots.yml'
 
@@ -40,7 +40,9 @@ jobs:
         run: flutter pub get
 
       - name: Render screenshots from production widgets
-        run: flutter test --update-goldens --reporter expanded --timeout 45s --plain-name '02 real size step with 10 x 15 preset' tool/store_screenshots/store_screenshots_test.dart
+        env:
+          STORE_SCREENSHOTS: '1'
+        run: flutter test --update-goldens --reporter expanded --timeout 60s test/store_screenshots/store_screenshots_test.dart
 
       - name: Verify screenshot dimensions
         run: |
@@ -49,9 +51,9 @@ jobs:
           import struct
 
           expected = (450, 900)
-          files = sorted(Path('tool/store_screenshots/generated').glob('*.png'))
-          if len(files) != 1:
-              raise SystemExit(f'Expected 1 diagnostic screenshot, found {len(files)}')
+          files = sorted(Path('test/store_screenshots/generated').glob('*.png'))
+          if len(files) != 6:
+              raise SystemExit(f'Expected 6 screenshots, found {len(files)}')
           for path in files:
               data = path.read_bytes()
               if data[:8] != b'\x89PNG\r\n\x1a\n':
@@ -68,5 +70,5 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: photocut-google-play-screenshots-${{ github.sha }}
-          path: tool/store_screenshots/generated/*.png
+          path: test/store_screenshots/generated/*.png
           retention-days: 30
