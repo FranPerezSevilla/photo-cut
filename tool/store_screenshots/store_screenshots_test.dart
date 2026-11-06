@@ -193,7 +193,7 @@ Future<Uint8List> _buildDemoPhoto() async {
   const int height = 800;
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
-  const ui.Rect bounds = ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
+  final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
 
   canvas.drawRect(
     bounds,
