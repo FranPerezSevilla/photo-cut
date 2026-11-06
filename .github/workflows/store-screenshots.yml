@@ -40,7 +40,7 @@ jobs:
         run: flutter pub get
 
       - name: Render screenshots from production widgets
-        run: flutter test --update-goldens tool/store_screenshots/store_screenshots_test.dart
+        run: flutter test --update-goldens --reporter expanded --timeout 45s tool/store_screenshots/store_screenshots_test.dart
 
       - name: Verify screenshot dimensions
         run: |
