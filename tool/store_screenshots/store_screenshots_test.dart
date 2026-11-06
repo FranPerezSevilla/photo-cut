@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -27,7 +28,10 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final Uint8List photoBytes = await _buildDemoPhoto();
+    final Uint8List photoBytes = base64Decode(
+      (await File('test_resources/store-landscape.png.base64').readAsString())
+          .trim(),
+    );
     final SelectedImage selectedImage = SelectedImage(
       bytes: photoBytes,
       displayName: 'photo-cut-demo.png',
@@ -191,101 +195,6 @@ Future<void> _capture(WidgetTester tester, String filename) async {
   final File file = File('build/store-screenshots/$filename');
   await file.parent.create(recursive: true);
   await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
-}
-
-Future<Uint8List> _buildDemoPhoto() async {
-  const int width = 1200;
-  const int height = 800;
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
-
-  canvas.drawRect(
-    bounds,
-    ui.Paint()
-      ..shader = ui.Gradient.linear(
-        const ui.Offset(0, 0),
-        const ui.Offset(0, 520),
-        const <ui.Color>[
-          ui.Color(0xFF73C9FF),
-          ui.Color(0xFFDDF5FF),
-        ],
-      ),
-  );
-
-  canvas.drawCircle(
-    const ui.Offset(930, 150),
-    78,
-    ui.Paint()..color = const ui.Color(0xFFFFE6A3),
-  );
-
-  final ui.Path distant = ui.Path()
-    ..moveTo(0, 510)
-    ..lineTo(210, 300)
-    ..lineTo(390, 470)
-    ..lineTo(590, 250)
-    ..lineTo(820, 500)
-    ..lineTo(1030, 315)
-    ..lineTo(1200, 500)
-    ..lineTo(1200, 800)
-    ..lineTo(0, 800)
-    ..close();
-  canvas.drawPath(distant, ui.Paint()..color = const ui.Color(0xFF5679A3));
-
-  final ui.Path foreground = ui.Path()
-    ..moveTo(0, 585)
-    ..lineTo(270, 410)
-    ..lineTo(485, 560)
-    ..lineTo(745, 365)
-    ..lineTo(1030, 565)
-    ..lineTo(1200, 455)
-    ..lineTo(1200, 800)
-    ..lineTo(0, 800)
-    ..close();
-  canvas.drawPath(foreground, ui.Paint()..color = const ui.Color(0xFF234A63));
-
-  canvas.drawRect(
-    const ui.Rect.fromLTWH(0, 590, 1200, 210),
-    ui.Paint()
-      ..shader = ui.Gradient.linear(
-        const ui.Offset(0, 590),
-        const ui.Offset(0, 800),
-        const <ui.Color>[
-          ui.Color(0xFF2CBBC8),
-          ui.Color(0xFF0B63A5),
-        ],
-      ),
-  );
-
-  final ui.Path shore = ui.Path()
-    ..moveTo(0, 650)
-    ..quadraticBezierTo(310, 610, 620, 660)
-    ..quadraticBezierTo(930, 705, 1200, 635)
-    ..lineTo(1200, 800)
-    ..lineTo(0, 800)
-    ..close();
-  canvas.drawPath(
-    shore,
-    ui.Paint()..color = const ui.Color(0xFF163D45).withValues(alpha: 0.30),
-  );
-
-  for (int x = 20; x < 1200; x += 90) {
-    final double treeHeight = 52 + (x % 170).toDouble() * 0.22;
-    final ui.Path tree = ui.Path()
-      ..moveTo(x.toDouble(), 610)
-      ..lineTo(x + 24.0, 610 - treeHeight)
-      ..lineTo(x + 48.0, 610)
-      ..close();
-    canvas.drawPath(tree, ui.Paint()..color = const ui.Color(0xFF174C3A));
-  }
-
-  final ui.Image image = await recorder.endRecording().toImage(width, height);
-  final ByteData? bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-  image.dispose();
-  if (bytes == null) {
-    throw StateError('Could not build store demo image');
-  }
-  return bytes.buffer.asUint8List();
 }
 
 final class _StoreImagePicker implements ImagePickerGateway {
