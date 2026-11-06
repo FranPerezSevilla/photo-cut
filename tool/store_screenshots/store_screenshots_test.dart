@@ -46,7 +46,7 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('choose-photo')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     await _capture(tester, '01-home-selected.png');
 
     await _pump(
@@ -57,7 +57,7 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('size-preset-10x15')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     await _capture(tester, '02-size-10x15.png');
 
     await _pump(
@@ -68,11 +68,11 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('size-preset-10x15')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     await tester.tap(find.byKey(const Key('wizard-next')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     await tester.tap(find.byKey(const Key('open-framing-focus')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     expect(find.byKey(const Key('framing-focus-screen')), findsOneWidget);
     await _capture(tester, '03-framing-focus.png');
 
@@ -84,9 +84,9 @@ void main() {
       ),
     );
     await tester.tap(find.byKey(const Key('wizard-next')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     await tester.tap(find.byKey(const Key('wizard-next')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     expect(find.text('A4'), findsOneWidget);
     expect(find.text('8'), findsOneWidget);
     await _capture(tester, '04-sheet-a4.png');
@@ -102,7 +102,7 @@ void main() {
     await _capture(tester, '05-sheet-10x15.png');
 
     await tester.tap(find.byKey(const Key('wizard-next')));
-    await tester.pumpAndSettle();
+    await _pumpUi(tester);
     expect(find.textContaining('Step 4 of 4'), findsOneWidget);
     expect(find.textContaining('100 × 150 mm'), findsWidgets);
     await _capture(tester, '06-review.png');
@@ -129,6 +129,11 @@ void main() {
   });
 }
 
+Future<void> _pumpUi(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 450));
+}
+
 Future<void> _pump(WidgetTester tester, Widget home) async {
   await tester.pumpWidget(
     RepaintBoundary(
@@ -149,24 +154,24 @@ Future<void> _pump(WidgetTester tester, Widget home) async {
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  await _pumpUi(tester);
 }
 
 Future<void> _configureTenByFifteen(WidgetTester tester) async {
   await tester.tap(find.byKey(const Key('size-preset-10x15')));
-  await tester.pumpAndSettle();
+  await _pumpUi(tester);
   await tester.tap(find.byKey(const Key('wizard-next')));
-  await tester.pumpAndSettle();
+  await _pumpUi(tester);
   await tester.tap(find.byKey(const Key('wizard-next')));
-  await tester.pumpAndSettle();
+  await _pumpUi(tester);
   await tester.tap(find.byKey(const Key('wizard-paper-photo-10x15')));
-  await tester.pumpAndSettle();
+  await _pumpUi(tester);
 
   for (int i = 0; i < 7; i += 1) {
     await tester.tap(find.byKey(const Key('copies-minus')));
     await tester.pump();
   }
-  await tester.pumpAndSettle();
+  await _pumpUi(tester);
 
   expect(find.text('Photo 10 × 15 cm'), findsOneWidget);
   expect(find.text('1'), findsWidgets);
