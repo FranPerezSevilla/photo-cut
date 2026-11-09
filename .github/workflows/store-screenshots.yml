@@ -54,7 +54,7 @@ jobs:
 
       - name: Render screenshots from production widgets
         run: |
-          flutter drive \
+          flutter drive --profile \
             --driver=test_driver/store_screenshots_test.dart \
             --target=integration_test/store_screenshots_test.dart \
             -d web-server \
