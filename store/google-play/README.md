@@ -20,11 +20,12 @@ flutter test test/store_screenshots/store_screenshots_test.dart
 The command writes six PNG files to:
 
 ```text
-test/store_screenshots/generated/
+build/store-screenshots/
 ```
 
-Each image is rendered at an Android-like 390 x 780 logical-pixel viewport and
-captured as 450 x 900 PNGs using Flutter's native golden renderer.
+Each image is rendered from a 450 × 900 Android-like logical viewport and
+captured directly from Flutter's rendered tree at 2.4× density, producing
+1080 × 2160 PNGs suitable for Google Play.
 
 Current set:
 
