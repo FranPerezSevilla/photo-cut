@@ -220,7 +220,7 @@ Future<void> _capture(WidgetTester tester, String filename) async {
   final RenderRepaintBoundary boundary =
       tester.renderObject<RenderRepaintBoundary>(find.byKey(_captureKey));
   final ui.Image image = await boundary.toImage(pixelRatio: 2.4);
-  final ui.ByteData? data = await image.toByteData(
+  final ByteData? data = await image.toByteData(
     format: ui.ImageByteFormat.png,
   );
   image.dispose();
