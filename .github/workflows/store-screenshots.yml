@@ -61,7 +61,7 @@ jobs:
             --web-port=7357 \
             --driver-port=4444 \
             --browser-name=chrome \
-            --browser-dimension=450,900 \
+            --browser-dimension=450,1043 \
             --no-pub
 
       - name: Verify screenshot dimensions
