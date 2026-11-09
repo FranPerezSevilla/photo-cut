@@ -1455,25 +1455,25 @@
       "objective": "Generate Google Play screenshot assets directly from Photo Cut's real Flutter widgets so store imagery stays faithful to the shipped UI, while preserving the approved feature graphic in the repository.",
       "acceptance": [
         "The approved 1024 x 500 Google Play feature graphic is versioned under store/google-play/.",
-        "A dedicated Flutter screenshot harness renders actual Photo Cut widgets rather than recreated or AI-invented application UI.",
+        "A dedicated Flutter integration-test screenshot harness renders actual Photo Cut widgets rather than recreated or AI-invented application UI.",
         "The screenshot set covers Home with a selected image, Size, focused Framing, A4 Sheet, exact 10 x 15 cm Sheet, and wizard Review.",
-        "Screenshot generation runs at a deterministic Android-like phone viewport with the English production localization and Photo Cut production theme.",
-        "A dedicated GitHub Actions workflow produces the six PNG screenshots as a downloadable artifact without manual device capture.",
-        "Normal CI verifies the screenshot harness compiles and existing app behavior remains green.",
-        "Store documentation records which assets are illustrative marketing artwork versus direct UI renders."
+        "Screenshot generation uses the English production localization, Photo Cut production theme and a deterministic 450 x 900 phone-shaped viewport.",
+        "A dedicated GitHub Actions workflow uses Flutter Driver and ChromeDriver to produce all six PNG screenshots as a downloadable artifact without manual device capture.",
+        "Normal CI remains green and analyzes the integration screenshot harness.",
+        "Store documentation records which assets are illustrative marketing artwork versus literal application UI renders."
       ],
       "checks": [
         {
-          "command": "STORE_SCREENSHOTS=1 flutter test --timeout 90s test/store_screenshots/store_screenshots_test.dart",
-          "runner": "linux"
+          "command": "flutter analyze --fatal-infos",
+          "runner": "any"
         },
         {
           "command": "flutter test",
           "runner": "any"
         },
         {
-          "command": "flutter analyze --fatal-infos",
-          "runner": "any"
+          "command": "flutter drive --driver=test_driver/store_screenshots_test.dart --target=integration_test/store_screenshots_test.dart -d web-server --browser-name=chrome --browser-dimension=450,900",
+          "runner": "linux"
         },
         {
           "command": "python3 tool/project.py validate",
@@ -1483,7 +1483,8 @@
       "evidence": [
         "store/google-play/feature-graphic-1024x500.jpg",
         "store/google-play/README.md",
-        "test/store_screenshots/store_screenshots_test.dart",
+        "integration_test/store_screenshots_test.dart",
+        "test_driver/store_screenshots_test.dart",
         ".github/workflows/store-screenshots.yml"
       ]
     },
