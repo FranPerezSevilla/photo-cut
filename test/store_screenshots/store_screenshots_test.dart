@@ -219,18 +219,21 @@ Future<void> _capture(WidgetTester tester, String filename) async {
   await _pumpUi(tester);
   final RenderRepaintBoundary boundary =
       tester.renderObject<RenderRepaintBoundary>(find.byKey(_captureKey));
-  final ui.Image image = await boundary.toImage(pixelRatio: 2.4);
-  final ByteData? data = await image.toByteData(
-    format: ui.ImageByteFormat.png,
-  );
-  image.dispose();
-  if (data == null) {
-    throw StateError('Could not encode $filename');
-  }
 
-  final File output = File('build/store-screenshots/$filename');
-  await output.parent.create(recursive: true);
-  await output.writeAsBytes(data.buffer.asUint8List(), flush: true);
+  await tester.runAsync(() async {
+    final ui.Image image = await boundary.toImage(pixelRatio: 2.4);
+    final ByteData? data = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    image.dispose();
+    if (data == null) {
+      throw StateError('Could not encode $filename');
+    }
+
+    final File output = File('build/store-screenshots/$filename');
+    await output.parent.create(recursive: true);
+    await output.writeAsBytes(data.buffer.asUint8List(), flush: true);
+  });
 }
 
 final class _Fixture {
