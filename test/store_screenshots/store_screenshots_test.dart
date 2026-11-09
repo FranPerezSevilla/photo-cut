@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:photo_cut/core/crop/crop.dart';
@@ -12,6 +14,8 @@ import 'package:photo_cut/features/print_job/guided_print_wizard.dart';
 import 'package:photo_cut/l10n/photo_cut_localizations.dart';
 import 'package:photo_cut/platform/image_picker/image_picker.dart';
 import 'package:photo_cut/platform/image_processing/image_processing.dart';
+
+const Key _captureKey = Key('store-screenshot-capture');
 
 final bool _runStoreScreenshots =
     Platform.environment['STORE_SCREENSHOTS'] == '1';
@@ -168,19 +172,22 @@ Future<_Fixture> _fixture() async {
 
 Future<void> _pump(WidgetTester tester, Widget home) async {
   await tester.pumpWidget(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      scrollBehavior: const PhotoCutScrollBehavior(),
-      locale: const Locale('en'),
-      supportedLocales: PhotoCutLocalizations.supportedLocales,
-      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-        PhotoCutLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: home,
+    RepaintBoundary(
+      key: _captureKey,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        scrollBehavior: const PhotoCutScrollBehavior(),
+        locale: const Locale('en'),
+        supportedLocales: PhotoCutLocalizations.supportedLocales,
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          PhotoCutLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: home,
+      ),
     ),
   );
   await _pumpUi(tester);
@@ -210,10 +217,20 @@ Future<void> _configureTenByFifteen(WidgetTester tester) async {
 
 Future<void> _capture(WidgetTester tester, String filename) async {
   await _pumpUi(tester);
-  await expectLater(
-    find.byType(Scaffold).last,
-    matchesGoldenFile('generated/$filename'),
+  final RenderRepaintBoundary boundary =
+      tester.renderObject<RenderRepaintBoundary>(find.byKey(_captureKey));
+  final ui.Image image = await boundary.toImage(pixelRatio: 2.4);
+  final ui.ByteData? data = await image.toByteData(
+    format: ui.ImageByteFormat.png,
   );
+  image.dispose();
+  if (data == null) {
+    throw StateError('Could not encode $filename');
+  }
+
+  final File output = File('build/store-screenshots/$filename');
+  await output.parent.create(recursive: true);
+  await output.writeAsBytes(data.buffer.asUint8List(), flush: true);
 }
 
 final class _Fixture {
