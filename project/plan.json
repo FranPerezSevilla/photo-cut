@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-09",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -1464,7 +1464,7 @@
       ],
       "checks": [
         {
-          "command": "flutter test tool/store_screenshots/store_screenshots_test.dart",
+          "command": "STORE_SCREENSHOTS=1 flutter test --timeout 90s test/store_screenshots/store_screenshots_test.dart",
           "runner": "linux"
         },
         {
@@ -1483,7 +1483,7 @@
       "evidence": [
         "store/google-play/feature-graphic-1024x500.jpg",
         "store/google-play/README.md",
-        "tool/store_screenshots/store_screenshots_test.dart",
+        "test/store_screenshots/store_screenshots_test.dart",
         ".github/workflows/store-screenshots.yml"
       ]
     },
