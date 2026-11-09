@@ -11,34 +11,38 @@ core value quickly. It must not be treated as a literal app screenshot.
 ## Phone screenshots
 
 The Google Play phone screenshots are generated from Photo Cut's **real Flutter
-widgets**, not recreated UI mockups. Run:
+widgets**, not recreated UI mockups. A Flutter integration test drives the same
+Home and GuidedPrintWizard widgets used by the app, and ChromeDriver captures the
+rendered app at a deterministic phone-shaped viewport.
 
-```bash
-flutter test test/store_screenshots/store_screenshots_test.dart
+The dedicated `Google Play Store Screenshots` GitHub Actions workflow runs:
+
+```text
+integration_test/store_screenshots_test.dart
 ```
 
-The command writes six PNG files to:
+through Flutter Driver and writes six PNG files to:
 
 ```text
 build/store-screenshots/
 ```
 
-Each image is rendered from a 450 × 900 Android-like logical viewport and
-captured directly from Flutter's rendered tree at 2.4× density, producing
-1080 × 2160 PNGs suitable for Google Play.
+Each screenshot is captured at 450 × 900 pixels, a valid 1:2 Google Play phone
+aspect ratio. The viewport is intentionally fixed so the store images remain
+reproducible after UI changes.
 
 Current set:
 
 1. `01-home-selected.png` — real Home screen after selecting a photo.
-2. `02-size-10x15.png` — real Size step with the 10 x 15 cm preset.
+2. `02-size-10x15.png` — real Size step with the 10 × 15 cm preset.
 3. `03-framing-focus.png` — real focused Adjust framing screen.
 4. `04-sheet-a4.png` — real Sheet step on A4 with the default copy count.
-5. `05-sheet-10x15.png` — real 10 x 15 cm photo-paper sheet setup with one copy.
+5. `05-sheet-10x15.png` — real 10 × 15 cm photo-paper setup with one copy.
 6. `06-review.png` — real wizard Review step before final PDF generation.
 
-The demo image shown inside the app is generated synthetically by the screenshot
-harness, so no personal or third-party photo is committed or uploaded.
+The photo shown inside the app is a synthetic scenic fixture created only for
+Photo Cut store imagery. No personal photograph is used.
 
-The dedicated `Google Play Store Screenshots` GitHub Actions workflow renders
-and uploads these files as a downloadable artifact. If product UI changes, rerun
-that workflow instead of editing the screenshots by hand.
+The screenshots are literal app UI renders. Marketing headlines, phone frames,
+invented navigation, or controls that do not exist in Photo Cut must not be
+added to these files.
