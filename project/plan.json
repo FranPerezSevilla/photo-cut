@@ -1447,7 +1447,7 @@
       "id": "M4-T18",
       "milestone": "M4",
       "title": "Generate faithful Google Play screenshots",
-      "status": "ready",
+      "status": "done",
       "executor": "agent",
       "dependsOn": [
         "M4-T17"
@@ -1493,6 +1493,15 @@
         "store/google-play/screenshots/04-sheet-a4.png",
         "store/google-play/screenshots/05-sheet-10x15.png",
         "store/google-play/screenshots/06-review.png"
+      ],
+      "completedAt": "2026-11-10",
+      "verification": [
+        "GitHub Actions CI run 42860951663: Quality and Android — success",
+        "GitHub Actions CI run 42860951663: iOS simulator build — success",
+        "Google Play Store Screenshots run 42860951894 — success",
+        "The screenshot workflow generated and verified six 450 x 900 PNG renders from the production Flutter widgets.",
+        "The reviewed feature graphic and all six screenshot PNGs are versioned under store/google-play/.",
+        "A backup copy of the seven store assets is available in Google Drive at PhotoCut/Store Assets."
       ]
     },
     {
@@ -1526,7 +1535,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "Google Play store imagery is being finalized in M4-T18 using real Flutter-rendered screenshots rather than invented mockups. After the screenshot artifact is reviewed, continue closed-test listing validation."
+      "statusReason": "Google Play listing assets are now reproducible and versioned in M4-T18. Continue the closed-test / Play validation using the signed build and the final store listing assets."
     },
     {
       "id": "M4-H01",
