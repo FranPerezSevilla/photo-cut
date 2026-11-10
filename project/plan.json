@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-11-10",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -1444,6 +1444,67 @@
       ]
     },
     {
+      "id": "M4-T18",
+      "milestone": "M4",
+      "title": "Generate faithful Google Play screenshots",
+      "status": "done",
+      "executor": "agent",
+      "dependsOn": [
+        "M4-T17"
+      ],
+      "objective": "Generate Google Play screenshot assets directly from Photo Cut's real Flutter widgets so store imagery stays faithful to the shipped UI, while preserving the approved feature graphic in the repository.",
+      "acceptance": [
+        "The approved 1024 x 500 Google Play feature graphic is versioned under store/google-play/.",
+        "A dedicated Flutter integration-test screenshot harness renders actual Photo Cut widgets rather than recreated or AI-invented application UI.",
+        "The screenshot set covers Home with a selected image, Size, focused Framing, A4 Sheet, exact 10 x 15 cm Sheet, and wizard Review.",
+        "Screenshot generation uses the English production localization, Photo Cut production theme and a deterministic 450 x 900 phone-shaped viewport.",
+        "A dedicated GitHub Actions workflow uses Flutter Driver and ChromeDriver to produce all six PNG screenshots as a downloadable artifact without manual device capture.",
+        "The reviewed six PNG screenshots are versioned under store/google-play/screenshots/.",
+        "Normal CI remains green and analyzes the integration screenshot harness.",
+        "Store documentation records which assets are illustrative marketing artwork versus literal application UI renders."
+      ],
+      "checks": [
+        {
+          "command": "flutter analyze --fatal-infos",
+          "runner": "any"
+        },
+        {
+          "command": "flutter test",
+          "runner": "any"
+        },
+        {
+          "command": "flutter drive --driver=test_driver/store_screenshots_test.dart --target=integration_test/store_screenshots_test.dart -d web-server --browser-name=chrome --browser-dimension=450,900",
+          "runner": "linux"
+        },
+        {
+          "command": "python3 tool/project.py validate",
+          "runner": "any"
+        }
+      ],
+      "evidence": [
+        "store/google-play/feature-graphic-1024x500.jpg",
+        "store/google-play/README.md",
+        "integration_test/store_screenshots_test.dart",
+        "test_driver/store_screenshots_test.dart",
+        ".github/workflows/store-screenshots.yml",
+        "store/google-play/screenshots/01-home-selected.png",
+        "store/google-play/screenshots/02-size-10x15.png",
+        "store/google-play/screenshots/03-framing-focus.png",
+        "store/google-play/screenshots/04-sheet-a4.png",
+        "store/google-play/screenshots/05-sheet-10x15.png",
+        "store/google-play/screenshots/06-review.png"
+      ],
+      "completedAt": "2026-11-10",
+      "verification": [
+        "GitHub Actions CI run 42860951663: Quality and Android — success",
+        "GitHub Actions CI run 42860951663: iOS simulator build — success",
+        "Google Play Store Screenshots run 42860951894 — success",
+        "The screenshot workflow generated and verified six 450 x 900 PNG renders from the production Flutter widgets.",
+        "The reviewed feature graphic and all six screenshot PNGs are versioned under store/google-play/.",
+        "A backup copy of the seven store assets is available in Google Drive at PhotoCut/Store Assets."
+      ]
+    },
+    {
       "id": "M4-H02",
       "milestone": "M4",
       "title": "Validate protected Android Play release signing",
@@ -1459,7 +1520,8 @@
         "M4-T14",
         "M4-T15",
         "M4-T16",
-        "M4-T17"
+        "M4-T17",
+        "M4-T18"
       ],
       "objective": "Run the protected Play Release AAB workflow once from main and confirm the original upload signing identity produces an uploadable internal-test bundle.",
       "acceptance": [
@@ -1473,7 +1535,7 @@
         "GitHub Actions Play Release AAB run",
         "Google Play internal-test release"
       ],
-      "statusReason": "The Photo Cut public site no longer exposes GitHub as a support channel. Let Netlify redeploy main, verify the final /privacy/ page, then use that URL in Play Console and confirm the signed closed-test build is accepted."
+      "statusReason": "Google Play listing assets are now reproducible and versioned in M4-T18. Continue the closed-test / Play validation using the signed build and the final store listing assets."
     },
     {
       "id": "M4-H01",

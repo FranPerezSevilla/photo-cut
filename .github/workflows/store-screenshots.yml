@@ -1,0 +1,100 @@
+name: Google Play Store Screenshots
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'integration_test/**'
+      - 'test_driver/**'
+      - 'store/google-play/**'
+      - 'pubspec.yaml'
+      - 'project/plan.json'
+      - '.github/workflows/store-screenshots.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.2
+
+jobs:
+  render:
+    name: Render real Flutter screenshots
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bootstrap temporary web host
+        run: flutter create . --platforms=web --no-pub
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Verify Chrome and ChromeDriver
+        run: |
+          google-chrome --version
+          chromedriver --version
+
+      - name: Start ChromeDriver
+        run: |
+          chromedriver --port=4444 > /tmp/chromedriver.log 2>&1 &
+          echo $! > /tmp/chromedriver.pid
+          sleep 2
+
+      - name: Render screenshots from production widgets
+        run: |
+          flutter drive --profile \
+            --driver=test_driver/store_screenshots_test.dart \
+            --target=integration_test/store_screenshots_test.dart \
+            -d web-server \
+            --web-port=7357 \
+            --driver-port=4444 \
+            --browser-name=chrome \
+            --browser-dimension=450,1043 \
+            --no-pub
+
+      - name: Verify screenshot dimensions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+
+          expected = (450, 900)
+          files = sorted(Path('build/store-screenshots').glob('*.png'))
+          if len(files) != 6:
+              raise SystemExit(f'Expected 6 screenshots, found {len(files)}')
+          for path in files:
+              data = path.read_bytes()
+              if data[:8] != b'\x89PNG\r\n\x1a\n':
+                  raise SystemExit(f'{path} is not a PNG')
+              width, height = struct.unpack('>II', data[16:24])
+              if (width, height) != expected:
+                  raise SystemExit(
+                      f'{path}: expected {expected}, got {(width, height)}'
+                  )
+              print(f'{path.name}: {width}x{height}')
+          PY
+
+      - name: Upload Google Play screenshots
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: photocut-google-play-screenshots-${{ github.sha }}
+          path: |
+            build/store-screenshots/*.png
+            pubspec.lock
+          retention-days: 30
