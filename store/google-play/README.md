@@ -27,9 +27,15 @@ through Flutter Driver and writes six PNG files to:
 build/store-screenshots/
 ```
 
-Each screenshot is captured at 450 × 900 pixels, a valid 1:2 Google Play phone
-aspect ratio. The viewport is intentionally fixed so the store images remain
-reproducible after UI changes.
+The reviewed store-ready copies are also versioned in:
+
+```text
+store/google-play/screenshots/
+```
+
+Each screenshot is captured at 450 × 900 pixels with a fixed 1:2 phone aspect
+ratio. The deterministic viewport and committed copies make the listing assets
+both reproducible and reviewable in normal source history.
 
 Current set:
 
