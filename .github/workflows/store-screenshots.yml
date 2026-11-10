@@ -9,6 +9,7 @@ on:
       - 'test_driver/**'
       - 'store/google-play/**'
       - 'pubspec.yaml'
+      - 'project/plan.json'
       - '.github/workflows/store-screenshots.yml'
 
 permissions:
