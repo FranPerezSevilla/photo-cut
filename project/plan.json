@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "photo-cut",
   "currentMilestone": "M4",
-  "updatedAt": "2026-11-09",
+  "updatedAt": "2026-11-10",
   "statusDefinitions": {
     "backlog": "Defined but not selectable yet.",
     "ready": "Dependencies are done and an agent may execute it.",
@@ -1459,6 +1459,7 @@
         "The screenshot set covers Home with a selected image, Size, focused Framing, A4 Sheet, exact 10 x 15 cm Sheet, and wizard Review.",
         "Screenshot generation uses the English production localization, Photo Cut production theme and a deterministic 450 x 900 phone-shaped viewport.",
         "A dedicated GitHub Actions workflow uses Flutter Driver and ChromeDriver to produce all six PNG screenshots as a downloadable artifact without manual device capture.",
+        "The reviewed six PNG screenshots are versioned under store/google-play/screenshots/.",
         "Normal CI remains green and analyzes the integration screenshot harness.",
         "Store documentation records which assets are illustrative marketing artwork versus literal application UI renders."
       ],
@@ -1485,7 +1486,13 @@
         "store/google-play/README.md",
         "integration_test/store_screenshots_test.dart",
         "test_driver/store_screenshots_test.dart",
-        ".github/workflows/store-screenshots.yml"
+        ".github/workflows/store-screenshots.yml",
+        "store/google-play/screenshots/01-home-selected.png",
+        "store/google-play/screenshots/02-size-10x15.png",
+        "store/google-play/screenshots/03-framing-focus.png",
+        "store/google-play/screenshots/04-sheet-a4.png",
+        "store/google-play/screenshots/05-sheet-10x15.png",
+        "store/google-play/screenshots/06-review.png"
       ]
     },
     {
